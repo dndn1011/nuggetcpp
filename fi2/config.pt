@@ -1,0 +1,345 @@
+
+geom {
+    cx : float = 0;
+    cy : float = 0;
+    cw : float = 0;
+    ch : float = 0;
+    x : dimension = 10.0;
+    y : dimension = 10.0;
+    w : dimension = 40.0;
+    h : dimension = 40.0;
+}
+
+container { 
+    geom : geom {
+         x=10;
+         y=10;
+         w=100;
+         h=50;
+    }
+    class = ui::Container;
+    hpolicy = centre;
+    vpolicy = space;
+    color : Color = { 0,1,1,1 };
+}
+
+circle {
+    geom : geom {
+        w = 100.0;
+        h = 100.0;
+    }
+    color : Color = { 0,1,0,1 };
+    class = ui::Circle;
+}  
+
+horizontal_container : container {
+    hpolicy = space;
+    vpolicy = centre;
+}
+
+vertical_container : container {
+    hpolicy = centre;
+    vpolicy = space;
+}
+
+centre_container : container {
+    hpolicy = centre;
+    vpolicy = centre;
+}
+
+vctest2 : centre_container {
+    sub {    
+        myCircle11 : circle {
+            color : Color = { 1,0,0,1 };
+            geom {
+                w = 200.0;
+                h = 200.0;
+            }
+        }
+        myCircle13 : circle {
+            color : Color = { 0,1,0,1 };
+            geom {
+                w = 150.0;
+                h = 150.0;
+            }
+        }
+        myCircle1 : circle {
+            color : Color = { 1,1,0,1 };
+        }
+    }
+}
+
+
+vctest3 : horizontal_container {
+    sub {    
+        myCircle11 : circle {
+            color : Color = { 0,1,0,1 };
+        }
+        myCircle13 : circle {
+            color : Color = { 0,1,0,1 };
+        }
+        myCircle1 : circle {
+            color : Color = { 0,1,0,1 };
+        }
+    }
+}
+
+vctest1 : vertical_container {
+    sub {    
+        myCircle11 : circle {
+            color : Color = { 1,0,0,1 };
+        }
+        myCircle13 : circle {
+            color : Color = { 0,1,0,1 };
+        }
+        myCircle1 : circle {
+            color : Color = { 1,1,0,1 };
+        }
+        myCircle2 : circle {
+            color : Color = { 1,0,0,1 };
+        }
+        myCircle3 : circle {
+            color : Color = { 0,1,0,1 };
+        }
+        myCircle12 : circle {
+            color : Color = { 0.2,0.2,0.2,1 };
+        }
+    }
+}
+
+light : circle {
+    geom {
+        w=50;
+        h=50;
+    }
+    color : Color = { 1,0,0,1 };
+}
+
+three_lights : horizontal_container {
+    geom {
+        w=200;
+        h=100;
+    }
+    color : Color = {0,1,0,1};
+    sub {
+            circle1 : circle {
+                geom {
+                    w=50;
+                    h=50;
+                }
+            color : Color = { 1,0,0,1 };
+        }
+        circle2 : circle {
+                geom {
+                    w=50;
+                    h=50;
+                }
+            color : Color = { 0,1,0,1 };
+        }
+        circle3 : circle {
+                geom {
+                    w=50;
+                    h=50;
+                }
+            color : Color = { 0,1,1,1 };
+        }
+    }
+}
+
+button {
+    class = ui::Button;
+    geom :geom {
+        w = 300;
+        h = 100;
+    }
+    text = "Foo";
+    textSize = 20;
+    color : Color = { 1,0.5,0,1 };
+    highlightColor : Color = {1,0,0,1};
+}
+
+test0 : vertical_container {
+    geom {
+        w=500;
+        h=700;
+    }
+    sub {
+        b1 : button {
+
+        }
+        b2 : button {
+
+        }
+        b3 : button {
+
+        }
+        b4 : button {
+
+        }
+        b5 : button {
+
+        }
+        b6 : button {
+
+        }
+//        light : circle {
+//        }
+//        c1 : three_lights {
+//        }
+//        c2 : three_lights {
+//        }
+//        c3 : three_lights {
+//        }
+//        c4 : three_lights {
+//        }
+    }
+//    hpolicy = space;
+//    vpolicy = centre;
+}
+
+myButton : button {
+    geom {
+        h=80;
+        w=500;
+    }
+    text = "oooooo!";
+    color = { 0,1,0,1};
+}
+
+test1 : vertical_container {
+    geom {
+        w=1200;
+        h=800;
+    }
+    sub {
+        : horizontal_container {
+            geom {
+                w=100%;
+                h=200;
+            }
+
+            sub {
+                : myButton {text="Foo!";}
+                : myButton {
+                    text="Exit";
+                    onClick {
+                        function = ExitClick;
+                    }
+                }
+            }
+        }
+        : horizontal_container {
+            geom {
+                w=1100;
+                h=200;
+            }
+
+            sub {
+                : myButton {text="So something";}
+                : myButton {text="Do something else";}
+            }
+        }
+    }
+//    hpolicy = space;
+//    vpolicy = centre;
+}
+
+test2 : vertical_container {
+    geom {
+        w=500;
+        h=700;
+    }
+    sub {
+        : horizontal_container {
+            geom {
+                w=600;
+                h=400;
+            }
+        }
+    }
+}
+
+deepbutton : button {
+    text = "A";
+    textSize = 10;
+    geom {
+        w = 50;
+        h = 50;
+    }
+}
+
+deepnode : horizontal_container {
+            geom {
+                w=30%;
+                h=90%;
+            }
+            color : Color = { 1,1,0,1 };
+            sub {
+                : vertical_container {
+                    geom {
+                        w=30%;
+                        h=90%;
+                    }
+                    sub {
+                        : deepbutton {}
+                        : deepbutton {}
+                        : deepbutton {}
+                        : deepbutton {}
+                        : deepbutton {}
+                    }
+                }
+                : vertical_container {
+                    geom {
+                        w=30%;
+                        h=90%;
+                    }
+                    sub {
+                        : deepbutton {}
+                        : deepbutton {}
+                        : deepbutton {}
+                        : deepbutton {}
+                        : deepbutton {}
+                    }
+                }
+                : vertical_container {
+                    geom {
+                        w=30%;
+                        h=90%;
+                    }
+                    sub {
+                        : deepbutton {}
+                        : deepbutton {}
+                        : deepbutton {}
+                        : deepbutton {}
+                        : deepbutton {}
+                    }
+                }
+            }
+}
+
+test3 : vertical_container {
+    geom {
+        w=700;
+        h=450;
+    }
+    sub {
+        : deepnode {
+        }
+        : deepnode {
+        }
+        : deepnode {
+        }
+    }
+    hpolicy = space;
+    vpolicy = centre;
+}
+
+
+
+
+main : test3 {
+}
+
+
+screen {
+}
