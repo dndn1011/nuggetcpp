@@ -77,7 +77,7 @@ namespace nugget::ui::entity {
 			}
 		} else {
 			Notice::Remove(to);
-			output("Removed {}\n", IDToString(to).c_str());
+//			output("Removed {}\n", IDToString(to).c_str());
 		}
 		std::vector<IDType> children;
 		if (auto r = Notice::GetChildren(to,children /*fill*/)) {

@@ -183,7 +183,7 @@ namespace nugget::properties {
     };
 
     std::vector<ParseExpression> parsers = {
-        /*   {
+        /* {
                "^//[^\n]*",   // comment
                [](const std::string& toParse) -> Token {
                    return Token{ Token::Type::whitespace,toParse };
@@ -560,7 +560,7 @@ namespace nugget::properties {
             return childCounts.back();
         }
         void NestWithCurrentBlock() {
-            currentPathName = IDCombineStrings({ currentPathName, currentBlockName });
+            currentPathName = IDCombineStrings(currentPathName, currentBlockName );
             IDType id = identifier::Register(currentPathName);
             if (nestLevel > 0) {   // we do not bother counting the children of the root
                 childCounts.back()++;
@@ -631,7 +631,7 @@ namespace nugget::properties {
             currentDerivedName = "";
         }
         void SetCurrentDerivedName() {
-            currentDerivedName = IDCombineStrings({ rootName, list[point - 1].text });
+            currentDerivedName = IDCombineStrings( rootName, list[point - 1].text );
         }
         void SetCurrentType() {
             currentValueType = Token::ValueTypeFromString(list[point - 1].text);
@@ -653,7 +653,7 @@ namespace nugget::properties {
             }
         }
         void SetCurrentDerivationOrType() {
-            currentDerivedName = IDCombineStrings({ rootName, list[point - 1].text });
+            currentDerivedName = IDCombineStrings( rootName, list[point - 1].text );
             currentPossibleType = list[point - 1].text;
         }
         void SetCurrentValue() {
@@ -783,7 +783,7 @@ namespace nugget::properties {
                     return false;
                 }
             }
-            std::string path = IDCombineStrings({ currentPathName, currentValueName });
+            std::string path = IDCombineStrings( currentPathName, currentValueName );
             if (currentValueType == Token::Type::unset) {
                 // we don't know the type from the syntax, check if data already exists and has a type
                 if (Notice::KeyExists(IDR(path))) {
@@ -836,37 +836,24 @@ namespace nugget::properties {
                 return false;
             }
 
-            for (auto& x : children) {
-                auto leaf = IDKeepLeaf(IDToString(x));
-                auto toPath = IDCombineStrings({ tostr, leaf });
-                auto fromPath = IDCombineStrings({ fromstr, leaf });
-                auto fromPathId = IDR(fromPath);
-                assert(Notice::KeyExists(fromPathId));
+            std::string toPath;
+            std::string fromPath;
+
+            for (auto& fromPathId : children) {
+                fromPath = IDToString(fromPathId);
+                auto leaf = IDKeepLeafCStr(IDToString(fromPathId));
+                IDCombineStringsInPlace( tostr, leaf, toPath);
+
                 auto value = Notice::GetValueAny(fromPathId);
                 if (!value.IsVoid()) { 
                     auto& fromValue = Notice::GetValueAny(IDR(fromPath));
                     Notice::Set(IDR(toPath), fromValue);
-                    auto& sourceValueVariant = Notice::GetValueAny(IDR(fromPath));
-                    auto& targetValueVariant = Notice::GetValueAny(IDR(toPath));
-                    std::string sourceValue = Notice::GetValueAsString(IDR(fromPath));
-                    std::string targetValue = Notice::GetValueAsString(IDR(toPath));
-                    if (0) {
-                        output("----------->FROM(%s : %s = %s) TO(%s : %s = %s)\n",
-                            fromPath.c_str(),
-                            Notice::GetValueTypeAsString(sourceValueVariant).c_str(),
-                            sourceValue.c_str(),
-                            toPath.c_str(),
-                            Notice::GetValueTypeAsString(targetValueVariant).c_str(),
-                            targetValue.c_str()
-                        );
-                    }
                 } else {
-                    auto r = CopyNodes(IDCombineStrings({ fromstr,leaf }), IDCombineStrings({ tostr,leaf }));
+                    auto r = CopyNodes(IDCombineStrings( fromstr,leaf ), IDCombineStrings( tostr,leaf ));
                     if (!r) {
                         return false;
                     }
                 }
-                //    output("%s %s %s\n", IDToString(x).c_str(),leaf.c_str(),toPath.c_str());
             }
             return true;
         }
@@ -919,27 +906,27 @@ namespace nugget::properties {
             switch (currentValueType) {
                 case Token::Type::integer: {
                     assert(currentTypeName == "" || currentTypeName == "int");
-                    std::string path = IDCombineStrings({ currentPathName, currentValueName });
+                    std::string path = IDCombineStrings( currentPathName, currentValueName );
                     Notice::Set(IDR(path), ParseInteger(currentValue));
                 } break;
                 case Token::Type::float_: {
                     assert(currentTypeName == "" || currentTypeName == "float");
-                    std::string path = IDCombineStrings({ currentPathName, currentValueName });
+                    std::string path = IDCombineStrings( currentPathName, currentValueName );
                     Notice::Set(IDR(path), ParseFloat(currentValue));
                 } break;
                 case Token::Type::string: {
                     assert(currentTypeName == "" || currentTypeName == "string");
-                    std::string path = IDCombineStrings({ currentPathName, currentValueName });
+                    std::string path = IDCombineStrings( currentPathName, currentValueName );
                     Notice::Set(IDR(path), ParseString(currentValue));
                 } break;
                 case Token::Type::qualifiedName: {
                     assert(currentTypeName == "");
-                    std::string path = IDCombineStrings({ currentPathName, currentValueName });
+                    std::string path = IDCombineStrings( currentPathName, currentValueName );
                     Notice::Set(IDR(path), ParseQualifiedName(currentValue));
                 } break;
                 case Token::Type::identifier: {
                     assert(currentTypeName == "");
-                    std::string path = IDCombineStrings({ currentPathName, currentValueName });
+                    std::string path = IDCombineStrings( currentPathName, currentValueName );
                     Notice::Set(IDR(path), IDR(currentValue));
                 } break;
                 default:

@@ -16,7 +16,7 @@ namespace nugget {
         // hash a string and register it in the identrifier db
         IDType Register(const std::string& str);
 
-        constexpr std::uint64_t __combineHashes(std::uint64_t hash1, std::uint64_t hash2) {
+        consteval std::uint64_t __combineHashes(std::uint64_t hash1, std::uint64_t hash2) {
             if (hash1 == 0) {
                 return hash2;
             } else {
@@ -24,7 +24,7 @@ namespace nugget {
             }
         }
 
-        constexpr std::pair<uint64_t,uint64_t> __fnv1a_64_hash(
+        consteval std::pair<uint64_t,uint64_t> __fnv1a_64_hash(
             const char* str, std::size_t index = 0,
             std::uint64_t hash = 14695981039346656037ULL,
             uint64_t combo=0) {
@@ -75,10 +75,18 @@ namespace nugget {
         IDType IDR(const std::vector<IDType>& ids);
 
         
-        std::string IDCombineStrings(const std::vector<std::string>& strings);
+//        std::string IDCombineStrings(const std::vector<std::string>& strings);
+        
+        std::string IDCombineStrings(const std::string &a, const std::string& b);
+        void IDCombineStringsInPlace(const std::string& a, const std::string& b, std::string &result);
+        
         std::string IDRemoveLeaf(const std::string& path);
-        std::string IDKeepLeaf(const std::string& path);
-        std::string IDToString(IDType id);
+        void IDRemoveLeafInPlace(std::string& path);
+
+        //std::string IDKeepLeaf(const std::string& path);
+        const char *IDKeepLeafCStr(const std::string& path);
+
+        const std::string& IDToString(IDType id);
 
         const std::unordered_set<IDType>* IDGetChildren(IDType id);
 //        bool IDGetChildren(IDType id, std::unordered_set<IDType>& result);

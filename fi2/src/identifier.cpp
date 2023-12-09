@@ -16,44 +16,70 @@ namespace nugget {
 			std::unordered_map<IDType, IDType> selfMap;
 		} data;
 
-		std::string IDToString(IDType id) {
+		static std::uint64_t CombineHashesRT(std::uint64_t hash1, std::uint64_t hash2) {
+			if (hash1 == 0) {
+				return hash2;
+			} else {
+				return (hash1 ^ hash2) * 1099511628211ULL;
+			}
+		}
+
+		static std::pair<uint64_t, uint64_t> HashRT(
+			const char* str, std::size_t index = 0,
+			std::uint64_t hash = 14695981039346656037ULL,
+			uint64_t combo = 0) {
+			if (str[index] == '\0') {
+				combo = CombineHashesRT(combo, hash);
+				return { hash, combo };
+			} else if (str[index] == '.') {
+				combo = CombineHashesRT(combo, hash);
+				return HashRT(str, index + 1, 14695981039346656037ULL, combo);
+			} else {
+				return HashRT(str, index + 1, (hash ^ static_cast<std::uint64_t>(str[index])) * 1099511628211ULL, combo);
+			}
+		}
+
+		const std::string& IDToString(IDType id) {
 			assert(("Null id used", id));
 
-			auto s = data.toStringMap[id];
+			auto &s = data.toStringMap[id];
 			assert(("Unable to do a reverse lookup",s != ""));
 			return(s);
 		}
 
 		void SetReverseLookup(IDType id,const std::string& str) {
 			if (data.toStringMap.contains(id)) {
-				std::string curval = data.toStringMap[id];
+				const std::string &curval = data.toStringMap.at(id);
 				if (str != curval) {
 					assert(("hash clash!!!!!!!!!!!!!!!!!!!!", 0));
 				}
 			} else {
-				data.toStringMap[id] = str;
+				data.toStringMap.emplace(id,str);
 			}
 		}
 
 		IDType Register(const std::string& str) {
 			assert(("hash request on empty string", str != ""));
-			std::string s = IDRemoveLeaf(str);
-			std::string leaf = IDKeepLeaf(str);
+			std::string path = str;
+			IDRemoveLeafInPlace(path);
 
-			IDType parent = __fnv1a_64_hash(s.c_str()).second;
-			IDType child = __fnv1a_64_hash(str.c_str()).second;
+			const char *leafPtr = IDKeepLeafCStr(str);
+//			std::string leaf = IDKeepLeaf(str);
+
+			IDType parent = HashRT(path.c_str()).second;
+			IDType child = HashRT(str.c_str()).second;
 			IDType strId = child;
 			SetReverseLookup(child,str);
 			data.parentMap[child] = parent;
-			IDType self = __fnv1a_64_hash(leaf.c_str()).second;
+			IDType self = HashRT(leafPtr).second;
 			data.selfMap[child] = self;
-			SetReverseLookup(self,leaf);
+			SetReverseLookup(self, leafPtr);
 			while (parent != child) {
-				SetReverseLookup(parent,s);
+				SetReverseLookup(parent,path);
 				data.childMap[parent].insert(child);
-				s = IDRemoveLeaf(s);
+				IDRemoveLeaf(path);
 				child = parent;
-				parent = __fnv1a_64_hash(s.c_str()).second;
+				parent = HashRT(path.c_str()).second;
 			}
 			return strId;
 		}
@@ -80,19 +106,19 @@ namespace nugget {
 			return Register(cstr);
 		}
 		IDType IDR(const char* cstr1, const char* cstr2) {
-			std::string combo = IDCombineStrings({ cstr1,cstr2 });
+			std::string combo = IDCombineStrings( cstr1,cstr2 );
 			return Register(combo);
 		}
 		IDType IDR(IDType hash1, const char* cstr2) {
 			assert(data.toStringMap.contains(hash1));
 			std::string str1 = IDToString(hash1);
-			std::string combo = IDCombineStrings({ str1,cstr2 });
+			std::string combo = IDCombineStrings( str1,cstr2 );
 			return Register(combo);
 		}
 		IDType IDR(const char* cstr1, IDType hash2) {
 			assert(data.toStringMap.contains(hash2));
 			std::string str2 = IDToString(hash2);
-			std::string combo = IDCombineStrings({ cstr1,str2 });
+			std::string combo = IDCombineStrings( cstr1,str2 );
 			return Register(combo);
 		}
 		IDType IDR(IDType hash1, IDType hash2) {
@@ -100,7 +126,7 @@ namespace nugget {
 			assert(data.toStringMap.contains(hash2));
 			std::string str1 = IDToString(hash1);
 			std::string str2 = IDToString(hash2);
-			std::string combo = IDCombineStrings({ str1,str2 });
+			std::string combo = IDCombineStrings( str1,str2 );
 			return Register(combo);
 		}
 		IDType IDR(IDType id, const std::string_view str) {
@@ -116,8 +142,8 @@ namespace nugget {
 			// check we have reverse lookup of id
 			if (data.toStringMap.contains(hash1)) {
 				std::string str1 = data.toStringMap[hash1];
-				std::string combo = IDCombineStrings({ str1,str2.data() });
-				IDType id = __fnv1a_64_hash(combo.c_str()).second;
+				std::string combo = IDCombineStrings( str1,str2.data() );
+				IDType id = HashRT(combo.c_str()).second;
 				if (data.toStringMap.contains(id)) {
 					return id;
 				} else {
@@ -151,8 +177,8 @@ namespace nugget {
 					id = x;
 					first = false;
 				} else {
-#ifdef NDEBUG
-					id = __combineHashes(id, x);
+#if defined(NDEBUG) || 1
+					id = CombineHashesRT(id, x);
 #else
 					id = IDR(id, x);
 #endif
@@ -161,6 +187,7 @@ namespace nugget {
 			return id;
 		}
 
+#if 0
 		std::string IDCombineStrings(const std::vector<std::string>& strings) {
 			std::stringstream ss;
 			bool first = true;
@@ -174,6 +201,18 @@ namespace nugget {
 				}
 			}
 			return ss.str();
+		}
+#endif
+
+		std::string IDCombineStrings(const std::string& a, const std::string& b) {
+			std::stringstream ss;
+			ss << a << "." << b;
+			return ss.str();
+		}
+
+		void IDCombineStringsInPlace(const std::string& a, const std::string& b,std::string &result) {
+			result.clear();
+			result.append(a).append(".").append(b);
 		}
 
 		std::string IDRemoveLeaf(const std::string& path) {
@@ -190,6 +229,17 @@ namespace nugget {
 			}
 		}
 
+		void IDRemoveLeafInPlace(std::string& path) {
+			// Find the position of the last '.' character
+			auto lastDotPosition = path.find_last_of('.');
+
+			// Check if a '.' character was found
+			if (lastDotPosition != std::string::npos) {
+				// Strip off everything after the last '.' character
+				path.resize(lastDotPosition);
+			}
+		}
+
 		std::string IDKeepLeaf(const std::string& path) {
 			// Find the position of the last '.' character
 			auto lastDotPosition = path.find_last_of('.');
@@ -199,6 +249,18 @@ namespace nugget {
 				return path.substr(lastDotPosition + 1);
 			} else {
 				return path;
+			}
+		}
+
+		const char* IDKeepLeafCStr(const std::string& path) {
+			// Find the position of the last '.' character
+			auto lastDotPosition = path.find_last_of('.');
+
+			// Check if a '.' character was found
+			if (lastDotPosition != std::string::npos) {
+				return path.data() + lastDotPosition + 1;
+			} else {
+				return path.data();
 			}
 		}
 	}

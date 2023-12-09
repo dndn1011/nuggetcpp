@@ -317,7 +317,7 @@ deepnode : horizontal_container {
             }
 }
 
-test3 : vertical_container {
+test3 : horizontal_container {
     geom {
         w=700;
         h=450;
@@ -330,16 +330,7 @@ test3 : vertical_container {
         : deepnode {
         }
     }
-    hpolicy = space;
-    vpolicy = centre;
 }
-
-
-
 
 main : test3 {
-}
-
-
-screen {
 }

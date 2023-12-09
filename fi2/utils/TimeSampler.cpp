@@ -14,7 +14,7 @@ void TimeSampler::End(const bool print) {
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
     float time = (float)(duration.count() / 1000.0);
     if (print) {
-        output("Time taken: {:12.4f} ms - {}\n", time, name.c_str());
+        outputAlways("Time taken: {:12.4f} ms - {}\n", time, name.c_str());
     }
     done = true;
     timings[name] = time;
