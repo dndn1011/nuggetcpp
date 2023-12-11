@@ -19,7 +19,7 @@ namespace nugget {
                 APPLY_RULE_OF_MINUS_5(Imp);
 
                 explicit Imp(IDType idIn) : UiEntityBaseImp(idIn) {
-                    Validate();
+                    RegisterInstance(this);
 
                     UpdateGeomProperties();
 

@@ -5,6 +5,7 @@
 #include "uicontainer.h"
 #include "uicircle.h"
 #include "uibutton.h"
+#include "uitextBox.h"
 #include "notice.h"
 #include "debug.h"
 
@@ -14,6 +15,12 @@ namespace nugget::ui_imp {
 
     std::unique_ptr<sf::RenderWindow> mainWindow;
     sf::Font font;
+
+    EntityPointer& GetInstance(IDType id) {
+        check(entityMap.contains(id), "Requested instance is not in map\n");
+        return entityMap.at(id);
+    }
+
 
     void Init() {
         mainWindow = std::make_unique<sf::RenderWindow>(sf::VideoMode(1600, 960), "SFML Window");
@@ -49,6 +56,7 @@ namespace nugget::ui_imp {
             container::DrawAll();
             circle::DrawAll();
             button::DrawAll();
+            textBox::DrawAll();
 
             window.display();
 
@@ -238,6 +246,31 @@ namespace nugget::ui_imp {
         return true;
     }
 
+    std::unordered_map<IDType, EntityPointer> entityMap;
+
+    namespace nugget::ui_imp{
+        namespace circle {
+            class Imp;
+        }
+    }
+
+    void h(nugget::ui_imp::circle::Imp* ptr) {
+    }
+
+    void SetInstance(identifier::IDType id, EntityPointer& ep) {
+        entityMap.emplace(id, ep);
+    }
+
+//    template void SetInstance<nugget::ui_imp::circle::Imp>(identifier::IDType, const nugget::ui_imp::circle::Imp*);
+
+    void EntityMapEmplace(IDType id, const void* ptr) {
+        entityMap.emplace(id, ptr);
+    }
+
+//    using namespace circle;
+//    class Imp;
+
+        //template void __cdecl nugget::ui_imp::SetInstance<struct nugget::ui_imp::circle::Imp>(unsigned __int64, struct nugget::ui_imp::circle::Imp const*);
 
 
 }

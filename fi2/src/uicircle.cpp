@@ -15,7 +15,7 @@ namespace nugget::ui_imp::circle {
         APPLY_RULE_OF_MINUS_5(Imp);
 
         explicit Imp(IDType idIn) : UiEntityBaseImp(idIn) {
-            Validate();
+            RegisterInstance(this);
 
             UpdateGeomProperties();
 
@@ -65,7 +65,7 @@ namespace nugget::ui_imp::circle {
         
     void Create(IDType id) {
         //output("---> %s\n", IDToString(id).c_str());
-        return Imp::Create(id);
+        Imp::Create(id);
     }
     /*static*/
     void DrawAll() {
@@ -73,9 +73,9 @@ namespace nugget::ui_imp::circle {
     }
 
 }
- 
+
 namespace nugget::ui::circle {
     void Create(IDType id) {
-        return ui_imp::circle::Imp::Create(id);
+        ui_imp::circle::Imp::Create(id);
     }
 }

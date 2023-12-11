@@ -16,7 +16,7 @@ namespace nugget::ui_imp::button {
         APPLY_RULE_OF_MINUS_5(Imp);
 
         explicit Imp(IDType idIn) : UiEntityBaseImp(idIn) {
-            Validate();
+            RegisterInstance(this);
 
             ConfigureSelfGeom();
             UpdateGeomProperties();
@@ -163,7 +163,7 @@ namespace nugget::ui_imp::button {
     };
 
     void Create(IDType id) {
-        return Imp::Create(id);
+        Imp::Create(id);
     }
     /*static*/
     void DrawAll() {
@@ -174,6 +174,6 @@ namespace nugget::ui_imp::button {
 
 namespace nugget::ui::button {
     void Create(IDType id) {
-        return ui_imp::button::Imp::Create(id);
+        ui_imp::button::Imp::Create(id);
     }
 }

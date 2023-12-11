@@ -5,14 +5,16 @@
 #include "uicontainer.h"
 #include "uicircle.h"
 #include "uibutton.h"
+#include "uitextbox.h"
 #include "notice.h"
 #include "debug.h"
+#include "../utils/utils.h"
 
 namespace nugget::ui::entity {
 	using namespace identifier;
 	using namespace Notice;
 
-	std::unordered_map<IDType, CreateLambda> functionMap;
+	static std::unordered_map<IDType, CreateLambda> functionMap;
 
 	void CreateEntity(IDType id, IDType class_) {
 		assert(0);
@@ -30,7 +32,6 @@ namespace nugget::ui::entity {
 			assert(("the entity constructor is not defined", functionMap.contains(classId)));
 
 //			printid(id);
-
 			functionMap[classId](id);
 
 			std::vector<IDType> children;
@@ -117,8 +118,9 @@ namespace nugget::ui::entity {
 
 	void ManageGeometry(IDType nodeId) {
 		nugget::ui::container::ManageGeometry(nodeId);
+		nugget::ui::textBox::ManageGeometry(nodeId);
 	}
-
+	 
 	void RegisterFunction(IDType type, CreateLambda func) {
 		functionMap[type]=func;
 	}
@@ -133,6 +135,7 @@ namespace nugget::ui::entity {
 		nugget::ui::entity::RegisterFunction(IDR("ui::Container"), ui::container::Create);
 		nugget::ui::entity::RegisterFunction(IDR("ui::Circle"), ui::circle::Create);
 		nugget::ui::entity::RegisterFunction(IDR("ui::Button"), ui::button::Create);
+		nugget::ui::entity::RegisterFunction(IDR("ui::TextBox"), ui::textBox::Create);
 	}
 
 	

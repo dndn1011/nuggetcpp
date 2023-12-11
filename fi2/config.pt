@@ -13,6 +13,7 @@ geom {
 container { 
     geom : geom {
          x=10;
+         x=10;
          y=10;
          w=100;
          h=50;
@@ -317,6 +318,8 @@ deepnode : horizontal_container {
             }
 }
 
+
+
 test3 : horizontal_container {
     geom {
         w=700;
@@ -332,5 +335,28 @@ test3 : horizontal_container {
     }
 }
 
-main : test3 {
+textbox {
+    geom : geom {
+        w = 400;
+        h = 200;
+    }
+    text = "TEXT!";
+    class = ui::TextBox;
+
+    frameColor : Color = { 1,1,0,1 };
+    textSize = 20;
+}
+
+test4 :  horizontal_container {
+    geom {
+        w=700;
+        h=450;
+    }
+    sub {
+        : circle;
+    }
+}
+
+
+main : test4 {
 }

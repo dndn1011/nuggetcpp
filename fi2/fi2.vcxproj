@@ -175,6 +175,7 @@
     <ClCompile Include="src\uibutton.cpp" />
     <ClCompile Include="src\uicontainer.cpp" />
     <ClCompile Include="src\uientities.cpp" />
+    <ClCompile Include="src\uitextbox.cpp" />
     <ClCompile Include="src\ui_imp.cpp" />
     <ClCompile Include="src\uicircle.cpp" />
     <ClCompile Include="src\uicircle.h" />
@@ -193,6 +194,7 @@
     <ClInclude Include="src\uibutton.h" />
     <ClInclude Include="src\uicontainer.h" />
     <ClInclude Include="src\uientities.h" />
+    <ClInclude Include="src\uitextbox.h" />
     <ClInclude Include="src\ui_imp.h" />
     <ClInclude Include="src\dimensions.h" />
     <ClInclude Include="utils\TimeSampler.h" />
