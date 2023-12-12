@@ -2,10 +2,6 @@
 #include "ui_imp.h"
 #include "UIEntities.h"
 #include <assert.h>
-#include "uicontainer.h"
-#include "uicircle.h"
-#include "uibutton.h"
-#include "uitextBox.h"
 #include "notice.h"
 #include "debug.h"
 
@@ -60,10 +56,7 @@ namespace nugget::ui_imp {
 
             window.clear();
 
-            container::DrawAll();
-            circle::DrawAll();
-            button::DrawAll();
-//            textBox::DrawAll();
+            entity::DrawAll();
 
             window.display();
 
@@ -190,7 +183,6 @@ namespace nugget::ui_imp {
 
 
     UiEntityBaseImp::~UiEntityBaseImp() {
-        //assert(allowDeletion);
     }
 
     void UiEntityBaseImp::AddHandler(identifier::IDType nodeId, Notice::HandlerFunc func) {
@@ -268,16 +260,8 @@ namespace nugget::ui_imp {
         entityMap.emplace(id, ep);
     }
 
-//    template void SetInstance<nugget::ui_imp::circle::Imp>(identifier::IDType, const nugget::ui_imp::circle::Imp*);
-
     void EntityMapEmplace(IDType id, const void* ptr) {
         entityMap.emplace(id, ptr);
     }
-
-//    using namespace circle;
-//    class Imp;
-
-        //template void __cdecl nugget::ui_imp::SetInstance<struct nugget::ui_imp::circle::Imp>(unsigned __int64, struct nugget::ui_imp::circle::Imp const*);
-
 
 }

@@ -309,7 +309,6 @@ namespace nugget {
 
 		// pass in both id and the entry to save another lookup
 		void Notify(IDType id, const ValueEntry&entry) {
-//			output("@@@@@@@@@@@@@ Notifying: {}\n", IDC(id));
 			if (!notifyLock) {
 				for (auto& x : entry.handlers) {
 					x.func(x.changeId);
@@ -324,7 +323,6 @@ namespace nugget {
 			if (KeyExists(id)) {
 				const auto& entry = data.valueEntries.at(id);
 				if (entry.value.GetType() == ValueAny::Type::void_) {  // if it is a parent node
-					//data.valueEntries.at(id).value.MarkDeleted();
 					std::vector<IDType> children;
 					if (GetChildren(id, children/*fill*/)) {
 						// mark all children deleted first
@@ -332,7 +330,6 @@ namespace nugget {
 							Remove(x);
 						}
 						// notify parent then mark parent deleted
-	//					printid(id);
 						Notify(id, entry);
 						data.valueEntries.at(id).value.MarkDeleted();
 					} else {
@@ -407,7 +404,6 @@ namespace nugget {
 			auto& v = data.valueEntries.at(id);
 			return v.value.GetType() == ValueAny::Type::dimension;
 		}
-
 		std::string GetString(IDType id) {
 			assert(KeyExists(id));
 			auto &v = data.valueEntries.at(id);
@@ -424,11 +420,8 @@ namespace nugget {
 			return v.value.GetValueAsInt64();
 		}
 		float GetFloat(IDType id) {
-//			output("---!!@--------> %s\n", IDToString(id).c_str());
 			assert(KeyExists(id));
 			auto &v = data.valueEntries.at(id);
-//    float f = v.value.GetValueAsFloat();
-//	output("---!!!-------> %llx %s %f\n", id,IDToString(id).c_str(),f);
 			return v.value.GetValueAsFloat();
 		}
 		IDType GetID(IDType id) {
@@ -483,8 +476,6 @@ namespace nugget {
 			} else {
 				data.valueEntries[id] = ValueEntry(ValueAny(value));
 			}
-
-//			output("setting %llx : %s = %s\n", id, IDToString(id).c_str(), GetValueAsString(id).c_str());
 		}
 		void Set(IDType id, int32_t value) {
 			if (KeyExists(id)) {
@@ -499,7 +490,6 @@ namespace nugget {
 			} else {
 				data.valueEntries[id] = ValueEntry(ValueAny(value));
 			}
-			//			output("setting %llx : %s = %s\n", id, IDToString(id).c_str(), GetValueAsString(id).c_str());
 		}
 		void Set(IDType id, int64_t value) {
 			if (KeyExists(id)) {
@@ -514,7 +504,6 @@ namespace nugget {
 			} else {
 				data.valueEntries[id] = ValueEntry(ValueAny(value));
 			}
-			//			output("setting %llx : %s = %s\n", id, IDToString(id).c_str(), GetValueAsString(id).c_str());
 		}
 		void Set(IDType id, float value) {
 			if (KeyExists(id)) {
@@ -529,7 +518,6 @@ namespace nugget {
 			} else {
 				data.valueEntries[id] = ValueEntry(ValueAny(value));
 			}
-//						output("setting %llx : %s = %s\n", id, IDToString(id).c_str(), GetValueAsString(id).c_str());
 		}
 		void Set(IDType id, Color value) {
 			if (KeyExists(id)) {
@@ -544,7 +532,6 @@ namespace nugget {
 			} else {
 				data.valueEntries[id] = ValueEntry(ValueAny(value));
 			}
-			//			output("setting %llx : %s = %s\n", id, IDToString(id).c_str(), GetValueAsString(id).c_str());
 		}
 		void Set(IDType id, IDType value) {
 			if (KeyExists(id)) {
@@ -559,7 +546,6 @@ namespace nugget {
 			} else {
 				data.valueEntries[id] = ValueEntry(ValueAny(value));
 			}
-			//			output("setting %llx : %s = %s\n", id, IDToString(id).c_str(), GetValueAsString(id).c_str());
 		}
 
 		void Set(IDType id, const ValueAny& value) {
@@ -623,7 +609,6 @@ namespace nugget {
 			data.valueEntries.at(handler.changeId).handlers.push_back(handler);
 		}
 		void RegisterHandlerOnChildren(const Handler &handler,std::vector<Handler> &out) {
-	//		output("@@@@ %s\n", IDToString(handler.notifyId).c_str());
 			std::vector<IDType> children;
 			auto r = GetChildren(handler.notifyId,children /*fill*/);
 			assert(r);
@@ -640,7 +625,6 @@ namespace nugget {
 		}
 
 		bool GetChildren(IDType id, std::vector<IDType>& fill) {
-			//output("---> %s\n", IDToString(id).c_str());
 			if (KeyExists(id)) {
 				if (auto set = identifier::IDGetChildren(id)) {
 					for (const auto& x : *set) {

@@ -1,16 +1,15 @@
-#include "identifier.h"
+#include "../identifier.h"
 #include <SFML/Graphics.hpp>
-#include "notice.h"
+#include "../notice.h"
 #include <unordered_map>
 #include <string>
 #include <numeric>
 #include <algorithm>
 
-#include "ui_imp.h"
-#include "UIContainer.h"
-#include "debug.h"
+#include "../ui_imp.h"
+#include "../debug.h"
 
-#include "../utils/StableVector.h"
+#include "../../utils/StableVector.h"
 
 
 namespace nugget {
@@ -65,15 +64,6 @@ namespace nugget {
                    
                     mainWindow->draw(lines);
                 }
-
-#if 0
-                void AddParentPositionToChild(IDType childGeom) {
-                    IDType gx = IDR(childGeom, "x");
-                    IDType gy = IDR(childGeom, "y");
-                    Notice::Set(gx, Notice::GetFloat(gx) + geom.x);
-                    Notice::Set(gy, Notice::GetFloat(gy) + geom.y);
-                }
-#endif
 
                 void SpaceEvenly(int axis) {
                     std::vector<IDType> children;
@@ -207,19 +197,8 @@ namespace nugget {
         }
     }
     namespace ui::container {
-        size_t init_dummy = nugget::ui::entity::RegisterEntityInit([]() {
-            auto impNode = IDR("ui::Container");
-            nugget::ui::entity::RegisterSelfGeomFunction(impNode,
-                nugget::ui::container::ManageGeometrySelf);
-            nugget::ui::entity::RegisterEntityCreator(impNode,
-                nugget::ui::container::Create);
-            nugget::ui::entity::RegisterPostSelfGeomFunction(impNode,
-                nugget::ui::container::ManageGeometryChildren);
-
-            });
 
         void Create(IDType id) {
-            //Output("---> %s\n", IDToString(id).c_str());
             ui_imp::container::Imp::Create(id);
         }
         
@@ -241,6 +220,19 @@ namespace nugget {
             }
             inst->ManageGeometryChildren();
         }
+
+        size_t init_dummy = nugget::ui::entity::RegisterEntityInit([]() {
+            auto impNode = IDR("ui::Container");
+            nugget::ui::entity::RegisterSelfGeomFunction(impNode,
+                nugget::ui::container::ManageGeometrySelf);
+            nugget::ui::entity::RegisterEntityCreator(impNode,
+                nugget::ui::container::Create);
+            nugget::ui::entity::RegisterPostSelfGeomFunction(impNode,
+                nugget::ui::container::ManageGeometryChildren);
+            nugget::ui::entity::RegisterEntityDraw(impNode,
+                nugget::ui_imp::container::DrawAll);
+
+            });
 
     }
 }

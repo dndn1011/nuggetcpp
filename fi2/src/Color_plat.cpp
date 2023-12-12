@@ -3,11 +3,6 @@
 #include "types.h"
 #include <sstream>
 
-//std::string nugget::Color::to_string(const nugget::Color& obj) {
-//	return "";
-//}
-
-
 	std::string nugget::Color::to_string_imp(const nugget::Color& obj) {
 		std::stringstream ss;
 		ss

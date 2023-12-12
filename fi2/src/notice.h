@@ -74,7 +74,6 @@ namespace nugget {
 			Type GetType() const;
 
 		private:
-			// todo put in a union
 			union Data {
 				int32_t int32_t_;
 				int64_t int64_t_;
@@ -85,7 +84,6 @@ namespace nugget {
 				void* ptr;
 				Dimension* dimensionPtr;
 			} data = {};
-			//
 
 			Type type = Type::void_;
 

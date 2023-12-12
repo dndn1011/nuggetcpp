@@ -9,13 +9,6 @@
 
 #include "../utils/utils.h"
 
-#define APPLY_RULE_OF_MINUS_5(Imp) \
-            Imp() = delete;\
-            Imp(const Imp& other) = delete;\
-            Imp(Imp&& other) = delete;\
-            Imp& operator=(const Imp& other) = delete;\
-            Imp& operator=(Imp&& other) = delete
-
 namespace nugget::ui_imp {
     using nugget::ui::entity::EntityPointer;
     ///////////////////////////////////////
@@ -40,9 +33,6 @@ namespace nugget::ui_imp {
     bool CheckInstanceType(const type_info& type, identifier::IDType id);
 
     void EntityMapEmplace(identifier::IDType id, const void* ptr);
-
-    //template <typename T>
-    //void SetInstance(identifier::IDType id, const T* ptr);
     
     extern std::unordered_map<identifier::IDType, EntityPointer> entityMap;
 

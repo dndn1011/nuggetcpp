@@ -1,15 +1,13 @@
-#include "identifier.h"
+#include "../identifier.h"
 #include <SFML/Graphics.hpp>
-#include "notice.h"
+#include "../notice.h"
 #include <unordered_map>
 #include <string>
 
-#include "ui_imp.h"
-#include "UIContainer.h"
-#include "debug.h"
-#include "uibutton.h"
-#include "uientities.h"
-#include "../utils/StableVector.h"
+#include "../ui_imp.h"
+#include "../debug.h"
+#include "../uientities.h"
+#include "../../utils/StableVector.h"
 
 namespace nugget::ui_imp::button {
     using namespace identifier;
@@ -193,18 +191,22 @@ namespace nugget::ui_imp::button {
 }
 
 namespace nugget::ui::button {
-    size_t init_dummy = nugget::ui::entity::RegisterEntityInit([]() {
-        auto impNode = IDR("ui::Button");
-        nugget::ui::entity::RegisterSelfGeomFunction(impNode,
-            nugget::ui::button::ManageGeometrySelf);
-        nugget::ui::entity::RegisterEntityCreator(impNode,
-            nugget::ui::button::Create);
-        });
-
+    using namespace nugget::identifier;
     void Create(IDType id) {
         ui_imp::button::Imp::Create(id);
     }
     void ManageGeometrySelf() {
         ui_imp::button::Imp::ManageGeometrySelfAll();
     }
+
+    size_t init_dummy = nugget::ui::entity::RegisterEntityInit([]() {
+        auto impNode = IDR("ui::Button");
+        nugget::ui::entity::RegisterSelfGeomFunction(impNode,
+            nugget::ui::button::ManageGeometrySelf);
+        nugget::ui::entity::RegisterEntityCreator(impNode,
+            nugget::ui::button::Create);
+        nugget::ui::entity::RegisterEntityDraw(impNode,
+            nugget::ui_imp::button::DrawAll);
+
+        });
 }

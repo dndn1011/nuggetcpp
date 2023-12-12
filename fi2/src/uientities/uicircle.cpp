@@ -1,14 +1,13 @@
-#include "identifier.h"
+#include "../identifier.h"
 #include <SFML/Graphics.hpp>
-#include "notice.h"
+#include "../notice.h"
 #include <unordered_map>
 #include <string>
 
-#include "ui_imp.h"
-#include "UIContainer.h"
-#include "debug.h"
-#include "uientities.h"
-#include "../utils/StableVector.h"
+#include "../ui_imp.h"
+#include "../debug.h"
+#include "../uientities.h"
+#include "../../utils/StableVector.h"
 
 namespace nugget::ui_imp::circle {
     using namespace identifier;
@@ -80,7 +79,6 @@ namespace nugget::ui_imp::circle {
     std::unordered_map<IDType, size_t> Imp::index;
 
     void Create(IDType id) {
-        //output("---> %s\n", IDToString(id).c_str());
         Imp::Create(id);
     }
     /*static*/
@@ -91,6 +89,7 @@ namespace nugget::ui_imp::circle {
 }
 
 namespace nugget::ui::circle {
+    using namespace nugget::identifier;
 
     void Create(IDType id) {
         ui_imp::circle::Imp::Create(id);
@@ -101,11 +100,15 @@ namespace nugget::ui::circle {
     }
 
     size_t init_dummy = nugget::ui::entity::RegisterEntityInit([]() {
+
         auto impNode = IDR("ui::Circle");
         nugget::ui::entity::RegisterSelfGeomFunction(impNode,
             nugget::ui::circle::ManageGeometrySelf);
         nugget::ui::entity::RegisterEntityCreator(impNode,
             nugget::ui::circle::Create);
+        nugget::ui::entity::RegisterEntityDraw(impNode,
+            nugget::ui_imp::circle::DrawAll);
+
         });
 
 }

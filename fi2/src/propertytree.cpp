@@ -182,88 +182,6 @@ namespace nugget::properties {
         std::function<Token(const std::string&)> func;
     };
 
-    std::vector<ParseExpression> parsers = {
-        /* {
-               "^//[^\n]*",   // comment
-               [](const std::string& toParse) -> Token {
-                   return Token{ Token::Type::whitespace,toParse };
-               }
-           },
-           {
-               "^[a-zA-Z_][a-zA-Z_0-9]+(::[a-zA-Z_][a-zA-Z_0-9]*)+",
-               [](const std::string& toParse) -> Token {
-                   return Token{ Token::Type::qualifiedName,toParse };
-               }
-           },
-           {
-               "^[_a-zA-z][_0-9a-zA-Z]*",
-               [](const std::string& toParse) -> Token {
-                   return Token{ Token::Type::identifier,toParse };
-               }
-           },
-           {
-               "^[{]",
-               [](const std::string& toParse) -> Token {
-                   return Token{ Token::Type::openBrace,toParse };
-               }
-           },
-           {
-               "^[ \t\n\r]+",
-               [](const std::string& toParse) -> Token {
-                   return Token{ Token::Type::whitespace,toParse };
-               }
-           },
-           {
-               "^:",
-               [](const std::string& toParse) -> Token {
-                   return Token{ Token::Type::colon,toParse };
-               }
-           },
-           {
-               "^=",
-               [](const std::string& toParse) -> Token {
-                   return Token{ Token::Type::equals,toParse };
-               }
-           },
-           {
-               "^;",
-               [](const std::string& toParse) -> Token {
-                   return Token{ Token::Type::semicolon,toParse };
-               }
-           },
-           {
-               "^[}]",
-               [](const std::string& toParse) -> Token {
-                   return Token{ Token::Type::closeBrace,toParse };
-               }
-           },
-           {
-               "^[+]?[0-9]+[.][0-9]*",
-               [](const std::string& toParse) -> Token {
-                   return Token{ Token::Type::float_,toParse };
-               }
-           },
-           {
-               "^[+]?[0-9]+",
-               [](const std::string& toParse) -> Token {
-                   return Token{ Token::Type::integer,toParse };
-               }
-           },
-           {
-               R"(^["][^"\\]*(\\.[^"\\]*)*["])",
-               [](const std::string& toParse) -> Token {
-                   return Token{ Token::Type::string,toParse };
-               }
-           },
-           {
-               R"(^,)",
-               [](const std::string& toParse) -> Token {
-                   return Token{ Token::Type::comma,toParse };
-               }
-           },
-           */
-    };
-
     Token TokenisebyRegex(Token::Type type, const std::string regex, const std::string& next, size_t& point, bool& ok, size_t lineNumber) {
         std::smatch match;
         std::regex pattern(regex);
@@ -440,19 +358,6 @@ namespace nugget::properties {
                 }
             } else if (next[0] == '"') {
                 co_yield TokenisebyRegex(Token::Type::string, R"(^["][^"\\]*(\\.[^"\\]*)*["])", next, point, ok, parseState.lineNumber);
-            } else {
-                for (auto& x : parsers) {
-                    std::smatch match;
-                    std::regex pattern(x.regex);
-                    if (std::regex_search(next, match, pattern) &&
-                        match.position() == 0) {
-                        size_t length = match[0].length();
-                        co_yield x.func(std::string(view.substr(0, length)));
-                        point += length;
-                        ok = true;
-                        break;
-                    }
-                }
             }
             if (!ok) {
                 parseState.description = std::format("Could not tokenise: ->{}<-\n", next);
@@ -1084,7 +989,6 @@ namespace nugget::properties {
                     return false;
             }
         }
-        //output("DONE!\n");
         return true;
     }
 
@@ -1114,7 +1018,6 @@ namespace nugget::properties {
             if (token.type != Token::Type::whitespace) {
                 tokenList.push_back(token);
             }
-//            output("%s ->%s\n\n\n", token.TypeAsString().c_str(), token.text.c_str());
         }
         auto r = GrammarParse(where, tokenList, parseState);
         if (!r) {
@@ -1130,24 +1033,3 @@ namespace nugget::properties {
     }
 
 }
-
-#if 0
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-

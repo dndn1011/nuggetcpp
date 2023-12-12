@@ -1,17 +1,15 @@
-#include "identifier.h"
+#include "../identifier.h"
 #include <SFML/Graphics.hpp>
-#include "notice.h"
+#include "../notice.h"
 #include <unordered_map>
 #include <string>
 #include <span>
 
-#include "ui_imp.h"
-#include "UIContainer.h"
-#include "debug.h"
-#include "uitextbox.h"
-#include "uientities.h"
+#include "../ui_imp.h"
+#include "../debug.h"
+#include "../uientities.h"
 #include <array>
-#include "../utils/stablevector.h"
+#include "../../utils/stablevector.h"
 
 static const size_t maxEntities = 100;
 
@@ -133,16 +131,12 @@ namespace nugget::ui_imp::textBox {
 }
 
 namespace nugget::ui::textBox {
+    using namespace nugget::identifier;
     void Create(IDType id) {
-        //Output("---> %s\n", IDToString(id).c_str());
         ui_imp::textBox::Imp::Create(id);
     }
     void ManageGeometrySelf() {
         ui_imp::textBox::Imp::ManageGeometrySelfAll();
-    }
-
-    void Draw() {
-        
     }
 
     size_t init_dummy = nugget::ui::entity::RegisterEntityInit([]() {
@@ -151,5 +145,7 @@ namespace nugget::ui::textBox {
             nugget::ui::textBox::ManageGeometrySelf);
         nugget::ui::entity::RegisterEntityCreator(impNode,
             nugget::ui::textBox::Create);
+        nugget::ui::entity::RegisterEntityDraw(impNode,
+            nugget::ui_imp::textBox::DrawAll);
         });
 }

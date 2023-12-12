@@ -73,9 +73,6 @@ namespace nugget {
 
         IDType IDR(const std::vector<std::string>& strings);
         IDType IDR(const std::vector<IDType>& ids);
-
-        
-//        std::string IDCombineStrings(const std::vector<std::string>& strings);
         
         std::string IDCombineStrings(const std::string &a, const std::string& b);
         void IDCombineStringsInPlace(const std::string& a, const std::string& b, std::string &result);
@@ -89,7 +86,6 @@ namespace nugget {
         const std::string& IDToString(IDType id);
 
         const std::unordered_set<IDType>* IDGetChildren(IDType id);
-//        bool IDGetChildren(IDType id, std::unordered_set<IDType>& result);
 
         IDType GetParent(IDType child);
         IDType GetLeaf(IDType child);

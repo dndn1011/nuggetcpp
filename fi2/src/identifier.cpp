@@ -64,7 +64,6 @@ namespace nugget {
 			IDRemoveLeafInPlace(path);
 
 			const char *leafPtr = IDKeepLeafCStr(str);
-//			std::string leaf = IDKeepLeaf(str);
 
 			IDType parent = HashRT(path.c_str()).second;
 			IDType child = HashRT(str.c_str()).second;
@@ -136,7 +135,7 @@ namespace nugget {
 			return IDR(str.data());
 		}
 
-		// this is run time hash, but it dows not register anything because we are checking if a node exists
+		// this is run time hash, but it does not register anything because we are checking if a node exists
 		// returns 0 if not found
 		IDType IDRCheck(IDType hash1, const std::string_view str2) {
 			// check we have reverse lookup of id
@@ -186,23 +185,6 @@ namespace nugget {
 			}
 			return id;
 		}
-
-#if 0
-		std::string IDCombineStrings(const std::vector<std::string>& strings) {
-			std::stringstream ss;
-			bool first = true;
-			for (const auto& x : strings) {
-				if (!first) {
-					ss << ".";
-					ss << x;
-				} else {
-					first = false;
-					ss << x;
-				}
-			}
-			return ss.str();
-		}
-#endif
 
 		std::string IDCombineStrings(const std::string& a, const std::string& b) {
 			std::stringstream ss;

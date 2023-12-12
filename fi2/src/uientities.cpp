@@ -2,10 +2,6 @@
 #include <unordered_map>
 #include <functional>
 #include <assert.h>
-#include "uicontainer.h"
-#include "uicircle.h"
-#include "uibutton.h"
-#include "uitextbox.h"
 #include "notice.h"
 #include "debug.h"
 #include "../utils/utils.h"
@@ -19,29 +15,17 @@ namespace nugget::ui::entity {
 		CreateLambda createFunc = {};
 		std::function<void()> selfGeomFunc = {};
 		std::function<void(IDType)> manageGeomFunc = {};
-
+		SimpleLambda drawFunc = {};
 	};
 	static inline std::unordered_map<IDType,EntityInfo> registeredEntities;
 
-#if 0
-	void CreateEntity(IDType id, IDType class_) {
-		assert(0);
-		output("CreateEntity: {}\n", IDToString(id));
-		assert(functionMap.contains(class_));
-		functionMap[class_](id);
-	}
-#endif
-
 	void CreateEntityRecursive(IDType id) {
-//		output("CreateEntity: {}\n", IDToString(id));
 		auto classNode = IDRCheck(id, "class");
 		if (classNode) {
 			assert(Notice::KeyExists(classNode));
 			auto classId = Notice::GetID(classNode);
 			check(registeredEntities.contains(classId), "the entity constructor is not defined: {}\n",
 				IDToString(classId));
-
-//			printid(id);
 
 			registeredEntities.at(classId).createFunc(id);
 
@@ -55,8 +39,7 @@ namespace nugget::ui::entity {
 				}
 			}
 		} else {
-			assert(("Could not find entity node", 
-				0));
+			assert(("Could not find entity node", 0));
 		}
 	}
 
@@ -155,13 +138,6 @@ namespace nugget::ui::entity {
 				x.second.manageGeomFunc(nodeId);
 			}
 		}
-
-		//		nugget::ui::container::ManageGeometrySelf(nodeId);
-//		nugget::ui::textBox::ManageGeometrySelf(nodeId);
-//		nugget::ui::circle::ManageGeometrySelf(nodeId);
-//		nugget::ui::button::ManageGeometrySelf(nodeId);
-
-//		nugget::ui::container::ManageGeometryChildren(nodeId);
 	}
 	 
 #if 0
@@ -172,17 +148,9 @@ namespace nugget::ui::entity {
 #endif
 
 	void Init() {
-//		nugget::ui::entity::RegisterFunction(IDR("ui::Container"), ui::container::Create);
-//		nugget::ui::entity::RegisterFunction(IDR("ui::Circle"), ui::circle::Create);
-//		nugget::ui::entity::RegisterFunction(IDR("ui::Button"), ui::button::Create);
-//		nugget::ui::entity::RegisterFunction(IDR("ui::TextBox"), ui::textBox::Create);
-
 		for (auto&& x : staticEntityRegistrations->initList) {
 			x();
 		}
-//		for (auto&& x : registeredEntities) {
-//			nugget::ui::entity::RegisterFunction(x.second.node, x.second.createFunc);
-//		}
 	}
 
 	size_t RegisterEntityInit(std::function<void()> func) {
@@ -197,6 +165,15 @@ namespace nugget::ui::entity {
 			x.createFunc = func;
 		} else {
 			registeredEntities[typeID] = EntityInfo{ .createFunc = func };
+		}
+	}
+
+	void RegisterEntityDraw(IDType typeID, SimpleLambda func) {
+		if (registeredEntities.contains(typeID)) {
+			auto& x = registeredEntities.at(typeID);
+			x.drawFunc = func;
+		} else {
+			registeredEntities[typeID] = EntityInfo{ .drawFunc = func };
 		}
 	}
 
@@ -215,6 +192,15 @@ namespace nugget::ui::entity {
 			x.manageGeomFunc = func;
 		} else {
 			registeredEntities[node] = EntityInfo{ .manageGeomFunc = func };
+		}
+	}
+
+	void DrawAll() {
+		// one call for each class
+		for (auto&& x : registeredEntities) {
+			if (x.second.drawFunc) {
+				x.second.drawFunc();
+			}
 		}
 	}
 

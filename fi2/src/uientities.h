@@ -32,17 +32,19 @@ namespace nugget::ui::entity {
     using namespace identifier;
 
     using CreateLambda = std::function<void(IDType id)>;
+    using SimpleLambda = std::function<void()>;
 
     void CallFunction(IDType functionId, IDType entityId);
-    //void CreateEntity(IDType id, IDType type);
     void CreateEntity(IDType id);
     void UpdateEntity(IDType to, IDType from);
-    void RegisterFunction(IDType type, CreateLambda func);
     void Init();
     void ManageGeometry(IDType nodeId);
     size_t RegisterEntityInit(std::function<void()> func);
     
     void RegisterPostSelfGeomFunction(IDType node, std::function<void(IDType)> func);
     void RegisterEntityCreator(IDType node, CreateLambda func);
+    void RegisterEntityDraw(IDType typeID, SimpleLambda func);
     void RegisterSelfGeomFunction(IDType node, std::function<void()> func);
+
+    void DrawAll();
 }

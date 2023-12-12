@@ -18,9 +18,9 @@ namespace nugget::ui {
 			return unit == other.unit && f == other.f;
 		}
 
-		Dimension() : f(0), unit(Units::none) {}
-		Dimension(float v,Units u) : f(v), unit(u) {}
-		Dimension(float val) : f(val), unit(Units::none) {}
+		Dimension() : f(0), unit(Units::none), originalValue{} {}
+		Dimension(float v, Units u) : f(v), unit(u), originalValue{} {}
+		Dimension(float val) : f(val), unit(Units::none), originalValue{} {}
 
 		operator float() const {
 			return f;
