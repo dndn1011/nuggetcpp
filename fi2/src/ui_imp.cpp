@@ -21,6 +21,13 @@ namespace nugget::ui_imp {
         return entityMap.at(id);
     }
 
+    bool CheckInstanceType(const type_info &type,IDType id) {
+        if (entityMap.contains(id)) {
+            return false; // it is not an instance
+        }
+        return entityMap.at(id).typeHash == type.hash_code();
+    }
+
 
     void Init() {
         mainWindow = std::make_unique<sf::RenderWindow>(sf::VideoMode(1600, 960), "SFML Window");
@@ -56,7 +63,7 @@ namespace nugget::ui_imp {
             container::DrawAll();
             circle::DrawAll();
             button::DrawAll();
-            textBox::DrawAll();
+//            textBox::DrawAll();
 
             window.display();
 

@@ -173,13 +173,14 @@
     </ClCompile>
     <ClCompile Include="src\ui.cpp" />
     <ClCompile Include="src\uibutton.cpp" />
+    <ClCompile Include="src\uicircle.cpp" />
     <ClCompile Include="src\uicontainer.cpp" />
     <ClCompile Include="src\uientities.cpp" />
     <ClCompile Include="src\uitextbox.cpp" />
     <ClCompile Include="src\ui_imp.cpp" />
-    <ClCompile Include="src\uicircle.cpp" />
     <ClCompile Include="src\uicircle.h" />
     <ClCompile Include="src\dimensions.cpp" />
+    <ClCompile Include="utils\StableVector.cpp" />
     <ClCompile Include="utils\TimeSampler.cpp" />
     <ClCompile Include="utils\utils.cpp" />
   </ItemGroup>
@@ -197,6 +198,7 @@
     <ClInclude Include="src\uitextbox.h" />
     <ClInclude Include="src\ui_imp.h" />
     <ClInclude Include="src\dimensions.h" />
+    <ClInclude Include="utils\StableVector.h" />
     <ClInclude Include="utils\TimeSampler.h" />
     <ClInclude Include="utils\utils.h" />
   </ItemGroup>

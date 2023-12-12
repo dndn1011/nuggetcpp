@@ -10,13 +10,21 @@
 #include "UIContainer.h"
 #include "debug.h"
 
+#include "../utils/StableVector.h"
+
 
 namespace nugget {
     using namespace identifier;
     namespace ui_imp {
         namespace container {
+            static const size_t maxEntities = 100;
+
             struct Imp : UiEntityBaseImp {
-                APPLY_RULE_OF_MINUS_5(Imp);
+                APPLY_RULE_OF_MINUS_4(Imp);
+
+                Imp() = default;
+
+
 
                 explicit Imp(IDType idIn) : UiEntityBaseImp(idIn) {
                     RegisterInstance(this);
@@ -29,7 +37,6 @@ namespace nugget {
 
                     AddHandler(id, [&](IDType changeId) {
                         MarkDeleted();
-                        list.erase(id);
                         });
                 }
 
@@ -131,14 +138,13 @@ namespace nugget {
                     }
                 }
 
-                void ManageGeometrySelf() {
-                    // set our own geometry
-                    SetSizeCoordPropertyComputed(id, 0, CalcSelfSize(id, 0));
-                    SetSizeCoordPropertyComputed(id, 1, CalcSelfSize(id, 1));
-                    SetPosCoordPropertyComputed(id, 0, CalcSelfPos(id, 0));
-                    SetPosCoordPropertyComputed(id, 1, CalcSelfPos(id, 1));
 
-           //         output("@@@@@ {} {},{}\n", IDToString(id), GetSizeCoordPropertyComputed(id, 0), GetSizeCoordPropertyComputed(id, 1));
+                static void ManageGeometrySelfAll() {
+                    for (auto& x : list.GetArray()) {
+                        if (!x.deleted) {
+                            x.ConfigureSelfGeom();
+                        }
+                    }
                 }
 
                 void ManageGeometryChildren() {
@@ -172,23 +178,28 @@ namespace nugget {
                 }
 
                 static void Create(IDType id) {
-                    auto r = list.emplace(id,id/*->Imp */);
-                }
-
-                static void DrawAll() {
-                    for (auto& x : list) {
-                        x.second.Draw();
+                    if (!index.contains(id)) {
+                        size_t i = list.emplace_back((id)/*->Imp */);
+                        index.emplace(id, i);
                     }
                 }
 
-                static Imp& GetInstance(IDType node) {
-                    check(list.contains(node), "Trying to get instance of non existing node: {}", IDToString(node));
-                    return list.at(node);
+                static void DrawAll() {
+                    for (auto& x : list.GetArray()) {
+                        if (!x.deleted) {
+                            x.Draw();
+                        }
+                    }
                 }
 
             private:
-                static inline std::unordered_map<IDType, Imp> list;
+                static std::unordered_map<IDType, size_t> index;
+                static StableVector<Imp, maxEntities> list;
             };
+
+            std::unordered_map<IDType, size_t> Imp::index;
+            StableVector<Imp, maxEntities> Imp::list;
+
 
             void DrawAll() {
                 Imp::DrawAll();
@@ -196,39 +207,40 @@ namespace nugget {
         }
     }
     namespace ui::container {
+        size_t init_dummy = nugget::ui::entity::RegisterEntityInit([]() {
+            auto impNode = IDR("ui::Container");
+            nugget::ui::entity::RegisterSelfGeomFunction(impNode,
+                nugget::ui::container::ManageGeometrySelf);
+            nugget::ui::entity::RegisterEntityCreator(impNode,
+                nugget::ui::container::Create);
+            nugget::ui::entity::RegisterPostSelfGeomFunction(impNode,
+                nugget::ui::container::ManageGeometryChildren);
+
+            });
+
         void Create(IDType id) {
             //Output("---> %s\n", IDToString(id).c_str());
             ui_imp::container::Imp::Create(id);
         }
-
-        void ManageGeometrySelf(IDType node) {
-
-            auto& inst = ui_imp::container::Imp::GetInstance(node);
-            inst.ManageGeometrySelf();
-
-            std::vector<IDType> children;
-            if (auto r = Notice::GetChildrenWithNodeOfValue(IDR(node, "sub"), ID("class"), ID("ui::Container"), children)) {
-                for (auto& x : children) {
-                    ManageGeometrySelf(x);
-                }
-            }
+        
+        void ManageGeometrySelf() {
+            ui_imp::container::Imp::ManageGeometrySelfAll();
         }
 
         void ManageGeometryChildren(IDType node) {
-            auto& inst = ui_imp::container::Imp::GetInstance(node);
-            inst.ManageGeometryChildren();
+            ui_imp::container::Imp* inst = ui_imp::GetInstance(node);
 
             std::vector<IDType> children;
-            if (auto r = Notice::GetChildrenWithNodeOfValue(IDR(node, "sub"), ID("class"), ID("ui::Container"), children)) {
+            if (auto r = Notice::GetChildrenWithNodeExisting(IDR(node, "sub"), ID("geom"), children)) {
                 for (auto& x : children) {
-                    ManageGeometryChildren(x);
+                    // check if container node
+                    if (ui_imp::CheckInstanceType(typeid(ui_imp::container::Imp*), node)) {
+                        ManageGeometryChildren(x);
+                    }
                 }
             }
+            inst->ManageGeometryChildren();
         }
 
-        void ManageGeometry(IDType node) {
-            ManageGeometrySelf(node);
-            ManageGeometryChildren(node);
-        }
     }
 }

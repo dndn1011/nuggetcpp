@@ -5,6 +5,8 @@
 #include "identifier.h"
 #include "notice.h"
 #include "dimensions.h"
+#include "uientities.h"
+
 #include "../utils/utils.h"
 
 #define APPLY_RULE_OF_MINUS_5(Imp) \
@@ -15,31 +17,7 @@
             Imp& operator=(Imp&& other) = delete
 
 namespace nugget::ui_imp {
-    struct EntityPointer {
-
-        EntityPointer() = default;
-        EntityPointer(const EntityPointer& other) = default;
-        EntityPointer(EntityPointer&& other) = delete;
-        EntityPointer& operator=(const EntityPointer& other) = delete;
-        EntityPointer& operator=(EntityPointer&& other) = delete;
-
-        void* ptr;
-        size_t typeHash;
-
-        template <typename T>
-        EntityPointer(T p) : ptr((void*)p), typeHash(typeid(T).hash_code()) {
-        }
-
-        // convert safely to required type
-        template <typename T>
-        operator T () const {
-            auto thisHash = typeid(T).hash_code();
-            check(typeHash == thisHash, ("Invalid retrieval: type mismatch\n"));
-            T retr = static_cast<T>(ptr);
-            return retr;
-        }
-    };
-
+    using nugget::ui::entity::EntityPointer;
     ///////////////////////////////////////
     extern std::unique_ptr<sf::RenderWindow> mainWindow;    
     extern sf::Font font;
@@ -59,6 +37,7 @@ namespace nugget::ui_imp {
     float CalcSelfPos(identifier::IDType id, int axis);
     float GetPosCoordPropertyComputed(identifier::IDType id, int axis);
     EntityPointer& GetInstance(identifier::IDType id);
+    bool CheckInstanceType(const type_info& type, identifier::IDType id);
 
     void EntityMapEmplace(identifier::IDType id, const void* ptr);
 
@@ -92,8 +71,8 @@ namespace nugget::ui_imp {
         bool Validate();
 
         template <typename T>
-        bool RegisterInstance(T* instance) {
-            EntityPointer ep(instance);
+        bool RegisterInstance(T* staticEntityRegistrations) {
+            EntityPointer ep(staticEntityRegistrations);
             SetInstance(id, ep);
             return Validate();
         }

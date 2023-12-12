@@ -14,25 +14,36 @@ namespace nugget::ui::entity {
 	using namespace identifier;
 	using namespace Notice;
 
-	static std::unordered_map<IDType, CreateLambda> functionMap;
+	struct EntityInfo {
+		IDType node = {};
+		CreateLambda createFunc = {};
+		std::function<void()> selfGeomFunc = {};
+		std::function<void(IDType)> manageGeomFunc = {};
 
+	};
+	static inline std::unordered_map<IDType,EntityInfo> registeredEntities;
+
+#if 0
 	void CreateEntity(IDType id, IDType class_) {
 		assert(0);
 		output("CreateEntity: {}\n", IDToString(id));
 		assert(functionMap.contains(class_));
 		functionMap[class_](id);
 	}
-	
+#endif
+
 	void CreateEntityRecursive(IDType id) {
 //		output("CreateEntity: {}\n", IDToString(id));
 		auto classNode = IDRCheck(id, "class");
 		if (classNode) {
 			assert(Notice::KeyExists(classNode));
 			auto classId = Notice::GetID(classNode);
-			assert(("the entity constructor is not defined", functionMap.contains(classId)));
+			check(registeredEntities.contains(classId), "the entity constructor is not defined: {}\n",
+				IDToString(classId));
 
 //			printid(id);
-			functionMap[classId](id);
+
+			registeredEntities.at(classId).createFunc(id);
 
 			std::vector<IDType> children;
 			if (auto r = Notice::GetChildren(IDR(id, "sub"),children)) {
@@ -44,7 +55,8 @@ namespace nugget::ui::entity {
 				}
 			}
 		} else {
-			assert(("Could not find entity node", 0));
+			assert(("Could not find entity node", 
+				0));
 		}
 	}
 
@@ -116,26 +128,94 @@ namespace nugget::ui::entity {
 		UpdateEntityRecursive2(to, from);
 	}
 
+	struct RegisterSingleton;
+	extern RegisterSingleton* staticEntityRegistrations;
+	struct RegisterSingleton {
+		std::vector<std::function<void()>> initList;
+		static RegisterSingleton* GetInstance() {
+			if (staticEntityRegistrations) {
+				return staticEntityRegistrations;
+			} else {
+				return staticEntityRegistrations = new RegisterSingleton();  // never deleted
+			}
+		}
+	};
+	RegisterSingleton* staticEntityRegistrations = RegisterSingleton::GetInstance();
+
+
 	void ManageGeometry(IDType nodeId) {
-		nugget::ui::container::ManageGeometry(nodeId);
-		nugget::ui::textBox::ManageGeometry(nodeId);
+		for (auto &&x : registeredEntities) {
+			check(x.second.selfGeomFunc, ("The function pointer is null\n"));
+			x.second.selfGeomFunc();
+		}
+
+
+		for (auto&& x : registeredEntities) {
+			if (x.second.manageGeomFunc) {
+				x.second.manageGeomFunc(nodeId);
+			}
+		}
+
+		//		nugget::ui::container::ManageGeometrySelf(nodeId);
+//		nugget::ui::textBox::ManageGeometrySelf(nodeId);
+//		nugget::ui::circle::ManageGeometrySelf(nodeId);
+//		nugget::ui::button::ManageGeometrySelf(nodeId);
+
+//		nugget::ui::container::ManageGeometryChildren(nodeId);
 	}
 	 
-	void RegisterFunction(IDType type, CreateLambda func) {
-		functionMap[type]=func;
-	}
-
+#if 0
 	void CallFunction(IDType functionId,IDType entityId) {
-		check(functionMap.contains(functionId),"no such function: {}",IDToString(functionId));
-		functionMap.at(functionId)(entityId);
+		check(registeredEntities.contains(functionId),"no such function: {}",IDToString(functionId));
+		registeredEntities.at(functionId).(entityId);
 	}
-
+#endif
 
 	void Init() {
-		nugget::ui::entity::RegisterFunction(IDR("ui::Container"), ui::container::Create);
-		nugget::ui::entity::RegisterFunction(IDR("ui::Circle"), ui::circle::Create);
-		nugget::ui::entity::RegisterFunction(IDR("ui::Button"), ui::button::Create);
-		nugget::ui::entity::RegisterFunction(IDR("ui::TextBox"), ui::textBox::Create);
+//		nugget::ui::entity::RegisterFunction(IDR("ui::Container"), ui::container::Create);
+//		nugget::ui::entity::RegisterFunction(IDR("ui::Circle"), ui::circle::Create);
+//		nugget::ui::entity::RegisterFunction(IDR("ui::Button"), ui::button::Create);
+//		nugget::ui::entity::RegisterFunction(IDR("ui::TextBox"), ui::textBox::Create);
+
+		for (auto&& x : staticEntityRegistrations->initList) {
+			x();
+		}
+//		for (auto&& x : registeredEntities) {
+//			nugget::ui::entity::RegisterFunction(x.second.node, x.second.createFunc);
+//		}
+	}
+
+	size_t RegisterEntityInit(std::function<void()> func) {
+		auto ptr = RegisterSingleton::GetInstance();
+		ptr->initList.push_back(func);
+		return ptr->initList.size();
+	}
+
+	void RegisterEntityCreator(IDType typeID, CreateLambda func) {
+		if (registeredEntities.contains(typeID)) {
+			auto& x = registeredEntities.at(typeID);
+			x.createFunc = func;
+		} else {
+			registeredEntities[typeID] = EntityInfo{ .createFunc = func };
+		}
+	}
+
+	void RegisterSelfGeomFunction(IDType typeID, std::function<void()> func) {
+		if (registeredEntities.contains(typeID)) {
+			auto& x = registeredEntities.at(typeID);
+			x.selfGeomFunc = func;
+		} else {
+			registeredEntities[typeID] = EntityInfo{ .selfGeomFunc = func };
+		}
+	}
+
+	void RegisterPostSelfGeomFunction(IDType node, std::function<void(IDType)> func) {
+		if (registeredEntities.contains(node)) {
+			auto& x = registeredEntities.at(node);
+			x.manageGeomFunc = func;
+		} else {
+			registeredEntities[node] = EntityInfo{ .manageGeomFunc = func };
+		}
 	}
 
 	

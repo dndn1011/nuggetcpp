@@ -12,3 +12,6 @@
     Imp(Imp&& other) = delete;\
     Imp& operator=(const Imp& other) = delete;\
     Imp& operator=(Imp&& other) = delete
+
+namespace nugget::utils {
+}

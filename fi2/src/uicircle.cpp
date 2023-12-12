@@ -8,11 +8,17 @@
 #include "UIContainer.h"
 #include "debug.h"
 #include "uientities.h"
+#include "../utils/StableVector.h"
 
 namespace nugget::ui_imp::circle {
     using namespace identifier;
+    using namespace utils;
+
+    static const size_t maxEntities = 100;
     struct Imp : UiEntityBaseImp {
-        APPLY_RULE_OF_MINUS_5(Imp);
+        APPLY_RULE_OF_MINUS_4(Imp);
+
+        Imp() = default;
 
         explicit Imp(IDType idIn) : UiEntityBaseImp(idIn) {
             RegisterInstance(this);
@@ -25,18 +31,17 @@ namespace nugget::ui_imp::circle {
 
             AddHandler(id, [&](IDType changeId) {
                 MarkDeleted();
-                list.erase(id);
                 });
         }
 
         void Draw() {
-            sf::CircleShape circle(geom.w/2); // Diameter of 50 pixels
-            circle.setPosition(geom.x, geom.y); // Position the circle in the center
+            sf::CircleShape circle(geom.cw/2); // Diameter of 50 pixels
+            circle.setPosition(geom.cx, geom.cy); // Position the circle in the center
 
             Color col = Notice::GetColor(IDR(id, "color"));
 
             circle.setFillColor(sf::ToPlatform(col));
-
+             
             mainWindow->draw(circle);
         }
 
@@ -45,24 +50,35 @@ namespace nugget::ui_imp::circle {
             // valid constructor and emplace the result in the container
             // To not try to explcitly convert the hashid (IDType) to Imp (implementation)
             // It will not compile, because of rule of -5
-            if (!list.contains(id)) {
-                auto r = list.emplace(id, (id)/*->Imp */);
-                assert(r.second);
+            if (!index.contains(id)) {
+                size_t i = list.emplace_back((id)/*->Imp */);
+                index.emplace(id, i);
             }
         }
 
         static void DrawAll() {
-            for (auto& x : list) {
-                if (!x.second.deleted) {
-                    x.second.Draw();
+            for (auto& x : list.GetArray()) {
+                if (!x.deleted) {
+                    x.Draw();
+                }
+            }
+        }
+
+        static void ManageGeometrySelfAll() {
+            for (auto& x : list.GetArray()) {
+                if (!x.deleted) {
+                    x.ConfigureSelfGeom();
                 }
             }
         }
 
     private:
-        static inline std::unordered_map<IDType, Imp> list;
+        static std::unordered_map<IDType, size_t> index;
+        static StableVector<Imp, maxEntities> list;
     };
-        
+    StableVector<Imp, maxEntities> Imp::list;
+    std::unordered_map<IDType, size_t> Imp::index;
+
     void Create(IDType id) {
         //output("---> %s\n", IDToString(id).c_str());
         Imp::Create(id);
@@ -75,7 +91,21 @@ namespace nugget::ui_imp::circle {
 }
 
 namespace nugget::ui::circle {
+
     void Create(IDType id) {
         ui_imp::circle::Imp::Create(id);
     }
+
+    void ManageGeometrySelf() {
+        ui_imp::circle::Imp::ManageGeometrySelfAll();
+    }
+
+    size_t init_dummy = nugget::ui::entity::RegisterEntityInit([]() {
+        auto impNode = IDR("ui::Circle");
+        nugget::ui::entity::RegisterSelfGeomFunction(impNode,
+            nugget::ui::circle::ManageGeometrySelf);
+        nugget::ui::entity::RegisterEntityCreator(impNode,
+            nugget::ui::circle::Create);
+        });
+
 }

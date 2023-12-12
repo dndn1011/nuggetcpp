@@ -94,10 +94,11 @@ int main() {
     }
 #endif
 
+#if 0
     nugget::ui::entity::RegisterFunction(IDR("ExitClick"), [](IDType id) {
         exit(0);
         });
-
+#endif
 
 
     nugget::ui::Exec([&watcher]() {

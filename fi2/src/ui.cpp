@@ -15,6 +15,7 @@
 namespace nugget::ui {
     void Init() {
         ui_imp::Init();
+
     }
 
     void Exec(const std::function<void()>& updateCallback) {

@@ -1,14 +1,15 @@
 #pragma once
+#if 0
 #include "identifier.h"
 
 namespace nugget {
 	using namespace identifier;
-	namespace ui::container {
+	namespace ui::textBox {
 		void Create(IDType id);
-		void ManageGeometryChildren(IDType id);
 		void ManageGeometrySelf();
 	}
-	namespace ui_imp::container {
+	namespace ui_imp::textBox {
 		void DrawAll();
 	}
 }
+#endif

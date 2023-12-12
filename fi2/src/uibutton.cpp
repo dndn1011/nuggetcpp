@@ -9,16 +9,22 @@
 #include "debug.h"
 #include "uibutton.h"
 #include "uientities.h"
+#include "../utils/StableVector.h"
 
 namespace nugget::ui_imp::button {
     using namespace identifier;
+
+
+    static const size_t maxEntities = 100;
     struct Imp : UiEntityBaseImp {
-        APPLY_RULE_OF_MINUS_5(Imp);
+
+        APPLY_RULE_OF_MINUS_4(Imp);
+
+        Imp() = default;
 
         explicit Imp(IDType idIn) : UiEntityBaseImp(idIn) {
             RegisterInstance(this);
 
-            ConfigureSelfGeom();
             UpdateGeomProperties();
 
             Notice::Set(IDR(id, "pressEventCount"), 0);
@@ -28,7 +34,6 @@ namespace nugget::ui_imp::button {
 
             AddHandler(id, [&](IDType changeId) {
                 MarkDeleted();
-                list.erase(id);
                 });
         }
             
@@ -136,31 +141,46 @@ namespace nugget::ui_imp::button {
                     if (Notice::KeyExists(onClick)) {
                         auto function = IDR(onClick, ID("function"));
                         check(Notice::KeyExists(function), "onClick needs a function node");
-                        ui::entity::CallFunction(Notice::GetID(function), id);
+                       // ui::entity::CallFunction(Notice::GetID(function), id);
                     }
                 }
             }
         }
 
         static void Create(IDType id) {
-            if (!list.contains(id)) {
-                auto r = list.emplace(id, (id)/*->Imp */);
-                assert(r.second);
+            // The emplace uses an implicit construction  to call the single
+            // valid constructor and emplace the result in the container
+            // To not try to explcitly convert the hashid (IDType) to Imp (implementation)
+            // It will not compile, because of rule of -5
+            if (!index.contains(id)) {
+                size_t i = list.emplace_back((id)/*->Imp */);
+                index.emplace(id, i);
             }
         }
 
         static void DrawAll() {
-            for (auto& x : list) {
-                if (!x.second.deleted) {
-                    x.second.Draw();
+            for (auto& x : list.GetArray()) {
+                if (!x.deleted) {
+                    x.Draw();
+                }
+            }
+        }
+
+        static void ManageGeometrySelfAll() {
+            for (auto& x : list.GetArray()) {
+                if (!x.deleted) {
+                    x.ConfigureSelfGeom();
                 }
             }
         }
 
     private:
-        static inline std::unordered_map<IDType, Imp> list;
         sf::Text text;
+        static std::unordered_map<IDType, size_t> index;
+        static StableVector<Imp, maxEntities> list;
     };
+    StableVector<Imp, maxEntities> Imp::list;
+    std::unordered_map<IDType, size_t> Imp::index;
 
     void Create(IDType id) {
         Imp::Create(id);
@@ -173,7 +193,18 @@ namespace nugget::ui_imp::button {
 }
 
 namespace nugget::ui::button {
+    size_t init_dummy = nugget::ui::entity::RegisterEntityInit([]() {
+        auto impNode = IDR("ui::Button");
+        nugget::ui::entity::RegisterSelfGeomFunction(impNode,
+            nugget::ui::button::ManageGeometrySelf);
+        nugget::ui::entity::RegisterEntityCreator(impNode,
+            nugget::ui::button::Create);
+        });
+
     void Create(IDType id) {
         ui_imp::button::Imp::Create(id);
+    }
+    void ManageGeometrySelf() {
+        ui_imp::button::Imp::ManageGeometrySelfAll();
     }
 }

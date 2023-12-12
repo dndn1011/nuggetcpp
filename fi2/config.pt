@@ -353,10 +353,64 @@ test4 :  horizontal_container {
         h=450;
     }
     sub {
-        : circle;
+        : circle {
+            geom {
+                x = 200;
+                y = 100;
+            }
+        }
+        : button {
+            geom {
+                x = 100;
+                y = 100;
+                w = 100;
+                h = 50;
+            }
+        }
+        : horizontal_container {
+            geom {
+                x = 300;
+                y = 400;
+            }
+        }
+        : textbox {
+            geom {
+                x = 100;
+                y = 300;
+                w = 200;
+                h=100;
+            }
+            text = "Bing and gone";
+        }
     }
 }
 
-
-main : test4 {
+test5 :  horizontal_container {
+    geom {
+        w=700;
+        h=450;
+    }
+    sub {
+        : horizontal_container {
+            color = { 1,1,0,1 };
+        }
+        : button {
+            geom {
+                w = 200;
+            }
+        }
+        : textbox {
+            geom {
+                w = 200;
+            }
+        }
+        : circle {
+            geom {
+                x = 20;
+                y = 20;
+            }
+        }
+    }
+}
+main : test5 {
 }
