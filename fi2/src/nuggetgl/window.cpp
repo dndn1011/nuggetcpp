@@ -194,34 +194,97 @@ namespace nugget::gl {
         return program;
     }
 
+    GLuint linkProgram(GLuint geometryShader, GLuint vertexShader, GLuint fragmentShader) {
+        GLuint program = glCreateProgram();
+        if (geometryShader) {
+            glAttachShader(program, geometryShader);
+        }
+        glAttachShader(program, vertexShader);
+        glAttachShader(program, fragmentShader);
+        glLinkProgram(program);
+
+        GLint success;
+        glGetProgramiv(program, GL_LINK_STATUS, &success);
+
+        if (!success) {
+            GLchar infoLog[512];
+            glGetProgramInfoLog(program, sizeof(infoLog), nullptr, infoLog);
+            std::cerr << "Program linking failed: " << infoLog << std::endl;
+
+            // Clean up resources (delete shaders and program when no longer needed)
+            if (geometryShader) {
+                glDeleteShader(geometryShader);
+            }
+            glDeleteShader(vertexShader);
+            glDeleteShader(fragmentShader);
+            glDeleteProgram(program);
+
+            return 0;
+        }
+
+        // Detach shaders after a successful link
+        if (geometryShader) {
+            glDetachShader(program, geometryShader);
+        }
+        glDetachShader(program, vertexShader);
+        glDetachShader(program, fragmentShader);
+
+        return program;
+    }
+
     void triangle_test() {
         const char* vertexShaderSource = R"(
             #version 450 core
-            out vec2 fragUV;
-            out vec4 fragCol;
+            out vec2 uv_g;
+            out vec4 col_g;
             layout (location = 0) in vec3 aPos;
             layout (location = 1) in vec2 aTexCoord;
             layout (location = 2) in vec4 aColour;
             void main()
             {
-                fragUV = aTexCoord;
-                fragCol = aColour;
+                uv_g = aTexCoord;
+                col_g = aColour;
                 gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
             }
         )";
 
+        const char* geometryShaderSource = R"(
+        #version 450 core
+
+        layout (triangles) in;
+        layout (triangle_strip, max_vertices = 3) out;
+
+        in vec2 uv_g[3];
+        out vec2 uv_f;
+        in vec4 col_g[3];
+        out vec4 col_f;
+
+        void main() {
+            for (int i = 0; i < 3; i++) {
+                gl_Position = gl_in[i].gl_Position;
+                col_f = col_g[i];
+                uv_f = uv_g[i];
+                EmitVertex();
+            }
+            EndPrimitive();
+}
+)";
+
+
         const char* fragmentShaderSource = R"(
             #version 450 core
-            in vec2 fragUV;
-            in vec4 fragCol;
+            in vec2 uv_f;
+            in vec4 col_f;
             out vec4 FragColor;
             void main()
             {
-                FragColor = fragCol;
-//                FragColor = vec4(fragUV.x, fragUV.y, 0.0, 1.0);
-//                  FragColor = vec4(fragUV.x, 1.0, 0.0, 1.0);
+//                  FragColor = vec4(1,1,0,1);
+                    FragColor = col_f;
+//               FragColor = vec4(uv_f.x, uv_f.y, 0.0, 1.0);
+//                  FragColor = vec4(uv_f.x, 1.0, 0.0, 1.0);
             }
         )";
+
 
         // Vertex Array Object (VAO)
         glGenVertexArrays(1, &VAO);
@@ -284,8 +347,13 @@ namespace nugget::gl {
         glEnableVertexAttribArray(2);
 
 
+        // Geometry Shader
+        GLuint geometryShader = {};
+        geometryShader = compileShader(geometryShaderSource, GL_GEOMETRY_SHADER);
+        check(geometryShader != 0, ("vertex shader compilation failed\n"));
+
         // Vertex Shader
-        GLuint vertexShader = compileShader(vertexShaderSource,GL_VERTEX_SHADER);
+        GLuint vertexShader = compileShader(vertexShaderSource, GL_VERTEX_SHADER);
         check(vertexShader != 0, ("vertex shader compilation failed\n"));
 
         // Fragment Shader
@@ -293,7 +361,7 @@ namespace nugget::gl {
         check(fragmentShader != 0, ("fragment shader compilation failed\n"));
 
         // Shader Program
-        shaderProgram = linkProgram(vertexShader, fragmentShader);
+        shaderProgram = linkProgram(geometryShader, vertexShader, fragmentShader);
         check(shaderProgram != 0, ("fragment shader compilation failed\n"));
 
         // Enable backface culling

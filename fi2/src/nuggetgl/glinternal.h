@@ -11,3 +11,5 @@ typedef char GLchar;
 #define GL_FRAGMENT_SHADER 0x8B30
 #define GL_COMPILE_STATUS 0x8B81
 #define GL_LINK_STATUS 0x8B82
+
+#define GL_GEOMETRY_SHADER 0x8DD9
