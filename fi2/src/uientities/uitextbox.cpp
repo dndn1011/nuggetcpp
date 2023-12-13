@@ -1,15 +1,15 @@
-#include "../identifier.h"
+#include "identifier.h"
 #include <SFML/Graphics.hpp>
-#include "../notice.h"
+#include "notice.h"
 #include <unordered_map>
 #include <string>
 #include <span>
 
-#include "../ui_imp.h"
-#include "../debug.h"
-#include "../uientities.h"
+#include "ui_imp.h"
+#include "debug.h"
+#include "uientities.h"
 #include <array>
-#include "../../utils/stablevector.h"
+#include "utils/stablevector.h"
 
 static const size_t maxEntities = 100;
 

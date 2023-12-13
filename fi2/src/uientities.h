@@ -1,7 +1,7 @@
 #pragma once
 #include "identifier.h"
 #include <functional>
-#include "../utils/utils.h"
+#include "utils/utils.h"
 
 namespace nugget::ui::entity {
     struct EntityPointer {

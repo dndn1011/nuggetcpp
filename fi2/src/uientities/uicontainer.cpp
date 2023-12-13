@@ -1,15 +1,15 @@
-#include "../identifier.h"
+#include "identifier.h"
 #include <SFML/Graphics.hpp>
-#include "../notice.h"
+#include "notice.h"
 #include <unordered_map>
 #include <string>
 #include <numeric>
 #include <algorithm>
 
-#include "../ui_imp.h"
-#include "../debug.h"
+#include "ui_imp.h"
+#include "debug.h"
 
-#include "../../utils/StableVector.h"
+#include "utils/StableVector.h"
 
 
 namespace nugget {

@@ -36,19 +36,16 @@
     <ClCompile Include="src\ui_imp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="utils\TimeSampler.cpp">
+    <ClCompile Include="src\utils\TimeSampler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="utils\utils.cpp">
+    <ClCompile Include="src\utils\utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\debug.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\dimensions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\uientities.cpp">
@@ -64,6 +61,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\uientities\uibutton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\nuggetgl\window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -86,10 +89,10 @@
     <ClInclude Include="src\ui_imp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="utils\TimeSampler.h">
+    <ClInclude Include="src\utils\TimeSampler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="utils\utils.h">
+    <ClInclude Include="src\utils\utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\debug.h">
@@ -98,7 +101,16 @@
     <ClInclude Include="src\dimensions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="utils\StableVector.h">
+    <ClInclude Include="src\utils\StableVector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\nuggetgl\gldefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\nuggetgl\gl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\nuggetgl\glinternal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

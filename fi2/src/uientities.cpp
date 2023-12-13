@@ -4,7 +4,7 @@
 #include <assert.h>
 #include "notice.h"
 #include "debug.h"
-#include "../utils/utils.h"
+#include "utils/utils.h"
 
 namespace nugget::ui::entity {
 	using namespace identifier;

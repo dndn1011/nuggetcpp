@@ -110,7 +110,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <AdditionalIncludeDirectories>C:\Users\dino\source\repos\fi2\SFML-2.6.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;C:\Users\dino\source\repos\fi2\SFML-2.6.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -122,7 +122,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\dino\source\repos\fi2\SFML-2.6.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
@@ -151,7 +151,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="src\Color_plat.cpp" />
     <ClCompile Include="src\debug.cpp" />
     <ClCompile Include="src\filereader.cpp" />
@@ -179,23 +178,28 @@
     <ClCompile Include="src\uientities\uitextbox.cpp" />
     <ClCompile Include="src\ui_imp.cpp" />
     <ClCompile Include="src\dimensions.cpp" />
-    <ClCompile Include="utils\TimeSampler.cpp" />
-    <ClCompile Include="utils\utils.cpp" />
+    <ClCompile Include="src\nuggetgl\window.cpp" />
+    <ClCompile Include="src\utils\TimeSampler.cpp" />
+    <ClCompile Include="src\utils\utils.cpp" />
+    <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="config.pt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\nuggetgl\gl.h" />
+    <ClInclude Include="src\nuggetgl\gldefs.h" />
     <ClInclude Include="src\debug.h" />
     <ClInclude Include="src\filereader.h" />
+    <ClInclude Include="src\nuggetgl\glinternal.h" />
     <ClInclude Include="src\propertytree.h" />
     <ClInclude Include="src\ui.h" />
     <ClInclude Include="src\uientities.h" />
     <ClInclude Include="src\ui_imp.h" />
     <ClInclude Include="src\dimensions.h" />
-    <ClInclude Include="utils\StableVector.h" />
-    <ClInclude Include="utils\TimeSampler.h" />
-    <ClInclude Include="utils\utils.h" />
+    <ClInclude Include="src\utils\StableVector.h" />
+    <ClInclude Include="src\utils\TimeSampler.h" />
+    <ClInclude Include="src\utils\utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

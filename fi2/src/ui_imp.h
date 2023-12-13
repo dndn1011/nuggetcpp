@@ -7,7 +7,7 @@
 #include "dimensions.h"
 #include "uientities.h"
 
-#include "../utils/utils.h"
+#include "utils/utils.h"
 
 namespace nugget::ui_imp {
     using nugget::ui::entity::EntityPointer;

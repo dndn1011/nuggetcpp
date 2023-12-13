@@ -1,13 +1,13 @@
-#include "../identifier.h"
+#include "identifier.h"
 #include <SFML/Graphics.hpp>
-#include "../notice.h"
+#include "notice.h"
 #include <unordered_map>
 #include <string>
 
-#include "../ui_imp.h"
-#include "../debug.h"
-#include "../uientities.h"
-#include "../../utils/StableVector.h"
+#include "ui_imp.h"
+#include "debug.h"
+#include "uientities.h"
+#include "utils/StableVector.h"
 
 namespace nugget::ui_imp::button {
     using namespace identifier;

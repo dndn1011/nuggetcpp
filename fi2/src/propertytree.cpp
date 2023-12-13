@@ -22,7 +22,7 @@
 #include "identifier.h"
 #include "notice.h"
 
-#include "../utils/TimeSampler.h"
+#include "utils/TimeSampler.h"
 
 
 namespace nugget::properties {

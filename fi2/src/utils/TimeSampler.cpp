@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <algorithm>
 #include "TimeSampler.h"
-#include "../src/debug.h"
+#include "debug.h"
 
 /*static*/
 std::unordered_map<std::string, float> TimeSampler::timings;
