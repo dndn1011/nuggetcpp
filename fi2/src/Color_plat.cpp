@@ -1,4 +1,4 @@
-#include <SFML/Graphics.hpp>
+//#include <SFML/Graphics.hpp>
 
 #include "types.h"
 #include <sstream>
@@ -29,11 +29,11 @@ namespace sf {
 		}
 		return (uint8_t)c;
 	}
-	Color ToPlatform(nugget::Color in) {
-		return sf::Color(
-			ConvColRange(in.r),
-			ConvColRange(in.g),
-			ConvColRange(in.b),
-			ConvColRange(in.a));
-	}
+//	Color ToPlatform(nugget::Color in) {
+// 		return sf::Color(
+//			ConvColRange(in.r),
+//			ConvColRange(in.g),
+//			ConvColRange(in.b),
+//			ConvColRange(in.a));
+//	}
 }

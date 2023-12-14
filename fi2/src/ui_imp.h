@@ -1,7 +1,7 @@
 #pragma once
 
 #include <functional>
-#include <SFML/Graphics.hpp>
+//#include <SFML/Graphics.hpp>
 #include "identifier.h"
 #include "notice.h"
 #include "dimensions.h"
@@ -12,8 +12,8 @@
 namespace nugget::ui_imp {
     using nugget::ui::entity::EntityPointer;
     ///////////////////////////////////////
-    extern std::unique_ptr<sf::RenderWindow> mainWindow;    
-    extern sf::Font font;
+  //  extern std::unique_ptr<sf::RenderWindow> mainWindow;    
+  //  extern sf::Font font;
     ///////////////////////////////////////
 
 	void Init();

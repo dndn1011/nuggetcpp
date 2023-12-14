@@ -110,7 +110,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;C:\Users\dino\source\repos\fi2\SFML-2.6.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -122,7 +122,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\dino\source\repos\fi2\SFML-2.6.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="src\Color_plat.cpp" />
     <ClCompile Include="src\debug.cpp" />
     <ClCompile Include="src\filereader.cpp" />
@@ -163,6 +164,9 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="src\notice.cpp" />
+    <ClCompile Include="src\nuggetgl\glinternal.cpp" />
+    <ClCompile Include="src\nuggetgl\shader.cpp" />
+    <ClCompile Include="src\nuggetgl\shader.h" />
     <ClCompile Include="src\propertytree.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MaxSpeed</Optimization>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Default</BasicRuntimeChecks>
@@ -171,17 +175,11 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="src\ui.cpp" />
-    <ClCompile Include="src\uientities\uibutton.cpp" />
-    <ClCompile Include="src\uientities\uicircle.cpp" />
-    <ClCompile Include="src\uientities\uicontainer.cpp" />
     <ClCompile Include="src\uientities.cpp" />
-    <ClCompile Include="src\uientities\uitextbox.cpp" />
-    <ClCompile Include="src\ui_imp.cpp" />
     <ClCompile Include="src\dimensions.cpp" />
     <ClCompile Include="src\nuggetgl\window.cpp" />
     <ClCompile Include="src\utils\TimeSampler.cpp" />
     <ClCompile Include="src\utils\utils.cpp" />
-    <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="config.pt" />

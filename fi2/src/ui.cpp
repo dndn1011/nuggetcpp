@@ -1,6 +1,5 @@
 #include <iostream>
 #include <filesystem>
-#include <SFML/Graphics.hpp>
 #include <assert.h>
 #include <functional>
 #include <memory>
@@ -10,15 +9,16 @@
 #include "notice.h"
 #include "UIEntities.h"
 #include "ui_imp.h"
+#include "nuggetgl/gl.h"
 
 namespace nugget::ui {
     void Init() {
-        ui_imp::Init();
-
+        nugget::gl::OpenWindow();
     }
 
     void Exec(const std::function<void()>& updateCallback) {
-        ui_imp::Exec(updateCallback);
+//        ui_imp::Exec(updateCallback);
+        nugget::gl::MainLoop(updateCallback);
     }
 }
 

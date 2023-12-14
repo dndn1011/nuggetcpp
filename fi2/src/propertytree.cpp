@@ -279,6 +279,7 @@ namespace nugget::properties {
 
     Generator<Token> Tokenise(std::function<std::string(size_t)> readFunc,ParseState &parseState) {
         size_t point = 0;
+        bool literalMode = false;
         while (true) {
             std::string view(readFunc(point));
             size_t endLength = view.length();
@@ -289,7 +290,23 @@ namespace nugget::properties {
             bool ok = false;
             size_t forward = std::min({ (size_t)512,endLength });
             std::string next = std::string(view.substr(0, forward));
-            if (next[0] == '\n') {
+            if (literalMode) {
+                if (next[0] == '>' && next[1] == '>') {
+                    point += 2;
+                    ok = true;
+                    literalMode = false;
+                    co_yield Token{ Token::Type::doubleMore,std::string(next.substr(0, 2)),parseState.lineNumber };
+                } else {
+                    // find end of line
+                    size_t i = 0;
+                    for (i = 0; i < next.size() && next[i] != '\n'; i++);
+                    check(next.size(), "Exceeded maximum line length");
+                    parseState.lineNumber++;
+                    point += i + 1;
+                    ok = true;
+                    co_yield Token{ Token::Type::literalLine,std::string(next.substr(0, i + 1)),parseState.lineNumber };
+                }
+            } else if (next[0] == '\n') {
                 parseState.lineNumber++;
                 point += 1;
                 ok = true;
@@ -358,8 +375,13 @@ namespace nugget::properties {
                 }
             } else if (next[0] == '"') {
                 co_yield TokenisebyRegex(Token::Type::string, R"(^["][^"\\]*(\\.[^"\\]*)*["])", next, point, ok, parseState.lineNumber);
+            } else if (next[0] == '<' && next[1] == '<') {
+                point += 2;
+                ok = true;
+                literalMode = true;
+                co_yield Token{ Token::Type::doubleLess,std::string(next.substr(0, 2)),parseState.lineNumber };
             }
-            if (!ok) {
+        if (!ok) {
                 parseState.description = std::format("Could not tokenise: ->{}<-\n", next);
                 co_yield Token({ Token::Type::error, "" ,parseState.lineNumber });
                 co_return;
@@ -769,6 +791,26 @@ namespace nugget::properties {
             }
             return true;
         }
+
+        void ClearLiteralLines() {
+            literalLines.clear();
+        }
+
+        void AddLiteralLine() {
+            literalLines.push_back(list[point - 1].text);
+        }
+
+        void AssignLiteralLines() {
+            std::stringstream ss;
+            for (auto&& x : literalLines) {
+                ss << x;
+            }
+            currentValue = ss.str();
+            currentValueType = Token::Type::string;
+            currentTypeName = "string";
+            StoreValue();
+        }
+
     private:
         std::vector<Token>& list;
         std::string currentPathName = rootName;
@@ -789,6 +831,8 @@ namespace nugget::properties {
         size_t uniqueNameCounter=0;
 
         std::vector<std::string> initaliserList;
+        std::vector<std::string> literalLines;
+
 
         std::unordered_map<std::string, std::function<void()>> objectInitialisers = {
             {"Color",[&]() {
@@ -964,6 +1008,26 @@ namespace nugget::properties {
                             pdata.BlockNameFromValueName();                           
                             pdata.NestWithCurrentBlock();
                             goto expectInitialisation__;
+                        } break;
+                        case Token::Type::doubleLess: {
+                            pdata.ClearLiteralLines();
+                            nextLiteralLine__:
+                            switch (pdata.NextTokenType()) {
+                                case Token::Type::literalLine: {
+                                    pdata.AddLiteralLine();
+                                    goto nextLiteralLine__;
+                                } break;
+                                case Token::Type::doubleMore: {
+                                } break;  
+                                default: {
+                                    assert(0);
+                                }
+                            }
+                            if (!pdata.ExpectSemicolon()) {
+                                output("vvvvvvvvvvvvvvvvvvv\n");
+                                return false;
+                            }
+                            pdata.AssignLiteralLines();
                         } break;
                         default:
                             output("vvvvvvvvvvvvvvvvvvv\n");

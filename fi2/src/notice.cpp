@@ -5,7 +5,6 @@
 #include <unordered_set>
 #include <functional>
 
-#include <SFML/Graphics.hpp>
 #include <sstream>
 
 #include "types.h"

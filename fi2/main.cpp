@@ -13,6 +13,7 @@
 #include <array>
 
 #include "src/debug.h"
+#include "nuggetgl/gl.h"
 
 using namespace nugget;
 using namespace nugget::identifier;
@@ -44,7 +45,6 @@ struct FileWatcher {
 
 static const std::string filename = "config.pt";
 int main() {
-    nugget::ui::Init();
 
     for (int i = 0; i<1; i++) {
         auto result = properties::LoadPropertyTree("properties",filename);
@@ -99,6 +99,8 @@ int main() {
         exit(0);
         });
 #endif
+
+    nugget::ui::Init();
 
 
     nugget::ui::Exec([&watcher]() {

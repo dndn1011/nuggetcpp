@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 namespace nugget::debug {
     void Break();
@@ -10,6 +11,7 @@ namespace nugget::debug {
 }
 
 #define outputAlways(...)     (nugget::debug::OutputToDebuggerAndConsole((std::format("{}({}): {}: ",__FILE__, __LINE__, __FUNCTION__) + std::format(__VA_ARGS__))))
+#define testAlways(a,...)  ((a)?(void)0:(output(__VA_ARGS__)))
 
 #if defined(NDEBUG)
 #define output(...) /**/

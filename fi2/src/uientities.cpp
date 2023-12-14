@@ -38,9 +38,10 @@ namespace nugget::ui::entity {
 					}
 				}
 			}
-		} else {
-			assert(("Could not find entity node", 0));
 		}
+		//else {
+		//	assert(("Could not find entity node", 0));
+		//}
 	}
 
 	IDType HashRemap(IDType path, IDType newRoot) {

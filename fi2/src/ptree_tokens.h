@@ -27,6 +27,9 @@ __PTREE_TOKEN(percentage)
 __PTREE_TOKEN(percent)
 __PTREE_TOKEN(dimension)
 __PTREE_TOKEN(doubleColon)
+__PTREE_TOKEN(doubleLess)
+__PTREE_TOKEN(doubleMore)
+__PTREE_TOKEN(literalLine)
 ////////////////////////////////////////
 
 #undef __PTREE_TOKEN_MAPDEF

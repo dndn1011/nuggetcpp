@@ -413,5 +413,70 @@ test5 :  horizontal_container {
     }
 }
 
-main : test5 {
+shaders {
+    biquad {
+        vertex <<
+            #version 450 core
+            out vec2 uv_g;
+            out vec4 col_g;
+            layout (location = 0) in vec3 aPos;
+            layout (location = 1) in vec2 aTexCoord;
+            layout (location = 2) in vec4 aColour;
+            void main()
+            {
+                uv_g = aTexCoord;
+                col_g = aColour;
+                gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+            }
+>>;
+        geometry <<
+                #version 450 core
+
+        layout (triangles_adjacency) in;
+        layout (triangle_strip, max_vertices = 4) out;
+
+        in vec2 uv_g[6];
+        out vec2 uv_f;
+        in vec4 col_g[6];
+        out vec4 col_f;
+        flat out vec4 colv_f[4];
+
+        void main() {
+            for (int i = 0; i < 4; i++) {
+                colv_f[i] = col_g[i];
+            }
+
+
+            for (int i = 0; i < 4; i++) {
+                gl_Position = gl_in[i].gl_Position;
+                col_f = col_g[i];
+                uv_f = uv_g[i];
+
+                EmitVertex();
+            }
+            EndPrimitive();
+}
+>>;
+    fragment  <<
+                #version 450 core
+                in vec2 uv_f;
+                in vec4 col_f;
+                out vec4 FragColor;
+                flat in vec4 colv_f[4];
+
+                void main()
+                {
+                    vec4 a = mix(colv_f[0],colv_f[1],uv_f.y);
+                    vec4 b = mix(colv_f[2],colv_f[3],uv_f.y);
+                    vec4 c = mix(a,b,uv_f.x);
+
+                    FragColor = c;
+
+                }
+
+>>;
+    }
+}
+
+main {
 }
