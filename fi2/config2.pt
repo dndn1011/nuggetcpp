@@ -1,11 +1,11 @@
 
 biquads_test {
-    root = .;
+    root = ();
     render {
         vao {
             vbo {
                 verts = (root).data.model.verts;
-                uvs = (root).data.model.uvs;
+                uvs = (root).data.model.uvs; 
                 colors = (root).data.model.colors;
             }
         }

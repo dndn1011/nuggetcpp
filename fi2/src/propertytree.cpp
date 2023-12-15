@@ -740,7 +740,7 @@ namespace nugget::properties {
         auto t = TimeSampler("parse", true);
 
         output("LoadPropertyTree: START\n");
-        FileReader fileReader("config.pt");
+        FileReader fileReader(filename);
         fileReader.Open();
         std::vector<Token> tokenList;
         auto tokeniseOK = Tokenise([&fileReader](size_t point) {

@@ -159,7 +159,7 @@ namespace nugget::properties {
 
 namespace nugget::properties {
 
-    bool Tokenise(std::function<std::string(size_t)> readFunc, ParseState& parseState, std::vector<Token>& tokenList) {
+    bool Tokenise(std::function<std::string(size_t)> readFunc, ParseState& parseState, std::vector<Token>& tokenList) {        
         size_t point = 0;
         bool literalMode = false;
         while (true) {
@@ -192,109 +192,139 @@ namespace nugget::properties {
                     ok = true;
                     tokenList.push_back(Token{ Token::Type::literalLine,std::string(next.substr(0, i + 1)),parseState.lineNumber });
                 }
-            } else if (next[0] == '\n') {
-                //////////////////////////////////////////////
-                // line count
-                parseState.lineNumber++;
-                point += 1;
-                ok = true;
-                //tokenList.push_back(Token{ Token::Type::whitespace,std::string(next.substr(0, 1)),parseState.lineNumber });
-            } else if (std::isspace(next[0]) && next[0] != '\n') {
-                //////////////////////////////////////////////
-                // new line whitespace
-                int i = 1;
-                while (std::isspace(next[i]) && next[i] != '\n') { ++i; }
-                ok = true;
-                point += i;
-                //tokenList.push_back(Token{ Token::Type::whitespace,std::string(next.substr(0, i)),parseState.lineNumber });
-            } else if (next[0] == '{') {
-                //////////////////////////////////////////////
-                // open brace
-                point += 1;
-                ok = true;
-                tokenList.push_back(Token{ Token::Type::openBrace,std::string(next.substr(0, 1)),parseState.lineNumber });
-            } else if (next[0] == '/' && next[1] == '/') {
-                //////////////////////////////////////////////
-                // line comment
-                int i = 2;
-                while (next[i] != '\n') { ++i; }
-                ok = true;
-                point += i;
-                //tokenList.push_back(Token{ Token::Type::whitespace,std::string(next.substr(0, i)), parseState.lineNumber });
-            } else if (std::isalpha(next[0]) || next[0] == '_') {
-                //////////////////////////////////////////////
-                // identifier
-                size_t i = ParseIdentifier(next.c_str(), next.size());
-                point += i;
-                ok = true;
-                tokenList.push_back(Token{ Token::Type::identifier,std::string(next.substr(0, i)), parseState.lineNumber });
-            } else if (next[0] == ':') {
-                if (next[1] == ':') {
-                    //////////////////////////////////////////////
-                    // double colon
-                    point += 2;
-                    ok = true;
-                    tokenList.push_back(Token{ Token::Type::doubleColon,std::string(next.substr(0, 2)),parseState.lineNumber });
-                } else {
-                    //////////////////////////////////////////////
-                    // single colon
-                    point += 1;
-                    ok = true;
-                    tokenList.push_back(Token{ Token::Type::colon,std::string(next.substr(0, 1)),parseState.lineNumber });
-                }
-            } else if (next[0] == ',') {
-                //////////////////////////////////////////////
-                // comma
-                point += 1;
-                ok = true;
-                tokenList.push_back(Token{ Token::Type::comma,std::string(next.substr(0, 1)),parseState.lineNumber });
-            } else if (next[0] == '=') {
-                //////////////////////////////////////////////
-                // equals
-                point += 1;
-                ok = true;
-                tokenList.push_back(Token{ Token::Type::equals,std::string(next.substr(0, 1)),parseState.lineNumber });
-            } else if (next[0] == ';') {
-                //////////////////////////////////////////////
-                // semicolon
-                point += 1;
-                ok = true;
-                tokenList.push_back(Token{ Token::Type::semicolon,std::string(next.substr(0, 1)),parseState.lineNumber });
-            } else if (next[0] == '}') {
-                //////////////////////////////////////////////
-                // close brace
-                point += 1;
-                ok = true;
-                tokenList.push_back(Token{ Token::Type::closeBrace,std::string(next.substr(0, 1)),parseState.lineNumber });
-            } else if (std::isdigit(next[0]) || next[0]=='-') {
-                //////////////////////////////////////////////
-                // precentage?
-                auto tpc = TokenisePercentage(Token::Type::percent, next, point, ok, parseState.lineNumber);
-                if (ok) {
-                    tokenList.push_back(tpc);
-                } else {
-                    //////////////////////////////////////////////
-                    // float?
-                    auto t = TokeniseFloat(Token::Type::float_, next, point, ok, parseState.lineNumber);
-                    if (ok) {
-                        tokenList.push_back(t);
-                    } else {
+            } else {
+                switch (next[0]) {
+                    case '\n': {
                         //////////////////////////////////////////////
-                        // integer
-                        tokenList.push_back(TokeniseInteger(Token::Type::integer, next, point, ok, parseState.lineNumber));
-                    }
+                        // line count
+                        parseState.lineNumber++;
+                        point += 1;
+                        ok = true;
+                    } break;
+                    case ' ':case '\t':case '\r':case '\f':case '\v': {
+                        //////////////////////////////////////////////
+                        // new line whitespace
+                        int i = 1;
+                        while (std::isspace(next[i]) && next[i] != '\n') { ++i; }
+                        ok = true;
+                        point += i;
+                    } break;
+                    case '{': {
+                        //////////////////////////////////////////////
+                        // open brace
+                        point += 1;
+                        ok = true;
+                        tokenList.push_back(Token{ Token::Type::openBrace,std::string(next.substr(0, 1)),parseState.lineNumber });
+                    } break;
+                    case '/': {
+                        if (next[1] == '/') {
+                            //////////////////////////////////////////////
+                            // line comment
+                            int i = 2;
+                            while (next[i] != '\n') { ++i; }
+                            ok = true;
+                            point += i;
+                            //tokenList.push_back(Token{ Token::Type::whitespace,std::string(next.substr(0, i)), parseState.lineNumber });
+                            break;
+                        }
+                    } // fall through
+                    case 'a':case 'b':case 'c':case 'd':case 'e':case 'f':case 'g':case 'h':
+                    case 'i':case 'j':case 'k':case 'l':case 'm':case 'n':case 'o':case 'p':
+                    case 'q':case 'r':case 's':case 't':case 'u':case 'v':case 'w':case 'x':
+                    case 'y':case 'z':
+                    case 'A':case 'B':case 'C':case 'D':case 'E':case 'F':case 'G':case 'H':
+                    case 'I':case 'J':case 'K':case 'L':case 'M':case 'N':case 'O':case 'P':
+                    case 'Q':case 'R':case 'S':case 'T':case 'U':case 'V':case 'W':case 'X':
+                    case 'Y':case 'Z':case'_':
+                    {
+                        //////////////////////////////////////////////
+                        // identifier
+                        size_t i = ParseIdentifier(next.c_str(), next.size());
+                        point += i;
+                        ok = true;
+                        tokenList.push_back(Token{ Token::Type::identifier,std::string(next.substr(0, i)), parseState.lineNumber });
+                    } break;
+                    case ':': {
+                        if (next[1] == ':') {
+                            //////////////////////////////////////////////
+                            // double colon
+                            point += 2;
+                            ok = true;
+                            tokenList.push_back(Token{ Token::Type::doubleColon,std::string(next.substr(0, 2)),parseState.lineNumber });
+                        } else {
+                            //////////////////////////////////////////////
+                            // single colon
+                            point += 1;
+                            ok = true;
+                            tokenList.push_back(Token{ Token::Type::colon,std::string(next.substr(0, 1)),parseState.lineNumber });
+                        }
+                    } break;
+                    case ',': {
+                        //////////////////////////////////////////////
+                        // comma
+                        point += 1;
+                        ok = true;
+                        tokenList.push_back(Token{ Token::Type::comma,std::string(next.substr(0, 1)),parseState.lineNumber });
+                    } break;
+                    case '=': {
+                        //////////////////////////////////////////////
+                        // equals
+                        point += 1;
+                        ok = true;
+                        tokenList.push_back(Token{ Token::Type::equals,std::string(next.substr(0, 1)),parseState.lineNumber });
+                    } break;
+                    case ';': {
+                        //////////////////////////////////////////////
+                        // semicolon
+                        point += 1;
+                        ok = true;
+                        tokenList.push_back(Token{ Token::Type::semicolon,std::string(next.substr(0, 1)),parseState.lineNumber });
+                    } break;
+                    case '}': {
+                        //////////////////////////////////////////////
+                        // close brace
+                        point += 1;
+                        ok = true;
+                        tokenList.push_back(Token{ Token::Type::closeBrace,std::string(next.substr(0, 1)),parseState.lineNumber });
+                    } break;
+                    case '0': case '1': case '2': case '3': case '4':
+                    case '5': case '6': case '7': case '8': case '9':
+                    case '-': {
+                        //////////////////////////////////////////////
+                        // precentage?
+                        auto tpc = TokenisePercentage(Token::Type::percent, next, point, ok, parseState.lineNumber);
+                        if (ok) {
+                            tokenList.push_back(tpc);
+                        } else {
+                            //////////////////////////////////////////////
+                            // float?
+                            auto t = TokeniseFloat(Token::Type::float_, next, point, ok, parseState.lineNumber);
+                            if (ok) {
+                                tokenList.push_back(t);
+                            } else {
+                                //////////////////////////////////////////////
+                                // integer
+                                tokenList.push_back(TokeniseInteger(Token::Type::integer, next, point, ok, parseState.lineNumber));
+                            }
+                        }
+                    } break;
+                    case '"': {
+                        tokenList.push_back(TokenisebyRegex(Token::Type::string, R"(^["][^"\\]*(\\.[^"\\]*)*["])", next, point, ok, parseState.lineNumber));
+                    } break;
+                    case '<': {
+                        if (next[1] == '<') {
+                            //////////////////////////////////////////////
+                            // start here doc
+                            point += 2;
+                            ok = true;
+                            literalMode = true;
+                            tokenList.push_back(Token{ Token::Type::doubleLess,std::string(next.substr(0, 2)),parseState.lineNumber });
+                            break;
+                        }
+                    } // pass through
+                    default: {
+                    } // pass through
                 }
-            } else if (next[0] == '"') {
-                //////////////////////////////////////////////
-                // double quote
-                tokenList.push_back(TokenisebyRegex(Token::Type::string, R"(^["][^"\\]*(\\.[^"\\]*)*["])", next, point, ok, parseState.lineNumber));
-            } else if (next[0] == '<' && next[1] == '<') {
-                //////////////////////////////////////////////
-                // start here doc
-                point += 2;
-                ok = true;
-                literalMode = true;
-                tokenList.push_back(Token{ Token::Type::doubleLess,std::string(next.substr(0, 2)),parseState.lineNumber });
             }
             if (!ok) {
                 parseState.description = std::format("Could not tokenise: ->{}<-\n", next);
