@@ -71,7 +71,7 @@ namespace nugget::ui_imp {
         bool deleted = false;
         UiEntityBaseImp(identifier::IDType idIn) : id(idIn) {}
         bool allowDeletion = false;
-        identifier::IDType id = 0;
+        identifier::IDType id = identifier::IDType::null;
 
         Geom geom = {};
     };

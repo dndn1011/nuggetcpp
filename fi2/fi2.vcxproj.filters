@@ -63,6 +63,9 @@
     <ClCompile Include="src\nuggetgl\glinternal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\propertytreetokeniser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="config.pt" />
@@ -105,6 +108,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\nuggetgl\glinternal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\propertytreetokeniser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

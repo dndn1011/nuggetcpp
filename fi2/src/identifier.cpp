@@ -40,7 +40,7 @@ namespace nugget {
 		}
 
 		const std::string& IDToString(IDType id) {
-			assert(("Null id used", id));
+			assert(("Null id used", +id));
 
 			auto &s = data.toStringMap[id];
 			assert(("Unable to do a reverse lookup",s != ""));
@@ -65,12 +65,12 @@ namespace nugget {
 
 			const char *leafPtr = IDKeepLeafCStr(str);
 
-			IDType parent = HashRT(path.c_str()).second;
-			IDType child = HashRT(str.c_str()).second;
+			IDType parent = (IDType)HashRT(path.c_str()).second;
+			IDType child = (IDType)HashRT(str.c_str()).second;
 			IDType strId = child;
 			SetReverseLookup(child,str);
 			data.parentMap[child] = parent;
-			IDType self = HashRT(leafPtr).second;
+			IDType self = (IDType)HashRT(leafPtr).second;
 			data.selfMap[child] = self;
 			SetReverseLookup(self, leafPtr);
 			while (parent != child) {
@@ -78,7 +78,7 @@ namespace nugget {
 				data.childMap[parent].insert(child);
 				IDRemoveLeaf(path);
 				child = parent;
-				parent = HashRT(path.c_str()).second;
+				parent = (IDType)HashRT(path.c_str()).second;
 			}
 			return strId;
 		}
@@ -142,19 +142,19 @@ namespace nugget {
 			if (data.toStringMap.contains(hash1)) {
 				std::string str1 = data.toStringMap[hash1];
 				std::string combo = IDCombineStrings( str1,str2.data() );
-				IDType id = HashRT(combo.c_str()).second;
+				IDType id = (IDType)HashRT(combo.c_str()).second;
 				if (data.toStringMap.contains(id)) {
 					return id;
 				} else {
-					return 0;
+					return IDType::null;
 				}
 			} else {
-				return 0;
+				return IDType::null;
 			}
 		}
 
 		IDType IDR(const std::vector<std::string>& strings) {
-			IDType id = 0;
+			IDType id = IDType::null;
 			bool first = true;
 			for (const auto& x : strings) {
 				if (first) {
@@ -169,7 +169,7 @@ namespace nugget {
 
 		// n.b. does not register the combined hash
 		IDType IDR(const std::vector<IDType>& ids) {
-			IDType id = 0;
+			IDType id = IDType::null;
 			bool first = true;
 			for (const auto& x : ids) {
 				if (first) {
@@ -177,7 +177,7 @@ namespace nugget {
 					first = false;
 				} else {
 #if defined(NDEBUG) || 1
-					id = CombineHashesRT(id, x);
+					id = (IDType)CombineHashesRT(+id, +x);
 #else
 					id = IDR(id, x);
 #endif
@@ -248,7 +248,7 @@ namespace nugget {
 	}
 }
 
-const char* DebugLookupHash(uint64_t hash) {
+const char* DebugLookupHash(nugget::identifier::IDType hash) {
 	static std::string str;
 	if (nugget::identifier::data.toStringMap.contains(hash)) {
 		str = nugget::identifier::data.toStringMap.at(hash);
@@ -258,7 +258,7 @@ const char* DebugLookupHash(uint64_t hash) {
 	}
 }
 
-void PrintHashTree(uint64_t hash) {
+void PrintHashTree(nugget::identifier::IDType hash) {
 	std::string str = nugget::identifier::data.toStringMap.at(hash);
 	output(":{}\n", str.c_str());
 	auto list = nugget::identifier::IDGetChildren(hash);                   

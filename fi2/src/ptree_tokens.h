@@ -30,6 +30,7 @@ __PTREE_TOKEN(doubleColon)
 __PTREE_TOKEN(doubleLess)
 __PTREE_TOKEN(doubleMore)
 __PTREE_TOKEN(literalLine)
+__PTREE_TOKEN(vertices)
 ////////////////////////////////////////
 
 #undef __PTREE_TOKEN_MAPDEF

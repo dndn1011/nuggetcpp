@@ -12,14 +12,16 @@ namespace nugget {
 		struct ValueAny {
 			ValueAny();
 
-			ValueAny(int32_t v);
-			ValueAny(int64_t v);
-			ValueAny(float v);
-			ValueAny(const Color& v);
-			ValueAny(const std::string& v);
-			ValueAny(IDType v);
-			ValueAny(void* v);
-			ValueAny(const Dimension &v);
+			explicit ValueAny(int32_t v);
+			explicit ValueAny(int64_t v);
+			explicit ValueAny(uint64_t v);
+			explicit ValueAny(float v);
+			explicit ValueAny(const Color& v);
+			explicit ValueAny(const std::string& v);
+			explicit ValueAny(IDType v);
+			explicit ValueAny(void* v);
+			explicit ValueAny(const Dimension& v);
+			explicit ValueAny(const Vertices& v);
 
 			ValueAny(const ValueAny & other);
 
@@ -33,6 +35,7 @@ namespace nugget {
 				void_,
 				int32_t_,
 				int64_t_,
+				uint64_t_,
 				float_,
 				factor_,
 				Color,
@@ -41,6 +44,7 @@ namespace nugget {
 				pointer,
 				deleted,
 				dimension,
+				Vertices,
 			};
 
 			std::string GetTypeAsString() const;
@@ -49,19 +53,23 @@ namespace nugget {
 			IDType GetValueAsIDType() const;
 			int32_t GetValueAsInt32() const;
 			int64_t GetValueAsInt64() const;
+			uint64_t GetValueAsUint64() const;
 			float GetValueAsFloat() const;
 			void* GetValueAsPointer() const;
 			Dimension GetValueAsDimension() const;
+			const Vertices& GetValueAsVertices() const;
 
 			void SetValue(std::string val);
 			void SetValue(int32_t val);
 			void SetValue(int64_t val);
+			void SetValue(uint64_t val);
 			void SetValue(float val);
 			void SetValue(const Color& colorIn);
 			void SetValue(identifier::IDType id);
 			void SetValue(const ValueAny& val);
 			void SetValue(void* ptr);
-			void SetValue(const Dimension &dim);
+			void SetValue(const Dimension& dim);
+			void SetValue(const Vertices& verts);
 			void SetValueVoid();
 
 			bool IsVoid();
@@ -77,12 +85,14 @@ namespace nugget {
 			union Data {
 				int32_t int32_t_;
 				int64_t int64_t_;
+				uint64_t uint64_t_;
 				float float_;
 				Color* colorPtr;
 				std::string* stringPtr;
 				IDType idType;
 				void* ptr;
 				Dimension* dimensionPtr;
+				Vertices* verticesPtr;
 			} data = {};
 
 			Type type = Type::void_;
@@ -112,35 +122,34 @@ namespace nugget {
 		std::string		GetString(IDType id);
 		int32_t			GetInt32(IDType id);
 		int64_t			GetInt64(IDType id);
+		uint64_t		GetUint64(IDType id);
 		float			GetFloat(IDType id);
 		nugget::Color	GetColor(IDType id);
 		IDType			GetID(IDType id);
 		const ValueAny& GetValueAny(IDType id);
 		void*           GetPointer(IDType id);
 		Dimension       GetDimension(IDType id);
+		const Vertices& GetVertices(IDType id);
 
 		std::string GetValueAsString(IDType id);
 		std::string GetValueTypeAsString(const ValueAny& var);
 
-		void Set(IDType id, const std::string& value);
-		void Set(IDType id, int32_t value);
-		void Set(IDType id, int64_t value);
-		void Set(IDType id, float value);
-		void Set(IDType id, nugget::Color value);
-		void Set(IDType id, IDType value);
-		void Set(IDType id, const ValueAny& value);
-		void Set(IDType id, const Dimension& value);
+		template <typename T>
+		void Set(IDType id, const T& value);
+
 		void SetVoid(IDType id);
 
 		void Remove(IDType id);
 
 		bool IsValueTypeInteger64(IDType id);
+		bool IsValueTypeUnsignedInteger64(IDType id);
 		bool IsValueTypeInteger32(IDType id);
 		bool IsValueTypeFloat(IDType id);
 		bool IsValueTypeString(IDType id);
 		bool IsValueTypeIdentifier(IDType id);
 		bool IsValueTypeColor(IDType id);
 		bool IsValueTypeDimension(IDType id);
+		bool IsValueTypeVertices(IDType id);
 
 		void RegisterHandler(const Handler& handler);
 		void UnregisterHandler(const Handler& handler);

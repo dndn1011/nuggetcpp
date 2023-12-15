@@ -21,7 +21,7 @@ namespace nugget::ui::entity {
 
 	void CreateEntityRecursive(IDType id) {
 		auto classNode = IDRCheck(id, "class");
-		if (classNode) {
+		if (classNode!=IDType::null) {
 			assert(Notice::KeyExists(classNode));
 			auto classId = Notice::GetID(classNode);
 			check(registeredEntities.contains(classId), "the entity constructor is not defined: {}\n",
@@ -33,7 +33,7 @@ namespace nugget::ui::entity {
 			if (auto r = Notice::GetChildren(IDR(id, "sub"),children)) {
 				for (auto& x : children) {
 					IDType classNodeHash = IDRCheck(x, "class");
-					if (classNodeHash && Notice::KeyExists(classNodeHash)) {
+					if (classNodeHash!=IDType::null && Notice::KeyExists(classNodeHash)) {
 						CreateEntityRecursive(x);
 					}
 				}
@@ -54,7 +54,7 @@ namespace nugget::ui::entity {
 		} else {
 			assert(0);
 		}
-		return 0;
+		return IDType::null;
 	}
 
 	// compare the state of the property tree with the current instances of entities

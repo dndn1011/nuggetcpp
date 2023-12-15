@@ -45,7 +45,6 @@ struct FileWatcher {
 
 static const std::string filename = "config.pt";
 int main() {
-
     for (int i = 0; i<1; i++) {
         auto result = properties::LoadPropertyTree("properties",filename);
         if (!result.successful) {
@@ -56,6 +55,8 @@ int main() {
             return 1;
         }
     }
+
+
 
 //    PrintHashTree(IDR("properties"));
 

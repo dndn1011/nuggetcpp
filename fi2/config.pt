@@ -478,5 +478,22 @@ shaders {
     }
 }
 
+render {
+    object {
+        section {
+            shader = shaders.biquad;
+            verts : vertices = {
+                1, 1, 0,
+                1,-1, 0,
+               -1, 1, 0,
+               -1,-1, 0,
+
+                0, 0, 0,
+                0, 0, 0
+            };
+        }
+    }
+}
+
 main {
 }

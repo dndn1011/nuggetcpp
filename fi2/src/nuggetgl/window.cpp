@@ -133,8 +133,8 @@ namespace nugget::gl {
             -s,  s, 0.0f,     // TL
             -s, -s, 0.0f,     // BL
 
-             2,  3, 0.0f,
-             5,  7, 0.0f,
+             0,  0, 0.0f,
+             0,  0, 0.0f,
         };
         float colours[] = {
 //             1,0,0,1,  // tr

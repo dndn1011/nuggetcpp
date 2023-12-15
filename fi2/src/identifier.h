@@ -9,9 +9,14 @@
 
 #include <cctype>
 
+
 namespace nugget {
     namespace identifier {
-        typedef uint64_t IDType;
+        enum class IDType : uint64_t {
+            null = 0,
+        };
+
+//        typedef uint64_t IDType;
 
         // hash a string and register it in the identrifier db
         IDType Register(const std::string& str);
@@ -43,23 +48,23 @@ namespace nugget {
 
         consteval IDType ID(const char* cstr) {
             assert(("This hash function is being executed at run time. Please use alterative function.", std::is_constant_evaluated()));
-            return __fnv1a_64_hash(cstr).second;
+            return (IDType)__fnv1a_64_hash(cstr).second;
         }
         consteval IDType ID(const char* cstr1, const char* cstr2) {
             assert(("This hash function is being executed at run time. Please use alterative function.", std::is_constant_evaluated()));
-            return __combineHashes(__fnv1a_64_hash(cstr1).second, __fnv1a_64_hash(cstr2).second);
+            return (IDType)__combineHashes(__fnv1a_64_hash(cstr1).second, __fnv1a_64_hash(cstr2).second);
         }
         consteval IDType ID(IDType hash1, const char* cstr2) {
             assert(("This hash function is being executed at run time. Please use alterative function.", std::is_constant_evaluated()));
-            return __combineHashes(hash1, __fnv1a_64_hash(cstr2).second);
+            return (IDType)__combineHashes((uint64_t)hash1, __fnv1a_64_hash(cstr2).second);
         }
         consteval IDType ID(const char *cstr1, IDType hash2) {
             assert(("This hash function is being executed at run time. Please use alterative function.", std::is_constant_evaluated()));
-            return __combineHashes(__fnv1a_64_hash(cstr1).second,hash2);
+            return (IDType)__combineHashes(__fnv1a_64_hash(cstr1).second, (uint64_t)hash2);
         }
         consteval IDType ID(IDType hash1,IDType hash2) {
             assert(("This hash function is being executed at run time. Please use alterative function.", std::is_constant_evaluated()));
-            return __combineHashes(hash1, hash2);
+            return (IDType)__combineHashes((uint64_t)hash1, (uint64_t)hash2);
         }
 
         IDType IDR(const char* cstr); 
@@ -94,3 +99,7 @@ namespace nugget {
 }
 
 void PrintHashTree(uint64_t hash);
+
+inline uint64_t operator+(const nugget::identifier::IDType& value) {
+    return uint64_t(value);
+}

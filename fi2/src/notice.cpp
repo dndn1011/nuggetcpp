@@ -27,12 +27,14 @@ namespace nugget {
 
 		ValueAny::ValueAny(int32_t v) : type(Type::int32_t_), data{ .int32_t_ = v } {}
 		ValueAny::ValueAny(int64_t v) : type(Type::int64_t_), data{ .int64_t_ = v } {}
+		ValueAny::ValueAny(uint64_t v) : type(Type::uint64_t_), data{ .uint64_t_ = v } {}
 		ValueAny::ValueAny(float v) : type(Type::float_), data{ .float_ = v } {}
 		ValueAny::ValueAny(const Color& v) : type(Type::Color), data{ .colorPtr = new Color(v) } {}
 		ValueAny::ValueAny(const std::string& v) : type(Type::string), data{ .stringPtr = new std::string(v) } {}
 		ValueAny::ValueAny(IDType v) : type(Type::IDType), data{ .idType = v } {}
 		ValueAny::ValueAny(void *ptr) : type(Type::pointer), data{ .ptr = ptr } {}
 		ValueAny::ValueAny(const Dimension& v) : type(Type::dimension), data{ .dimensionPtr = new Dimension(v) } {}
+		ValueAny::ValueAny(const Vertices& v) : type(Type::Vertices), data{ .verticesPtr = new Vertices(v) } {}
 
 		ValueAny::ValueAny(const ValueAny& other) {
 			CopyFrom(other);
@@ -52,7 +54,10 @@ namespace nugget {
 						return data.int32_t_ == other.data.int32_t_;
 					} break;
 					case ValueAny::Type::int64_t_: {
-						return data.int32_t_ == other.data.int32_t_;
+						return data.int64_t_ == other.data.int64_t_;
+					} break;
+					case ValueAny::Type::uint64_t_: {
+						return data.uint64_t_ == other.data.uint64_t_;
 					} break;
 					case ValueAny::Type::float_: {
 						return data.float_ == other.data.float_;
@@ -71,6 +76,10 @@ namespace nugget {
 					} break;
 					case ValueAny::Type::dimension: {
 						return *data.dimensionPtr == *other.data.dimensionPtr;
+					} break;
+					case ValueAny::Type::Vertices: {
+						assert(0); // imp
+						return false; // *data.verticesPtr == *other.data.verticesPtr;
 					} break;
 					default: {
 						assert(0);
@@ -92,6 +101,9 @@ namespace nugget {
 				case ValueAny::Type::int64_t_: {
 					return std::to_string(data.int64_t_);
 				} break;
+				case ValueAny::Type::uint64_t_: {
+					return std::to_string(data.uint64_t_);
+				} break;
 				case ValueAny::Type::float_: {
 					return std::to_string(data.float_);
 				} break;
@@ -99,13 +111,16 @@ namespace nugget {
 					return *data.stringPtr;
 				} break;
 				case ValueAny::Type::IDType: {
-					return std::to_string(data.idType);
+					return std::to_string(+data.idType);
 				} break;
 				case ValueAny::Type::Color: {
 					return data.colorPtr->to_string();
 				} break;
 				case ValueAny::Type::dimension: {
 					return data.dimensionPtr->ToString();
+				} break;
+				case ValueAny::Type::Vertices: {
+					return "<unsupported>";
 				} break;
 				case ValueAny::Type::void_: {
 					return "<void>";
@@ -114,7 +129,7 @@ namespace nugget {
 					assert(0);
 				} break;
 			}
-			return "<undefined";
+			return "<undefined>";
 		}
 		Color ValueAny::GetValueAsColor() const {
 			assert(type == Type::Color);
@@ -132,6 +147,10 @@ namespace nugget {
 			assert(type == Type::int64_t_);
 			return data.int64_t_;
 		}
+		uint64_t ValueAny::GetValueAsUint64() const {
+			assert(type == Type::int64_t_);
+			return data.int64_t_;
+		}
 		float ValueAny::GetValueAsFloat() const {
 			assert(type == Type::float_);
 			return data.float_;
@@ -144,6 +163,11 @@ namespace nugget {
 		{
 			assert(type == Type::dimension);
 			return *data.dimensionPtr;
+		}
+		const Vertices& ValueAny::GetValueAsVertices() const
+		{
+			assert(type == Type::Vertices);
+			return *data.verticesPtr;
 		}
 		void ValueAny::SetValue(std::string val) {
 			assert(type == Type::string);
@@ -159,6 +183,10 @@ namespace nugget {
 		void ValueAny::SetValue(int64_t val) {
 			assert(type == Type::int64_t_);
 			data.int64_t_ = val;
+		}
+		void ValueAny::SetValue(uint64_t val) {
+			assert(type == Type::uint64_t_);
+			data.uint64_t_ = val;
 		}
 		void ValueAny::SetValue(float val) {
 			assert(type == Type::float_);
@@ -186,6 +214,14 @@ namespace nugget {
 				delete 	data.dimensionPtr;
 			}
 			data.dimensionPtr = new Dimension(dim);
+		}
+		void ValueAny::SetValue(const Vertices& verts)
+		{
+			assert(type == Type::Vertices);
+			if (data.verticesPtr != nullptr) {
+				delete 	data.verticesPtr;
+			}
+			data.verticesPtr = new Vertices(verts);
 		}
 		void ValueAny::SetValueVoid() {
 			type = Type::void_;
@@ -229,6 +265,9 @@ namespace nugget {
 				case Type::int64_t_: {
 					data.int64_t_ = other.data.int64_t_;
 				} break;
+				case Type::uint64_t_: {
+					data.uint64_t_ = other.data.uint64_t_;
+				} break;
 				case Type::int32_t_: {
 					data.int32_t_ = other.data.int32_t_;
 				} break;
@@ -256,6 +295,12 @@ namespace nugget {
 					}
 					data.dimensionPtr = new Dimension(*other.data.dimensionPtr);
 				} break;
+				case Type::Vertices: {
+					if (data.verticesPtr) {
+						delete data.verticesPtr;
+					}
+					data.verticesPtr = new Vertices(*other.data.verticesPtr);
+				} break;
 				case Type::pointer: {
 					data.ptr = other.data.ptr;
 				} break;
@@ -271,7 +316,10 @@ namespace nugget {
 			{ValueAny::Type::void_,"void"},
 			{ValueAny::Type::int32_t_,"int32_t_"},
 			{ValueAny::Type::int64_t_,"int64_t_"},
+			{ValueAny::Type::uint64_t_,"uint64_t_"},
 			{ValueAny::Type::Color,"Color"},
+			{ValueAny::Type::Vertices,"Vertices"},
+			{ValueAny::Type::dimension,"Dimension"},
 			{ValueAny::Type::float_,"float"},
 		};
 
@@ -373,6 +421,11 @@ namespace nugget {
 			auto& v = data.valueEntries.at(id);
 			return v.value.GetType() == ValueAny::Type::int64_t_;
 		}
+		bool IsValueTypeUnsignedInteger64(IDType id) {
+			assert(KeyExists(id));
+			auto& v = data.valueEntries.at(id);
+			return v.value.GetType() == ValueAny::Type::uint64_t_;
+		}
 		bool IsValueTypeInteger32(IDType id) {
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
@@ -415,8 +468,13 @@ namespace nugget {
 		}
 		int64_t GetInt64(IDType id) {
 			assert(KeyExists(id));
-			auto &v = data.valueEntries.at(id);
+			auto& v = data.valueEntries.at(id);
 			return v.value.GetValueAsInt64();
+		}
+		uint64_t GetUint64(IDType id) {
+			assert(KeyExists(id));
+			auto& v = data.valueEntries.at(id);
+			return v.value.GetValueAsUint64();
 		}
 		float GetFloat(IDType id) {
 			assert(KeyExists(id));
@@ -438,6 +496,12 @@ namespace nugget {
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
 			return v.value.GetValueAsDimension();
+		}
+		const Vertices& GetVertices(IDType id)
+		{
+			assert(KeyExists(id));
+			auto& v = data.valueEntries.at(id);
+			return v.value.GetValueAsVertices();
 		}
 		const ValueAny& GetValueAny(IDType id) {
 			if (KeyExists(id)) {
@@ -462,84 +526,13 @@ namespace nugget {
 			entry.value.SetValueVoid();
 		}
 
-		void Set(IDType id, const std::string& value) {
+		template <typename T>
+		void Set(IDType id, const T& value) {
 			if (KeyExists(id)) {
 				auto& entry = data.valueEntries[id];
-				std::string current = entry.value.GetValueAsString();
-				assert(("Cannot change type of an existing entry", entry.value.GetType() == ValueAny::Type::string));
 				auto currentValue = entry.value;
 				entry.value.SetValue(value);
-				if (currentValue != value) {
-					Notify(id, entry);
-				}
-			} else {
-				data.valueEntries[id] = ValueEntry(ValueAny(value));
-			}
-		}
-		void Set(IDType id, int32_t value) {
-			if (KeyExists(id)) {
-				auto& entry = data.valueEntries[id];
-				int32_t current = entry.value.GetValueAsInt32();
-				assert(("Cannot change type of an existing entry", entry.value.GetType() == ValueAny::Type::int32_t_));
-				auto currentValue = entry.value;
-				entry.value.SetValue(value);
-				if (currentValue != value) {
-					Notify(id, entry);
-				}
-			} else {
-				data.valueEntries[id] = ValueEntry(ValueAny(value));
-			}
-		}
-		void Set(IDType id, int64_t value) {
-			if (KeyExists(id)) {
-				auto& entry = data.valueEntries[id];
-				int64_t current = entry.value.GetValueAsInt64();
-				assert(("Cannot change type of an existing entry", entry.value.GetType() == ValueAny::Type::int64_t_));
-				auto currentValue = entry.value;
-				entry.value.SetValue(value);
-				if (currentValue != value) {
-					Notify(id, entry);
-				}
-			} else {
-				data.valueEntries[id] = ValueEntry(ValueAny(value));
-			}
-		}
-		void Set(IDType id, float value) {
-			if (KeyExists(id)) {
-				auto& entry = data.valueEntries[id];
-				float current = entry.value.GetValueAsFloat();
-				assert(("Cannot change type of an existing entry", entry.value.GetType() == ValueAny::Type::float_));
-				auto currentValue = entry.value;
-				entry.value.SetValue(value);
-				if (currentValue != value) {
-					Notify(id, entry);
-				}
-			} else {
-				data.valueEntries[id] = ValueEntry(ValueAny(value));
-			}
-		}
-		void Set(IDType id, Color value) {
-			if (KeyExists(id)) {
-				auto& entry = data.valueEntries[id];
-				Color current = entry.value.GetValueAsColor();
-				assert(("Cannot change type of an existing entry", entry.value.GetType() == ValueAny::Type::Color));
-				auto currentValue = entry.value;
-				entry.value.SetValue(value);
-				if (currentValue != value) {
-					Notify(id, entry);
-				}
-			} else {
-				data.valueEntries[id] = ValueEntry(ValueAny(value));
-			}
-		}
-		void Set(IDType id, IDType value) {
-			if (KeyExists(id)) {
-				auto& entry = data.valueEntries[id];
-				IDType current = entry.value.GetValueAsIDType();
-				assert(("Cannot change type of an existing entry", entry.value.GetType() == ValueAny::Type::IDType));
-				auto currentValue = entry.value;
-				entry.value.SetValue(value);
-				if (currentValue != value) {
+				if (currentValue != ValueAny(value)) {
 					Notify(id, entry);
 				}
 			} else {
@@ -547,61 +540,17 @@ namespace nugget {
 			}
 		}
 
-		void Set(IDType id, const ValueAny& value) {
-			if (KeyExists(id)) {
-				auto& entry = data.valueEntries[id];
-				auto currentType = entry.value.GetType();
-				assert(("Cannot change the type of an existing entry", entry.value.GetType() == currentType));
-				auto currentValue = entry.value;
-				entry.value.SetValue(value);
-				if (currentValue != value) {
-					Notify(id, entry);
-				}
-			} else {
-				data.valueEntries[id] = ValueEntry(value);
-			}
-		}
-
-		void Set(IDType id, void* value) {
-			if (KeyExists(id)) {
-				auto& entry = data.valueEntries[id];
-				auto currentType = entry.value.GetType();
-				assert(("Cannot change the type of an existing entry", entry.value.GetType() == currentType));
-				auto currentValue = entry.value;
-				entry.value.SetValue(value);
-				if (currentValue != value) {
-					Notify(id, entry);
-				}
-			} else {
-				data.valueEntries[id] = ValueEntry(value);
-			}
-		}
-
-		void Set(IDType id, const Dimension &value) {
-			if (KeyExists(id)) {
-				auto& entry = data.valueEntries[id];
-				auto currentType = entry.value.GetType();
-				assert(("Cannot change the type of an existing entry", entry.value.GetType() == currentType));
-				auto currentValue = entry.value;
-				entry.value.SetValue(value);
-				if (currentValue != value) {
-					Notify(id, entry);
-				}
-			} else {
-				data.valueEntries[id] = ValueEntry(value);
-			}
-		}
-
-		void UnregisterHandler(const Handler& handler) {
-			assert(data.valueEntries.contains(handler.changeId));
-			auto& list = data.valueEntries.at(handler.changeId).handlers;
-			for (int i = 0; i < list.size();i++) {
-				if (list[i].uid == handler.uid) {
-					list.erase(list.begin()+i);
-					break;
-				}
-			}
-		}
+		template void Set<int64_t>(IDType id, const int64_t& value);
+		template void Set<uint64_t>(IDType id, const uint64_t& value);
+		template void Set<std::string>(IDType id, const std::string& value);
+		template void Set<int32_t>(IDType id, const int32_t& value);
+		template void Set<Color>(IDType id, const Color& value);
+		template void Set<float>(IDType id, const float& value);
+		template void Set<ValueAny>(IDType id, const ValueAny& value);
+		//template void Set<Vertices>(IDType id, const Vertices& value);
+		template void Set<Dimension>(IDType id, const Dimension& value);
+		template void Set<IDType>(IDType id, const IDType& value);
+		template void Set<Vertices>(IDType id, const Vertices& value);
 
 		void RegisterHandler(const Handler &handler) {
 			check(KeyExists(handler.changeId), "Could not find node for handler registration: {}\n", IDToString(handler.changeId));

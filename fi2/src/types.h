@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <fstream>
+#include <vector>
 
 namespace std {
 	template <class T, size_t N>
@@ -32,6 +33,13 @@ namespace nugget {
 		}
 	private:
 		static std::string to_string_imp(const nugget::Color& obj);
+	};
+
+	struct Vector3f {
+		float x, y, z;
+	};
+	struct Vertices {
+		std::vector<Vector3f> data;
 	};
 
 }
