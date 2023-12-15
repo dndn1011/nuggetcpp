@@ -167,14 +167,14 @@ namespace nugget::properties {
                     },
                 },
                 {
-                    "vertices",[&]() {
+                    "Vector3fList",[&]() {
                         size_t size = initaliserList.size();
                         assert(size / 3 * 3 == size);
-                        Vertices verts;
-                        for (int i = 0; i <= size; i += 3) {
-                            auto v0 = ParseFloat(initaliserList[0]);
-                            auto v1 = ParseFloat(initaliserList[1]);
-                            auto v2 = ParseFloat(initaliserList[2]);
+                        Vector3fList verts;
+                        for (int i = 0; i < size; i += 3) {
+                            auto v0 = ParseFloat(initaliserList[i+0]);
+                            auto v1 = ParseFloat(initaliserList[i+1]);
+                            auto v2 = ParseFloat(initaliserList[i+2]);
                             verts.data.push_back(Vector3f{v0,v1,v2});
                         }
                         IDType id = IDR(IDR(currentPathName), currentValueName);

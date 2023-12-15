@@ -21,7 +21,7 @@ namespace nugget {
 			explicit ValueAny(IDType v);
 			explicit ValueAny(void* v);
 			explicit ValueAny(const Dimension& v);
-			explicit ValueAny(const Vertices& v);
+			explicit ValueAny(const Vector3fList& v);
 
 			ValueAny(const ValueAny & other);
 
@@ -44,7 +44,7 @@ namespace nugget {
 				pointer,
 				deleted,
 				dimension,
-				Vertices,
+				Vector3fList,
 			};
 
 			std::string GetTypeAsString() const;
@@ -57,8 +57,8 @@ namespace nugget {
 			float GetValueAsFloat() const;
 			void* GetValueAsPointer() const;
 			Dimension GetValueAsDimension() const;
-			const Vertices& GetValueAsVertices() const;
-
+			const Vector3fList& GetValueAsVector3fList() const;
+			
 			void SetValue(std::string val);
 			void SetValue(int32_t val);
 			void SetValue(int64_t val);
@@ -69,7 +69,7 @@ namespace nugget {
 			void SetValue(const ValueAny& val);
 			void SetValue(void* ptr);
 			void SetValue(const Dimension& dim);
-			void SetValue(const Vertices& verts);
+			void SetValue(const Vector3fList& verts);
 			void SetValueVoid();
 
 			bool IsVoid();
@@ -92,7 +92,8 @@ namespace nugget {
 				IDType idType;
 				void* ptr;
 				Dimension* dimensionPtr;
-				Vertices* verticesPtr;
+
+				Vector3fList* vector3fPtr;
 			} data = {};
 
 			Type type = Type::void_;
@@ -129,7 +130,7 @@ namespace nugget {
 		const ValueAny& GetValueAny(IDType id);
 		void*           GetPointer(IDType id);
 		Dimension       GetDimension(IDType id);
-		const Vertices& GetVertices(IDType id);
+		const Vector3fList& GetVector3fList(IDType id);
 
 		std::string GetValueAsString(IDType id);
 		std::string GetValueTypeAsString(const ValueAny& var);

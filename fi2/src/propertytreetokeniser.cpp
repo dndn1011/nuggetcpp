@@ -59,7 +59,7 @@ namespace nugget::properties {
         {"string",Type::string},
         {"Color",Type::Color},
         {"dimension",Type::dimension},
-        {"vertices",Type::vertices},
+        {"Vector3fList",Type::Vector3fList},
     };
 
     Token TokenisebyRegex(Token::Type type, const std::string regex, const std::string& next, size_t& point, bool& ok, size_t lineNumber) {

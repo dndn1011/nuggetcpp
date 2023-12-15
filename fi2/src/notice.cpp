@@ -34,7 +34,7 @@ namespace nugget {
 		ValueAny::ValueAny(IDType v) : type(Type::IDType), data{ .idType = v } {}
 		ValueAny::ValueAny(void *ptr) : type(Type::pointer), data{ .ptr = ptr } {}
 		ValueAny::ValueAny(const Dimension& v) : type(Type::dimension), data{ .dimensionPtr = new Dimension(v) } {}
-		ValueAny::ValueAny(const Vertices& v) : type(Type::Vertices), data{ .verticesPtr = new Vertices(v) } {}
+		ValueAny::ValueAny(const Vector3fList& v) : type(Type::Vector3fList), data{ .vector3fPtr = new Vector3fList(v) } {}
 
 		ValueAny::ValueAny(const ValueAny& other) {
 			CopyFrom(other);
@@ -77,9 +77,8 @@ namespace nugget {
 					case ValueAny::Type::dimension: {
 						return *data.dimensionPtr == *other.data.dimensionPtr;
 					} break;
-					case ValueAny::Type::Vertices: {
-						assert(0); // imp
-						return false; // *data.verticesPtr == *other.data.verticesPtr;
+					case ValueAny::Type::Vector3fList: {
+						return *data.vector3fPtr == *other.data.vector3fPtr;
 					} break;
 					default: {
 						assert(0);
@@ -119,7 +118,7 @@ namespace nugget {
 				case ValueAny::Type::dimension: {
 					return data.dimensionPtr->ToString();
 				} break;
-				case ValueAny::Type::Vertices: {
+				case ValueAny::Type::Vector3fList: {
 					return "<unsupported>";
 				} break;
 				case ValueAny::Type::void_: {
@@ -164,10 +163,10 @@ namespace nugget {
 			assert(type == Type::dimension);
 			return *data.dimensionPtr;
 		}
-		const Vertices& ValueAny::GetValueAsVertices() const
+		const Vector3fList& ValueAny::GetValueAsVector3fList() const
 		{
-			assert(type == Type::Vertices);
-			return *data.verticesPtr;
+			assert(type == Type::Vector3fList);
+			return *data.vector3fPtr;
 		}
 		void ValueAny::SetValue(std::string val) {
 			assert(type == Type::string);
@@ -215,13 +214,13 @@ namespace nugget {
 			}
 			data.dimensionPtr = new Dimension(dim);
 		}
-		void ValueAny::SetValue(const Vertices& verts)
+		void ValueAny::SetValue(const Vector3fList& verts)
 		{
-			assert(type == Type::Vertices);
-			if (data.verticesPtr != nullptr) {
-				delete 	data.verticesPtr;
+			assert(type == Type::Vector3fList);
+			if (data.vector3fPtr != nullptr) {
+				delete 	data.vector3fPtr;
 			}
-			data.verticesPtr = new Vertices(verts);
+			data.vector3fPtr = new Vector3fList(verts);
 		}
 		void ValueAny::SetValueVoid() {
 			type = Type::void_;
@@ -295,11 +294,11 @@ namespace nugget {
 					}
 					data.dimensionPtr = new Dimension(*other.data.dimensionPtr);
 				} break;
-				case Type::Vertices: {
-					if (data.verticesPtr) {
-						delete data.verticesPtr;
+				case Type::Vector3fList: {
+					if (data.vector3fPtr) {
+						delete data.vector3fPtr;
 					}
-					data.verticesPtr = new Vertices(*other.data.verticesPtr);
+					data.vector3fPtr = new Vector3fList(*other.data.vector3fPtr);
 				} break;
 				case Type::pointer: {
 					data.ptr = other.data.ptr;
@@ -318,7 +317,7 @@ namespace nugget {
 			{ValueAny::Type::int64_t_,"int64_t_"},
 			{ValueAny::Type::uint64_t_,"uint64_t_"},
 			{ValueAny::Type::Color,"Color"},
-			{ValueAny::Type::Vertices,"Vertices"},
+			{ValueAny::Type::Vector3fList,"Vertices"},
 			{ValueAny::Type::dimension,"Dimension"},
 			{ValueAny::Type::float_,"float"},
 		};
@@ -497,11 +496,11 @@ namespace nugget {
 			auto& v = data.valueEntries.at(id);
 			return v.value.GetValueAsDimension();
 		}
-		const Vertices& GetVertices(IDType id)
+		const Vector3fList& GetVector3fList(IDType id)
 		{
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
-			return v.value.GetValueAsVertices();
+			return v.value.GetValueAsVector3fList();
 		}
 		const ValueAny& GetValueAny(IDType id) {
 			if (KeyExists(id)) {
@@ -550,7 +549,7 @@ namespace nugget {
 		//template void Set<Vertices>(IDType id, const Vertices& value);
 		template void Set<Dimension>(IDType id, const Dimension& value);
 		template void Set<IDType>(IDType id, const IDType& value);
-		template void Set<Vertices>(IDType id, const Vertices& value);
+		template void Set<Vector3fList>(IDType id, const Vector3fList& value);
 
 		void RegisterHandler(const Handler &handler) {
 			check(KeyExists(handler.changeId), "Could not find node for handler registration: {}\n", IDToString(handler.changeId));
