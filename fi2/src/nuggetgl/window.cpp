@@ -211,8 +211,8 @@ namespace nugget::gl {
     void triangle_test() {
 
         // Vertex Array Object (VAO)
-        glGenVertexArrays(1, &VAO);
-        glBindVertexArray(VAO);
+//        glGenVertexArrays(1, &VAO);
+//        glBindVertexArray(VAO);
     
 
         // Create Vertex Array Object (VAO) and Vertex Buffer Object (VBO)
@@ -223,10 +223,13 @@ namespace nugget::gl {
         // Bind VAO
         glBindVertexArray(VAO);
 
-        // Bind VBO, set the vertices and UV coordinates data
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float)*1200 + sizeof(uvCoords)+sizeof(colours), nullptr, GL_STATIC_DRAW);
-        ApplyRenderingData();
+        {
+            // Bind VBO, set the vertices and UV coordinates data
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 1200 + sizeof(uvCoords) + sizeof(colours), nullptr, GL_STATIC_DRAW);
+            ApplyRenderingData();
+        }
+
 
         std::vector<Notice::Handler> handlers;
         Notice::RegisterHandlerOnChildren(Notice::Handler(IDR("properties.shaders.biquad"), [](IDType id) {

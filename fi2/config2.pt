@@ -1,0 +1,70 @@
+
+biquads_test {
+    root = .;
+    render {
+        vao {
+            vbo {
+                verts = (root).data.model.verts;
+                uvs = (root).data.model.uvs;
+                colors = (root).data.model.colors;
+            }
+        }
+        shaders {
+            s0 = shaders.biquad;
+        }
+        primitive = GL_TRIANGLES_ADJACENCY;
+    }
+    data {
+        model {
+            verts : Vector3fList = {
+                -0.25, 0.25, 0,
+                -0.25, -0.25, 0,
+                -0.75, 0.25, 0,
+                -0.75, -0.25, 0,
+                -0.5, 0, 0,
+                -0.5, 0, 0,
+
+                0.75, 0.25, 0,
+                0.75, -0.25, 0,
+                0.25, 0.25, 0,
+                0.25, -0.25, 0,
+                0.5, 0, 0,
+                0.5, 0, 0
+            };
+            uvs : Vector2fList = {
+                0.0f, 1.0f,  // tr
+                1.0f, 1.0f,  // br
+                0.0f, 0.0f,  // tl
+                1.0f, 0.0f,   // bl
+
+                1.0f, 0.0f,  // tl
+                0.0f, 1.0f,  // br
+
+                0.0f, 1.0f,  // tr
+                1.0f, 1.0f,  // br
+                0.0f, 0.0f,  // tl
+                1.0f, 0.0f,   // bl
+
+                1.0f, 0.0f,  // tl
+                0.0f, 1.0f  // br
+            };              
+            colors : Vector4fList {
+                1,0,0,1,
+                0,1,0,1,
+                0,0,1,1,
+                1,1,0,1,
+
+                0.5,0,0,1,  // tl
+                0,0.5,0,1,  // br
+
+                1,0,0,1,
+                0,1,0,1,
+                0,0,1,1,
+                1,1,0,1,
+
+                0.5,0,0,1,  // tl
+                0,0.5,0,1,  // br
+            };
+        }       
+    }
+}

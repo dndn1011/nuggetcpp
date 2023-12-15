@@ -69,6 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="config.pt" />
+    <None Include="config2.pt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\filereader.h">
