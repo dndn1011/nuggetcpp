@@ -43,7 +43,7 @@ struct FileWatcher {
     std::filesystem::file_time_type mtime;
 };
 
-static const std::string filename = "config.pt";
+static const std::string filename = "config3.pt";
 int main() {
     for (int i = 0; i<1; i++) {
         auto result = properties::LoadPropertyTree("properties",filename);
@@ -56,7 +56,7 @@ int main() {
         }
     }
 
-
+    exit(0);
 
 //    PrintHashTree(IDR("properties"));
 

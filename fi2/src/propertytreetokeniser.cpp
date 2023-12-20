@@ -11,42 +11,6 @@
 
 namespace nugget::properties {
     using namespace identifier;
-#if 0
-    struct ParseExpression {
-        std::string regex;
-        std::function<Token(const std::string&)> func;
-    };
-
-    struct KeyValue {
-        std::string key;
-        std::string type;
-        std::string value;
-    };
-
-    struct IdentifierBlock {
-        std::string identifier;
-        std::string parent;
-        std::vector<KeyValue> keyValues;
-    };
-
-    Generator<KeyValue> parseKeyValues(std::string_view input) {
-        // Implement parsing logic here
-        KeyValue kv;
-        kv.key = "key";
-        kv.type = "type";
-        kv.value = "value";
-        tokenList.push_back(kv;
-    }
-
-    Generator<IdentifierBlock> parseIdentifierBlock(std::string_view input) {
-        // Implement parsing logic here
-        IdentifierBlock identifierBlock;
-        identifierBlock.identifier = "my_identifier";
-        identifierBlock.parent = "parent_identifier";
-        tokenList.push_back(identifierBlock;
-    }
-#endif
-
     /*static*/
     std::unordered_map<enum Token::Type, std::string> Token::typeToString = {
     #define __PTREE_TOKEN_MAPDEF
@@ -158,7 +122,6 @@ namespace nugget::properties {
 }
 
 namespace nugget::properties {
-
     bool Tokenise(std::function<std::string(size_t)> readFunc, ParseState& parseState, std::vector<Token>& tokenList) {        
         size_t point = 0;
         bool literalMode = false;
@@ -216,6 +179,34 @@ namespace nugget::properties {
                         ok = true;
                         tokenList.push_back(Token{ Token::Type::openBrace,std::string(next.substr(0, 1)),parseState.lineNumber });
                     } break;
+                    case '(': {
+                        //////////////////////////////////////////////
+                        // open brace
+                        point += 1;
+                        ok = true;
+                        tokenList.push_back(Token{ Token::Type::openParen,std::string(next.substr(0, 1)),parseState.lineNumber });
+                    } break;
+                    case ')': {
+                        //////////////////////////////////////////////
+                        // open brace
+                        point += 1;
+                        ok = true;
+                        tokenList.push_back(Token{ Token::Type::closeParen,std::string(next.substr(0, 1)),parseState.lineNumber });
+                    } break;
+                    case '+': {
+                        //////////////////////////////////////////////
+                        // +
+                        point += 1;
+                        ok = true;
+                        tokenList.push_back(Token{ Token::Type::plus,std::string(next.substr(0, 1)),parseState.lineNumber });
+                    } break;
+                    case '*': {
+                        //////////////////////////////////////////////
+                        // +
+                        point += 1;
+                        ok = true;
+                        tokenList.push_back(Token{ Token::Type::multiply,std::string(next.substr(0, 1)),parseState.lineNumber });
+                    } break;
                     case '/': {
                         if (next[1] == '/') {
                             //////////////////////////////////////////////
@@ -227,7 +218,13 @@ namespace nugget::properties {
                             //tokenList.push_back(Token{ Token::Type::whitespace,std::string(next.substr(0, i)), parseState.lineNumber });
                             break;
                         }
-                    } // fall through
+                        else {
+                            point += 1;
+                            ok = true;
+                            tokenList.push_back(Token{ Token::Type::divide,std::string(next.substr(0, 1)), parseState.lineNumber });
+                            break;
+                        }
+                    }
                     case 'a':case 'b':case 'c':case 'd':case 'e':case 'f':case 'g':case 'h':
                     case 'i':case 'j':case 'k':case 'l':case 'm':case 'n':case 'o':case 'p':
                     case 'q':case 'r':case 's':case 't':case 'u':case 'v':case 'w':case 'x':
@@ -286,6 +283,13 @@ namespace nugget::properties {
                         point += 1;
                         ok = true;
                         tokenList.push_back(Token{ Token::Type::closeBrace,std::string(next.substr(0, 1)),parseState.lineNumber });
+                    } break;
+                    case '@': {
+                        //////////////////////////////////////////////
+                        // close brace
+                        point += 1;
+                        ok = true;
+                        tokenList.push_back(Token{ Token::Type::at,std::string(next.substr(0, 1)),parseState.lineNumber });
                     } break;
                     case '0': case '1': case '2': case '3': case '4':
                     case '5': case '6': case '7': case '8': case '9':

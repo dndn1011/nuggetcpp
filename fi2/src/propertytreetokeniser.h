@@ -24,7 +24,7 @@ namespace nugget::properties {
             }
         }
 
-        std::string TypeAsString() {
+        std::string TypeAsString() const {
             return typeToString[type];
         }
 

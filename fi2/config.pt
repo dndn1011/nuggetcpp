@@ -1,3 +1,11 @@
+app {
+    window {
+        x = 100;
+        y = 100;
+        w = 400;
+        h = 200;
+    }
+}
 
 geom {
     cx : float = 0;
@@ -507,4 +515,9 @@ render {
 }
 
 main {
+}
+
+foo {
+//    @haha = hello;
+    //test = @haha;
 }

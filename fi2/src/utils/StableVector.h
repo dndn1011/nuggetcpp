@@ -5,13 +5,13 @@
 template <typename T, std::size_t TSize>
 class StableVector {
 public:
-    StableVector() : size(0) {}
+    StableVector() : vSize(0) {}
 
     template <typename... Args>
     size_t emplace_back(Args&&... args) {
-        if (size < TSize) {
-            new (&data_[size++]) T(std::forward<Args>(args)...);
-            return size - 1;
+        if (vSize < TSize) {
+            new (&data_[vSize++]) T(std::forward<Args>(args)...);
+            return vSize - 1;
         } else {
             check(0, "Run out of slots: maxEntities = {}\n", TSize);
         }
@@ -24,15 +24,35 @@ public:
     }
 
     std::size_t GetSize() const {
-        return size;
+        return vSize;
+    }
+
+    void SetSize(size_t s) {
+        vSize = s;
+    }
+ 
+    size_t size() {
+        return vSize;
+    }
+
+    void Pop(size_t n) {
+        vSize -= n;
+        check(vSize < TSize && vSize>=0,"popped too far?");
     }
 
     std::span<T> GetArray() {
-        return std::span<T>(data_.data(), size);
+        return std::span<T>(data_.data(), vSize);
+    }
+
+    std::span<T> GetArrayLast(size_t n) {
+        return std::span<T>(data_.data() + (vSize - n), n);
+    }
+    std::span<T> GetArrayFrom(size_t n) {
+        return std::span<T>(data_.data() + n, vSize - n);
     }
 
 private:
     std::array<T, TSize> data_;
-    std::size_t size = {};
+    std::size_t vSize = {};
 };
 

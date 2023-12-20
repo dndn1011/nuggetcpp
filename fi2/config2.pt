@@ -1,12 +1,12 @@
 
 biquads_test {
-    root = ();
+    @root = @here;
     render {
         vao {
             vbo {
-                verts = (root).data.model.verts;
-                uvs = (root).data.model.uvs; 
-                colors = (root).data.model.colors;
+                verts = @root.data.model.verts;
+                uvs = @root.data.model.uvs; 
+                colors = @root.data.model.colors;
             }
         }
         shaders {

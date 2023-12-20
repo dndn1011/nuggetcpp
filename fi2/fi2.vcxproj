@@ -154,6 +154,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\Color_plat.cpp" />
     <ClCompile Include="src\debug.cpp" />
+    <ClCompile Include="src\expressions.cpp" />
     <ClCompile Include="src\filereader.cpp" />
     <ClCompile Include="src\identifier.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MaxSpeed</Optimization>
@@ -181,12 +182,15 @@
     <ClCompile Include="src\nuggetgl\window.cpp" />
     <ClCompile Include="src\utils\TimeSampler.cpp" />
     <ClCompile Include="src\utils\utils.cpp" />
+    <ClCompile Include="src\ValueAny.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="config.pt" />
     <None Include="config2.pt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\expressions.h" />
+    <ClInclude Include="src\expressions_operators.h" />
     <ClInclude Include="src\nuggetgl\gl.h" />
     <ClInclude Include="src\nuggetgl\gldefs.h" />
     <ClInclude Include="src\debug.h" />
@@ -201,6 +205,7 @@
     <ClInclude Include="src\utils\StableVector.h" />
     <ClInclude Include="src\utils\TimeSampler.h" />
     <ClInclude Include="src\utils\utils.h" />
+    <ClInclude Include="src\ValueAny.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

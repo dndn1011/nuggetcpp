@@ -63,8 +63,8 @@ namespace nugget::ui::entity {
 		//output("checking: %s <- %s : %zu %zu\n", IDToString(to).c_str(), IDToString(from).c_str(),to,from);
 		if (Notice::KeyExists(from)) {
 			// both exist
-			Notice::ValueAny valueTo = Notice::GetValueAny(to);
-			Notice::ValueAny valueFrom = Notice::GetValueAny(from);
+			ValueAny valueTo = Notice::GetValueAny(to);
+			ValueAny valueFrom = Notice::GetValueAny(from);
 			if (valueTo == valueFrom) {
 			//	output("SAME!\n");
 			} else {
@@ -91,8 +91,8 @@ namespace nugget::ui::entity {
 			// both exist
 		} else {
 //			output("MISSING!!!! {}\n", IDToString(from).c_str());
-			Notice::ValueAny valueTo = Notice::GetValueAny(from);
-			Notice::Set(to, valueTo);
+			ValueAny valueTo = Notice::GetValueAny(from);
+			Set(to, valueTo);
 		}
 		std::vector<IDType> children;
 		if (auto r = Notice::GetChildren(from, children /*fill*/)) {

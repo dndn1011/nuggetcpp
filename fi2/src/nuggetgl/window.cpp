@@ -64,7 +64,10 @@ namespace nugget::gl {
 
         // Create the window
         HWND hwnd = CreateWindowEx(0, L"MyOpenGLProject", L"My OpenGL Project", WS_OVERLAPPEDWINDOW,
-            CW_USEDEFAULT, CW_USEDEFAULT, 850, 520, 0, 0, GetModuleHandle(NULL), 0);
+            CW_USEDEFAULT, CW_USEDEFAULT,
+            (int)Notice::GetInt64(IDR("properties.app.window.w")),
+            (int)Notice::GetInt64(IDR("properties.app.window.h")),
+            0, 0, GetModuleHandle(NULL), 0);
 
         if (!hwnd) {
             std::cerr << "Failed to create window" << std::endl;
@@ -74,7 +77,10 @@ namespace nugget::gl {
         // Show the window
         ShowWindow(hwnd, SW_SHOW);
 
-        SetWindowPos(hwnd, NULL, -1649, -211, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
+        SetWindowPos(hwnd, NULL,
+            (int)Notice::GetInt64(IDR("properties.app.window.x")),
+            (int)Notice::GetInt64(IDR("properties.app.window.y")),
+            0, 0, SWP_NOZORDER | SWP_NOSIZE);
 
         hdc = GetDC(hwnd);
 
