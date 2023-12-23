@@ -63,7 +63,6 @@ int main(int argc, char* argv[]) {
 
     auto v = Notice::GetValueAny(IDR("properties.test.value"));
     output("RESULT: {} : {}\n", v.GetTypeAsString(), v.GetValueAsString());
-    exit(0);
 
 //    PrintHashTree(IDR("properties"));
 
