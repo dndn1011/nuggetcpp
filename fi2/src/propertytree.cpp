@@ -165,13 +165,14 @@ namespace nugget::properties {
                         assert(size / 3 * 3 == size);
                         Vector3fList verts;
                         for (int i = 0; i < size; i += 3) {
-                            assert(0);
-#if 0
-                            auto v0 = ParseFloat(initaliserList[i+0]);
-                            auto v1 = ParseFloat(initaliserList[i+1]);
-                            auto v2 = ParseFloat(initaliserList[i+2]);
-                            verts.data.push_back(Vector3f{v0,v1,v2});
-#endif
+                            auto v0 = initaliserList[i+0];
+                            auto v1 = initaliserList[i+1];
+                            auto v2 = initaliserList[i+2];
+                            verts.data.push_back(Vector3f{
+                                Expression::ConvertType(v0,ValueAny::Type::float_).GetValueAsFloat(),
+                                Expression::ConvertType(v1,ValueAny::Type::float_).GetValueAsFloat(),
+                                Expression::ConvertType(v2,ValueAny::Type::float_).GetValueAsFloat()
+                                });
                         }
                         IDType id = IDR(IDR(currentPathName), currentValueName);
                         Notice::Set(id,verts);
@@ -374,7 +375,7 @@ namespace nugget::properties {
                 return parseVariables.at(id);
             }
         }
-        assert(0);
+        return ValueAny(Exception{ .description = std::format("Parse variable not set: {}\n",IDToString(id)) });
         return {};
     }
 
@@ -546,15 +547,15 @@ namespace nugget::properties {
 
             for (auto& fromPathId : children) {
                 fromPath = IDToString(fromPathId);
-                auto leaf = IDKeepLeafCStr(IDToString(fromPathId));
-                IDCombineStringsInPlace(tostr, leaf, toPath);
+                auto leaf = IDKeepLeaf(IDToString(fromPathId));
+                IDCombineStringsInPlace(tostr, leaf.data(), toPath);
 
                 auto value = Notice::GetValueAny(fromPathId);
                 if (!value.IsVoid()) {
                     auto& fromValue = Notice::GetValueAny(IDR(fromPath));
                     Notice::Set(IDR(toPath), fromValue);
                 } else {
-                    auto r = CopyNodes(IDCombineStrings(fromstr, leaf), IDCombineStrings(tostr, leaf));
+                    auto r = CopyNodes(IDCombineStrings(fromstr, leaf.data()), IDCombineStrings(tostr, leaf.data()));
                     if (!r) {
                         return false;
                     }
@@ -616,7 +617,7 @@ namespace nugget::properties {
         size_t uniqueNameCounter = 0;
 
 
-        StableVector<ValueAny,10> initaliserList;
+        StableVector<ValueAny,100> initaliserList;
         std::vector<std::string> literalLines;
     };
 }

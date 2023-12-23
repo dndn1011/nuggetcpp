@@ -43,7 +43,7 @@ struct FileWatcher {
     std::filesystem::file_time_type mtime;
 };
 
-static const std::string filename = "config3.pt";
+static const std::string filename = "config.pt";
 int main(int argc, char* argv[]) {
     std::string file = filename;
     if (argc > 1) {

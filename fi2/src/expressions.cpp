@@ -110,6 +110,7 @@ namespace nugget::expressions {
             for (const auto& token : input) {
                 switch (token.type) {
                     case Token::Type::integer:
+                    case Token::Type::percent:
                     case Token::Type::float_:
                     case Token::Type::string: {
                         output.push_back(token);
@@ -126,6 +127,7 @@ namespace nugget::expressions {
                     case Token::Type::comma:
                     case Token::Type::plus:
                     case Token::Type::dot:
+                    case Token::Type::doubleColon:
                     case Token::Type::minus:
                     case Token::Type::multiply:
                     case Token::Type::divide: {
@@ -279,13 +281,21 @@ namespace nugget::expressions {
                 case Token::Type::dimension: {
                     check(0, "not implemented");
                 } break;
+                case Token::Type::percent: {
+                    float val;
+                    if(ParseFloat(token.text,val)) {
+                        return ValueAny(nugget::ui::Dimension{ val,nugget::ui::Dimension::Units::none });
+                    } else {
+                        check(0, "could not parse percent");
+                    }
+                } break;
                 case Token::Type::float_: {
                     float val;
                     if (ParseFloat(token.text, val)) {
                         return ValueAny(val);
                     }
                     else {
-                        check(0, "could not parse integer");
+                        check(0, "could not parse float");
                     }
                 } break;
                 case Token::Type::integer: {
@@ -358,6 +368,7 @@ namespace nugget::expressions {
 #define EXPR_MULTIPLY 3
 #define EXPR_DIVIDE 4
 #define EXPR_DOT 4
+#define EXPR_DOUBLE_COLON 5
 
 #define EXPR_OPERATOR +
 #define EXPR_NAME Plus
@@ -376,6 +387,10 @@ namespace nugget::expressions {
 
 #define EXPR_NAME Dot
 #define EXPR_OP EXPR_DOT
+#include "expressions_operators.h"
+
+#define EXPR_NAME DoubleColon
+#define EXPR_OP EXPR_DOUBLE_COLON
 #include "expressions_operators.h"
 
         // unary
@@ -408,6 +423,7 @@ namespace nugget::expressions {
 //                output("token: {}\n", output[point].ToString());
                 switch (output[point].type) {
                     case Token::Type::float_:
+                    case Token::Type::percent:
                     case Token::Type::identifier:
                     case Token::Type::string:
                     case Token::Type::integer: {
@@ -428,8 +444,8 @@ namespace nugget::expressions {
                     case Token::Type::at: {
                         output("at: {} : {}", accumulation.GetArrayLast(1)[0].GetTypeAsString(), accumulation.GetArrayLast(1)[0].GetValueAsString());
                         const auto& r = ExpandParseVariable(accumulation.GetArrayLast(1),expandParseVars);
-                        if (r.IsVoid()) {
-                            assert(0);
+                        if (r.IsException()) {
+                            return r;
                         }
                         accumulation.Pop(1);
                         accumulation.emplace_back(r);
@@ -452,6 +468,12 @@ namespace nugget::expressions {
                         }
                     } break;
                     case Token::Type::comma: {
+                        point++;
+                    } break;
+                    case Token::Type::doubleColon: {
+                        const auto& r = DoubleColon(accumulation.GetArrayLast(2));
+                        accumulation.Pop(2);
+                        accumulation.emplace_back(r);
                         point++;
                     } break;
                     case Token::Type::dot: {

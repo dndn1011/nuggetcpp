@@ -6,6 +6,7 @@
 #include <unordered_set>
 #include <format>
 #include "debug.h"
+#pragma optimize("", off)
 
 namespace nugget {
 	namespace identifier {
@@ -41,14 +42,13 @@ namespace nugget {
 
 		std::string IDToString(IDType id) {
 			assert(("Null id used", +id));
-			auto &s = data.toStringMap[id];
-			if (s == "") {
-				return std::format("{}", s);
-			}
+			auto &s = data.toStringMap.at(id);
 			return(s);
 		}
 
 		void SetReverseLookup(IDType id,const std::string& str) {
+			static int c = 0;
+//			output("@@@@@@@@@@@@ {} : {}\n", c++, str);
 			if (data.toStringMap.contains(id)) {
 				const std::string &curval = data.toStringMap.at(id);
 				if (str != curval) {
@@ -64,16 +64,16 @@ namespace nugget {
 			std::string path = str;
 			IDRemoveLeafInPlace(path);
 
-			const char *leafPtr = IDKeepLeafCStr(str);
+			auto leaf = IDKeepLeaf(str);
 
 			IDType parent = (IDType)HashRT(path.c_str()).second;
 			IDType child = (IDType)HashRT(str.c_str()).second;
 			IDType strId = child;
 			SetReverseLookup(child,str);
 			data.parentMap[child] = parent;
-			IDType self = (IDType)HashRT(leafPtr).second;
+			IDType self = (IDType)HashRT(leaf.data()).second;
 			data.selfMap[child] = self;
-			SetReverseLookup(self, leafPtr);
+			SetReverseLookup(self, leaf.data());
 			while (parent != child) {
 				SetReverseLookup(parent,path);
 				data.childMap[parent].insert(child);
@@ -232,18 +232,6 @@ namespace nugget {
 				return path.substr(lastDotPosition + 1);
 			} else {
 				return path;
-			}
-		}
-
-		const char* IDKeepLeafCStr(const std::string& path) {
-			// Find the position of the last '.' character
-			auto lastDotPosition = path.find_last_of('.');
-
-			// Check if a '.' character was found
-			if (lastDotPosition != std::string::npos) {
-				return path.data() + lastDotPosition + 1;
-			} else {
-				return path.data();
 			}
 		}
 	}

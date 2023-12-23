@@ -514,6 +514,11 @@ render {
     }
 }
 
+test {
+    @b=properties.render.object.section.verts;
+	value = ref(@b);
+}
+
 main {
 }
 

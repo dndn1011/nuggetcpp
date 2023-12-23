@@ -20,7 +20,7 @@ ValueAny EXPR_NAME(const std::span<ValueAny> values) {
             }
         }
         switch (v.GetType()) {
-#if EXPR_OP == EXPR_DOT
+#if EXPR_OP == EXPR_DOT || EXPR_OP == EXPR_DOUBLE_COLON
             case ValueAny::Type::IDType: {
                 return ValueAny(IDR(v.GetValueAsIDType(), w.GetValueAsIDType()));
             }

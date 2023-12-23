@@ -176,6 +176,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="src\propertytreetokeniser.cpp" />
+    <ClCompile Include="src\types.cpp" />
     <ClCompile Include="src\ui.cpp" />
     <ClCompile Include="src\uientities.cpp" />
     <ClCompile Include="src\dimensions.cpp" />

@@ -2,6 +2,7 @@
 #include "identifier.h"
 #include "ValueAny.h"
 #include "dimensions.h"
+#include <sstream>
 namespace nugget {
 	using namespace identifier;
 
@@ -16,7 +17,7 @@ namespace nugget {
 	ValueAny::ValueAny(IDType v) : type(Type::IDType), data{ .idType = v } {}
 	ValueAny::ValueAny(void* ptr) : type(Type::pointer), data{ .ptr = ptr } {}
 	ValueAny::ValueAny(const nugget::ui::Dimension& v) : type(Type::dimension), data{ .dimensionPtr = new nugget::ui::Dimension(v) } {}
-	ValueAny::ValueAny(const Vector3fList& v) : type(Type::Vector3fList), data{ .vector3fPtr = new Vector3fList(v) } {}
+	ValueAny::ValueAny(const Vector3fList& v) : type(Type::Vector3fList), data{ .vector3fListPtr = new Vector3fList(v) } {}
 	ValueAny::ValueAny(const Exception& v) : type(Type::Exception), data{ .exceptionPtr = new Exception(v) } {}
 
 	ValueAny::ValueAny(const ValueAny& other) {
@@ -62,7 +63,7 @@ namespace nugget {
 				return *data.dimensionPtr == *other.data.dimensionPtr;
 			} break;
 			case ValueAny::Type::Vector3fList: {
-				return *data.vector3fPtr == *other.data.vector3fPtr;
+				return *data.vector3fListPtr == *other.data.vector3fListPtr;
 			} break;
 			default: {
 				assert(0);
@@ -108,6 +109,7 @@ namespace nugget {
 			return data.dimensionPtr->ToString();
 		} break;
 		case ValueAny::Type::Vector3fList: {
+			return data.vector3fListPtr->to_string();
 			return "<unsupported>";
 		} break;
 		case ValueAny::Type::void_: {
@@ -159,7 +161,7 @@ namespace nugget {
 	const Vector3fList& ValueAny::GetValueAsVector3fList() const
 	{
 		assert(type == Type::Vector3fList);
-		return *data.vector3fPtr;
+		return *data.vector3fListPtr;
 	}
 	void ValueAny::SetValue(std::string val) {
 		assert(type == Type::string);
@@ -210,10 +212,10 @@ namespace nugget {
 	void ValueAny::SetValue(const Vector3fList& verts)
 	{
 		assert(type == Type::Vector3fList);
-		if (data.vector3fPtr != nullptr) {
-			delete 	data.vector3fPtr;
+		if (data.vector3fListPtr != nullptr) {
+			delete 	data.vector3fListPtr;
 		}
-		data.vector3fPtr = new Vector3fList(verts);
+		data.vector3fListPtr = new Vector3fList(verts);
 	}
 	void ValueAny::SetValueVoid() {
 		type = Type::void_;
@@ -273,8 +275,8 @@ namespace nugget {
 				}
 			} break;
 			case Type::Vector3fList: {
-				if (data.vector3fPtr) {
-					delete data.vector3fPtr;
+				if (data.vector3fListPtr) {
+					delete data.vector3fListPtr;
 				}
 			} break;
 			case Type::Exception: {
@@ -314,7 +316,7 @@ namespace nugget {
 				data.dimensionPtr = new nugget::ui::Dimension(*other.data.dimensionPtr);
 			} break;
 			case Type::Vector3fList: {
-				data.vector3fPtr = new Vector3fList(*other.data.vector3fPtr);
+				data.vector3fListPtr = new Vector3fList(*other.data.vector3fListPtr);
 			} break;
 			case Type::pointer: {
 				data.ptr = other.data.ptr;

@@ -49,6 +49,11 @@ namespace nugget {
 		bool operator==(const Vector3f& other) const {
 			return x == other.x && y == other.y && z == other.z;
 		}
+		std::string to_string() const {
+			return to_string_imp(*this);
+		}
+	private:
+		static std::string to_string_imp(const Vector3f& obj);
 	};
 	struct Vector3fList {
 		bool operator==(const Vector3fList& other) const {
@@ -64,6 +69,11 @@ namespace nugget {
 			}
 		}
 		std::vector<Vector3f> data;
+		std::string to_string() const {
+			return to_string_imp(*this);
+		}
+	private:
+		static std::string to_string_imp(const Vector3fList& obj);
 	};
 	struct Exception {
 		std::string description;

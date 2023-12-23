@@ -96,7 +96,7 @@ namespace nugget {
 			void* ptr;
 			nugget::ui::Dimension* dimensionPtr;
 
-			Vector3fList* vector3fPtr;
+			Vector3fList* vector3fListPtr;
 		} data = {};
 
 		Type type = Type::void_;

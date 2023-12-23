@@ -3,3 +3,4 @@ test {
 	a = 10+1+@b;
 	value = ref(@here.a);
 }
+

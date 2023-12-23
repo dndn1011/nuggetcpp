@@ -86,7 +86,7 @@ namespace nugget {
         void IDRemoveLeafInPlace(std::string& path);
 
         //std::string IDKeepLeaf(const std::string& path);
-        const char *IDKeepLeafCStr(const std::string& path);
+        std::string IDKeepLeaf(const std::string& path);
 
         std::string IDToString(IDType id);
 
