@@ -39,6 +39,8 @@ __PTREE_TOKEN(multiply)
 __PTREE_TOKEN(divide)
 __PTREE_TOKEN(openParen)
 __PTREE_TOKEN(closeParen)
+__PTREE_TOKEN(function)
+__PTREE_TOKEN(dollar)
 
 ////////////////////////////////////////
 

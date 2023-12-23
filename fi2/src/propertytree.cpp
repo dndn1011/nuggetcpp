@@ -357,6 +357,27 @@ namespace nugget::properties {
             return Token::Type::unset;
         }
         
+    std::unordered_map<IDType, std::function<nugget::ValueAny(IDType id)>> expandParseVars = {
+        {
+            ID("here"),
+            [&](IDType id) {
+                return ValueAny(IDR(currentPathName));
+            }
+        }
+    };
+
+    ValueAny ExpandParseVariable(IDType id) {
+        if (expandParseVars.contains(id)) {
+            return expandParseVars.at(id)(id);
+        } else {
+            if (parseVariables.contains(id)) {
+                return parseVariables.at(id);
+            }
+        }
+        assert(0);
+        return {};
+    }
+
     ValueAny ParseInitialiserExpressionToValue() {
         Expression ex;
         while (GetCurrentToken().type != Token::Type::comma && GetCurrentToken().type != Token::Type::closeBrace) {
@@ -367,7 +388,10 @@ namespace nugget::properties {
         }
         // must not consume the next token, "push back"
         point--;
-        return ex.Evaluate();
+        return ex.Evaluate([&](IDType id) {
+            return ExpandParseVariable(id);
+            }
+        );
     }
 
     bool ParseExpression() {
@@ -378,10 +402,32 @@ namespace nugget::properties {
                 return false;
             }
         }
-        ValueAny any = ex.Evaluate();
+        ValueAny any = ex.Evaluate([&](IDType id) {
+            return ExpandParseVariable(id);
+            }
+        );
+        if (any.IsException()) {
+            auto e = any.GetValueAsException();
+            parseState.description = std::format("Could not evaluate expression: {}", e.description);
+            return false;
+        }
         std::string path = IDCombineStrings(currentPathName, currentValueName);
         Notice::Set<ValueAny>(IDR(path), any);
         return true;
+    }
+
+    ValueAny ParseExpressionToValue() {
+        Expression ex;
+        while (GetCurrentToken().type != Token::Type::semicolon) {
+            ex.AddToken(GetCurrentToken());
+            if (!NextToken()) {
+                return {};
+            }
+        }
+        return ex.Evaluate([&](IDType id) {
+            return ExpandParseVariable(id);
+            }
+        );
     }
 #if 0
         [[nodiscard]] bool ParseAssignment() {
@@ -542,15 +588,14 @@ namespace nugget::properties {
             currentTypeName = "string";
             StoreValue();
         }
-
-        void SetParseVariableMode() {
-            parseVariableMode = true;
-        }
-
         const std::string& GetCurrentTypeName() {
             return currentTypeName;
         }
+        const std::string& GetCurrentValueName() {
+            return currentValueName;
+        }
 
+        std::unordered_map<IDType, ValueAny> parseVariables;
     private:
         std::vector<Token>& list;
         std::string currentPathName = rootName;
@@ -570,9 +615,6 @@ namespace nugget::properties {
 
         size_t uniqueNameCounter = 0;
 
-        bool parseVariableMode = false;
-
-        std::unordered_map<std::string, std::string> parseVariables;
 
         StableVector<ValueAny,10> initaliserList;
         std::vector<std::string> literalLines;
@@ -609,6 +651,7 @@ namespace nugget::properties {
                                         case Token::Type::equals: {
                                             if (!pdata.ConfirmCurrentType()) {
                                                 output("vvvvvvvvvvvvvvvvvvv\n");
+                                                pdata.SetLineNumberToToken(); 
                                                 parseState.description = std::format("Type error, probably unknown: {}", pdata.GetCurrentTypeName());
                                                 return false;
                                             }
@@ -647,6 +690,7 @@ namespace nugget::properties {
                                                                 return false;
                                                             }
                                                             if (!pdata.ExpectSemicolon()) {
+                                                                pdata.SetLineNumberToToken();
                                                                 output("vvvvvvvvvvvvvvvvvvv\n");
                                                                 return false;
                                                             }
@@ -654,6 +698,7 @@ namespace nugget::properties {
                                                         } break;
                                                         default: {
                                                             output("vvvvvvvvvvvvvvvvvvv\n");
+                                                            pdata.SetLineNumberToToken(); 
                                                             parseState.description = std::format("Unexpected token: {}", pdata.GetCurrentToken().TypeAsString());
                                                             return false;
                                                         }
@@ -663,6 +708,8 @@ namespace nugget::properties {
                                                     ///////////////////////////////////////////////
                                                     // assume expression, note this consumes the ending semicolon
                                                     if (!pdata.ParseExpression()) {
+                                                        output("vvvvvvvvvvvvvvvvvvv\n");
+                                                        pdata.SetLineNumberToToken(); 
                                                         return false;
                                                     }
                                                     goto expectInitialisation__;
@@ -694,6 +741,7 @@ namespace nugget::properties {
                                         } break;
                                         default:
                                             output("vvvvvvvvvvvvvvvvvvv\n");
+                                            pdata.SetLineNumberToToken();
                                             parseState.description = std::format("Unexpected token: {}", pdata.GetCurrentToken().TypeAsString());
                                             return false;
                                     }
@@ -749,7 +797,27 @@ namespace nugget::properties {
                     goto nameOfNodeIsSet__;
                 } break;
                 case Token::Type::at: {
-                    pdata.SetParseVariableMode();
+                    switch (pdata.NextTokenType()) {
+                        case Token::Type::identifier: {
+                            pdata.SetCurrentValueName();
+                            switch (pdata.NextTokenType()) {
+                                case Token::Type::equals: {
+                                    pdata.NextToken();
+                                    pdata.parseVariables[IDR(pdata.GetCurrentValueName())] = pdata.ParseExpressionToValue();
+                                } break;
+                                default: {
+                                    output("vvvvvvvvvvvvvvvvvvv\n");
+                                    parseState.description = std::format("Unexpected token: {} {}", pdata.GetCurrentToken().TypeAsString(), pdata.GetCurrentToken().text);
+                                    return false;
+                                }
+                            }
+                        } break;
+                        default: {
+                            output("vvvvvvvvvvvvvvvvvvv\n");
+                            parseState.description = std::format("Unexpected token: {} {}", pdata.GetCurrentToken().TypeAsString(), pdata.GetCurrentToken().text);
+                            return false;
+                        }
+                    }
                 } break;
                 case Token::Type::eof: {
                     // we are done, correctly

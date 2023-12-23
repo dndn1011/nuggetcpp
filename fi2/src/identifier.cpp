@@ -39,11 +39,12 @@ namespace nugget {
 			}
 		}
 
-		const std::string& IDToString(IDType id) {
+		std::string IDToString(IDType id) {
 			assert(("Null id used", +id));
-
 			auto &s = data.toStringMap[id];
-			assert(("Unable to do a reverse lookup",s != ""));
+			if (s == "") {
+				return std::format("{}", s);
+			}
 			return(s);
 		}
 

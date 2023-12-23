@@ -20,6 +20,11 @@ ValueAny EXPR_NAME(const std::span<ValueAny> values) {
             }
         }
         switch (v.GetType()) {
+#if EXPR_OP == EXPR_DOT
+            case ValueAny::Type::IDType: {
+                return ValueAny(IDR(v.GetValueAsIDType(), w.GetValueAsIDType()));
+            }
+#else
             case ValueAny::Type::int64_t_: {
                 return ValueAny(v.GetValueAsInt64() EXPR_OPERATOR w.GetValueAsInt64());
             }
@@ -31,8 +36,12 @@ ValueAny EXPR_NAME(const std::span<ValueAny> values) {
             case ValueAny::Type::float_: {
                 return ValueAny(v.GetValueAsFloat() EXPR_OPERATOR w.GetValueAsFloat());
             }
+            case ValueAny::Type::Color: {
+                return ValueAny(v.GetValueAsColor() EXPR_OPERATOR w.GetValueAsColor());
+            }
+#endif
             default: {
-                check(0, "Plus not implemented for types");
+                check(0, "not implemented for types");
             }
         }
     }

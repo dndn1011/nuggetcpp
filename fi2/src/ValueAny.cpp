@@ -17,6 +17,7 @@ namespace nugget {
 	ValueAny::ValueAny(void* ptr) : type(Type::pointer), data{ .ptr = ptr } {}
 	ValueAny::ValueAny(const nugget::ui::Dimension& v) : type(Type::dimension), data{ .dimensionPtr = new nugget::ui::Dimension(v) } {}
 	ValueAny::ValueAny(const Vector3fList& v) : type(Type::Vector3fList), data{ .vector3fPtr = new Vector3fList(v) } {}
+	ValueAny::ValueAny(const Exception& v) : type(Type::Exception), data{ .exceptionPtr = new Exception(v) } {}
 
 	ValueAny::ValueAny(const ValueAny& other) {
 		CopyFrom(other);
@@ -98,7 +99,7 @@ namespace nugget {
 			return *data.stringPtr;
 		} break;
 		case ValueAny::Type::IDType: {
-			return std::to_string(+data.idType);
+			return IDToString(data.idType);
 		} break;
 		case ValueAny::Type::Color: {
 			return data.colorPtr->to_string();
@@ -121,6 +122,10 @@ namespace nugget {
 	Color ValueAny::GetValueAsColor() const {
 		assert(type == Type::Color);
 		return *data.colorPtr;
+	}
+	const Exception &ValueAny::GetValueAsException() const {
+		assert(type == Type::Exception);
+		return *data.exceptionPtr;
 	}
 	IDType ValueAny::GetValueAsIDType() const {
 		assert(type == Type::IDType);
@@ -217,8 +222,12 @@ namespace nugget {
 		CopyFrom(val);
 	}
 
-	bool ValueAny::IsVoid() {
+	bool ValueAny::IsVoid() const {
 		return type == Type::void_;
+	}
+
+	bool ValueAny::IsException() const {
+		return type == Type::Exception;
 	}
 
 	bool ValueAny::NotDeleted()
@@ -268,6 +277,11 @@ namespace nugget {
 					delete data.vector3fPtr;
 				}
 			} break;
+			case Type::Exception: {
+				if (data.exceptionPtr) {
+					delete data.exceptionPtr;
+				}
+			} break;
 		}
 
 		type = other.type;
@@ -289,6 +303,9 @@ namespace nugget {
 			} break;
 			case Type::Color: {
 				data.colorPtr = new Color(*other.data.colorPtr);
+			} break;
+			case Type::Exception: {
+				data.exceptionPtr = new Exception(*other.data.exceptionPtr);
 			} break;
 			case Type::string: {
 				data.stringPtr = new std::string(*other.data.stringPtr);
@@ -320,5 +337,8 @@ namespace nugget {
 		{ValueAny::Type::dimension,"Dimension"},
 		{ValueAny::Type::float_,"float"},
 		{ValueAny::Type::string,"string"},
+		{ValueAny::Type::IDType,"IDType"},
 	};
+
+
 }

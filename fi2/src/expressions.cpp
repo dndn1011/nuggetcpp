@@ -10,6 +10,7 @@
 #include "utils/StableVector.h"
 #include "types.h"
 #include <span>
+#include "notice.h"
 
 namespace nugget::expressions {
     using namespace nugget::properties;
@@ -53,7 +54,6 @@ namespace nugget::expressions {
         std::vector<Token> output;
         std::vector<Token> input;
 
-
         void AddToken(const Token& token) {
             input.emplace_back(token);
         }
@@ -66,7 +66,7 @@ namespace nugget::expressions {
             case Token::Type::multiply:
             case Token::Type::divide:
                 return 2;
-            case Token::Type::colon:
+            case Token::Type::at:
                 return 100;
             default:
                 return 0;
@@ -106,26 +106,48 @@ namespace nugget::expressions {
         }
 
         void InfixToPostfix() {
+            std::vector<bool> inFunction;
             for (const auto& token : input) {
                 switch (token.type) {
                     case Token::Type::integer:
                     case Token::Type::float_:
-                    case Token::Type::identifier:
                     case Token::Type::string: {
                         output.push_back(token);
                     } break;
-                    case Token::Type::colon:
+                    case Token::Type::identifier: {
+                        output.push_back(token);
+                    } break;
+                    case Token::Type::dollar: {
+                        ProcessOperator(token);
+                    } break;
+                    case Token::Type::at: {
+                        ProcessOperator(token);
+                    } break;
                     case Token::Type::comma:
                     case Token::Type::plus:
+                    case Token::Type::dot:
                     case Token::Type::minus:
                     case Token::Type::multiply:
                     case Token::Type::divide: {
                         ProcessOperator(token);
                     } break;
                     case Token::Type::openParen: {
+                        // if previous is an identifier, this us a function call
+                        auto t = output.back();
+                        if (t.type == Token::Type::identifier) { 
+                            output.pop_back();
+                            output.push_back(Token{ .type = Token::Type::function,.text = t.text });
+                            inFunction.push_back(true);
+                        } else {
+                            inFunction.push_back(false);
+                        }
                         operatorStack.push(token);
                     } break;
                     case Token::Type::closeParen: {
+                        if (inFunction.back()) {
+                            ProcessOperator(token);
+                        }
+                        inFunction.pop_back();
                         while (!operatorStack.empty() &&
                             operatorStack.top().type != Token::Type::openParen) {
                             output.push_back(operatorStack.top());
@@ -138,13 +160,11 @@ namespace nugget::expressions {
                     } break;
                 }
             }
-
             while (!operatorStack.empty()) {
                 output.push_back(operatorStack.top());
                 operatorStack.pop();
             }
         }
-
         static bool ParseInteger(const std::string& str,int64_t &result) {
             auto [p, ec] = std::from_chars(str.data(), str.data() + str.size(), result);
             if (ec == std::errc()) {
@@ -176,7 +196,7 @@ namespace nugget::expressions {
             return IDR(str);
         }
 
-        static inline std::unordered_map<IDType, std::function<ValueAny(const std::span<ValueAny>& args)>> creators = {
+        std::unordered_map<IDType, std::function<ValueAny(const std::span<ValueAny>& args)>> functions = {
             {
                 ID("Color"),
                 [](const std::span<ValueAny>& args) {
@@ -186,6 +206,18 @@ namespace nugget::expressions {
                     float b = Expression::ConvertType(args[2], ValueAny::Type::float_).GetValueAsFloat();
                     float a = Expression::ConvertType(args[3], ValueAny::Type::float_).GetValueAsFloat();
                     return ValueAny(Color(r, g, b, a));
+                }
+            },
+            {
+                ID("ref"),
+                [&](const std::span<ValueAny>& args) {
+                    check(args.size() == 1,"Incorrect number of arguments");
+                    IDType id = args[0].GetValueAsIDType();
+                    if (Notice::KeyExists(id)) {
+                        return Notice::GetValueAny(id);
+                    } else {
+                        return ValueAny(Exception{ .description = std::format("Could not find property '{}'",IDToString(id)) });
+                    }
                 }
             }
         };
@@ -225,11 +257,23 @@ namespace nugget::expressions {
                     return ValueAny(std::format("{}",from.GetValueAsInt64()));
                 }
             },
+            {
+                {
+                    ValueAny::Type::int64_t_, ValueAny::Type::Color
+                },
+                [](const ValueAny& from) {
+                float v = (float)from.GetValueAsInt64();
+                    return ValueAny(Color{v,v,v,v});
+                }
+            },
         };
 
         ValueAny ParseToken(const Token& token) {
             switch (token.type) {
                 case Token::Type::identifier: {
+                    return ValueAny(IDR(token.text));
+                } break;
+                case Token::Type::function: {
                     return ValueAny(IDR(token.text));
                 } break;
                 case Token::Type::dimension: {
@@ -287,7 +331,7 @@ namespace nugget::expressions {
                 ValueAny::Type::uint64_t_,
                 ValueAny::Type::int64_t_,
                 ValueAny::Type::float_,
-                ValueAny::Type::Color,
+                ValueAny::Type::Color,  
                 ValueAny::Type::string,
                 ValueAny::Type::IDType,
                 ValueAny::Type::pointer,
@@ -313,6 +357,7 @@ namespace nugget::expressions {
 #define EXPR_MINUS 2
 #define EXPR_MULTIPLY 3
 #define EXPR_DIVIDE 4
+#define EXPR_DOT 4
 
 #define EXPR_OPERATOR +
 #define EXPR_NAME Plus
@@ -329,36 +374,79 @@ namespace nugget::expressions {
 #define EXPR_OP EXPR_DIVIDE
 #include "expressions_operators.h"
 
-        ValueAny EvalRpn() {
+#define EXPR_NAME Dot
+#define EXPR_OP EXPR_DOT
+#include "expressions_operators.h"
+
+        // unary
+        ValueAny IndirectValue(const std::span<ValueAny> values) {
+            const ValueAny& v = values[0];
+            check(v.GetType() == ValueAny::Type::IDType, "Must be an IDType");
+            const ValueAny& w = Notice::GetValueAny(v.GetValueAsIDType());
+            const IDType wid = w.GetValueAsIDType();
+            if (Notice::KeyExists(wid)) {
+                return Notice::GetValueAny(wid);
+            }
+            return {};
+        }
+
+        // unary
+        ValueAny ExpandParseVariable(const std::span<ValueAny> values, std::function<ValueAny(IDType)> expandParseVars) {
+            const ValueAny& v = values[0];
+            output("{}\n", v.GetValueAsString());
+            auto id = v.GetValueAsIDType();
+            return expandParseVars(id);
+        }
+
+        ValueAny EvalRpn(std::function<ValueAny(IDType)> expandParseVars) {
             size_t point = 0; 
             size_t outSize = output.size();
-            StableVector<ValueAny, 10> accumulation;
+            StableVector<ValueAny, 100> accumulation;
+            std::vector<size_t> functionMarkers;
 
             while (point < outSize) {
+//                output("token: {}\n", output[point].ToString());
                 switch (output[point].type) {
-                    case Token::Type::identifier: {
-                        const ValueAny& v = ParseToken(output[point++]);
-                        accumulation.emplace_back(v);
-                    } break;
+                    case Token::Type::float_:
+                    case Token::Type::identifier:
+                    case Token::Type::string:
                     case Token::Type::integer: {
                         const ValueAny& v = ParseToken(output[point++]);
                         accumulation.emplace_back(v);
                     } break;
-                    case Token::Type::string: {
+                    case Token::Type::function: {
                         const ValueAny& v = ParseToken(output[point++]);
+                        functionMarkers.push_back(accumulation.size());
                         accumulation.emplace_back(v);
                     } break;
-                    case Token::Type::float_: {
-                        const ValueAny& v = ParseToken(output[point++]);
-                        accumulation.emplace_back(v);
+                    case Token::Type::dollar: {
+                        const auto& r = IndirectValue(accumulation.GetArrayLast(1));
+                        accumulation.Pop(1);
+                        accumulation.emplace_back(r);
+                        point++;
                     } break;
-                    case Token::Type::colon: {
-                        IDType className = accumulation[0].GetValueAsIDType();
-                        if (!creators.contains(className)) {
-                            check(0, "No constructor available for this class");
+                    case Token::Type::at: {
+                        output("at: {} : {}", accumulation.GetArrayLast(1)[0].GetTypeAsString(), accumulation.GetArrayLast(1)[0].GetValueAsString());
+                        const auto& r = ExpandParseVariable(accumulation.GetArrayLast(1),expandParseVars);
+                        if (r.IsVoid()) {
+                            assert(0);
+                        }
+                        accumulation.Pop(1);
+                        accumulation.emplace_back(r);
+                        point++;
+                    } break;
+                    case Token::Type::closeParen: {
+                        size_t i = functionMarkers.back();
+                        functionMarkers.pop_back();
+                        IDType className = accumulation[i].GetValueAsIDType();
+                        if (!functions.contains(className)) {
+                            return ValueAny(Exception{ .description = std::format("Could not find function '{}'",IDToString(className)) });
                         } else {
-                            ValueAny any = creators.at(className)(accumulation.GetArrayFrom(1));
-                            accumulation.SetSize(0);
+                            ValueAny any = functions.at(className)(accumulation.GetArrayLast(accumulation.size()-i-1));
+                            if (any.IsException()) {
+                                return ValueAny(any);
+                            }
+                            accumulation.SetSize(i);
                             accumulation.emplace_back(any);
                             point++;
                         }
@@ -366,8 +454,14 @@ namespace nugget::expressions {
                     case Token::Type::comma: {
                         point++;
                     } break;
+                    case Token::Type::dot: {
+                        const auto& r = Dot(accumulation.GetArrayLast(2));
+                        accumulation.Pop(2);
+                        accumulation.emplace_back(r);
+                        point++;
+                    } break;
                     case Token::Type::plus: {
-                        const auto &r = Plus(accumulation.GetArrayLast(2));
+                        const auto& r = Plus(accumulation.GetArrayLast(2));
                         accumulation.Pop(2);
                         accumulation.emplace_back(r);
                         point++;
@@ -392,9 +486,9 @@ namespace nugget::expressions {
             return accumulation[0];
         }
 
-        ValueAny Evaluate() {
+        ValueAny Evaluate(std::function<ValueAny(IDType)> expandParseVars) {
             InfixToPostfix();
-            return EvalRpn();
+            return EvalRpn(expandParseVars);
         }
 
         void PrintPostfix() {
@@ -415,8 +509,8 @@ namespace nugget::expressions {
         imp.rpn.AddToken(token);
     }
 
-    ValueAny Expression::Evaluate() {
-        return imp.rpn.Evaluate();
+    ValueAny Expression::Evaluate(std::function<nugget::ValueAny(IDType)> expandParseVars) {
+        return imp.rpn.Evaluate(expandParseVars);
     }
 
     /*static*/

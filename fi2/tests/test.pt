@@ -1,0 +1,5 @@
+test {
+	@b = a;
+	a = 10+1;
+	value = ref(@here.@b);
+}

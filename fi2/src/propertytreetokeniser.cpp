@@ -46,7 +46,7 @@ namespace nugget::properties {
             return 0;
         }
         const char* p = str + 1;
-        for (p = str; (size_t)(p - str) < len && (std::isalnum(*p) || *p == '_' || *p=='.'); ++p);
+        for (p = str; (size_t)(p - str) < len && (std::isalnum(*p) || *p == '_'); ++p);
         if ((size_t)(p - str) < len) {
             return (size_t)(p - str);
         } else {
@@ -193,6 +193,13 @@ namespace nugget::properties {
                         ok = true;
                         tokenList.push_back(Token{ Token::Type::closeParen,std::string(next.substr(0, 1)),parseState.lineNumber });
                     } break;
+                    case '.': {
+                        //////////////////////////////////////////////
+                        // +
+                        point += 1;
+                        ok = true;
+                        tokenList.push_back(Token{ Token::Type::dot,std::string(next.substr(0, 1)),parseState.lineNumber });
+                    } break;
                     case '+': {
                         //////////////////////////////////////////////
                         // +
@@ -206,6 +213,13 @@ namespace nugget::properties {
                         point += 1;
                         ok = true;
                         tokenList.push_back(Token{ Token::Type::multiply,std::string(next.substr(0, 1)),parseState.lineNumber });
+                    } break;
+                    case '$': {
+                        //////////////////////////////////////////////
+                        // +
+                        point += 1;
+                        ok = true;
+                        tokenList.push_back(Token{ Token::Type::dollar,std::string(next.substr(0, 1)),parseState.lineNumber });
                     } break;
                     case '/': {
                         if (next[1] == '/') {
@@ -339,4 +353,9 @@ namespace nugget::properties {
         tokenList.push_back(Token({ Token::Type::eof,"" }));
         return true;
     }
+
+    std::string Token::ToString() {
+        return std::format("Token::Type::{} = {}", TypeAsString(type), text);
+    }
+
 }

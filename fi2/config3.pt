@@ -1,3 +1,5 @@
-a {
-	a = :Color(1,1,1,1)*10;
+@b = 111;
+test {
+	a = 10+1+@b;
+	value = ref(@here.a);
 }

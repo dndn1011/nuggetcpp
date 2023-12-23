@@ -44,18 +44,25 @@ struct FileWatcher {
 };
 
 static const std::string filename = "config3.pt";
-int main() {
+int main(int argc, char* argv[]) {
+    std::string file = filename;
+    if (argc > 1) {
+        file = std::string(argv[1]);
+    }
     for (int i = 0; i<1; i++) {
-        auto result = properties::LoadPropertyTree("properties",filename);
+        auto result = properties::LoadPropertyTree("properties",file);
         if (!result.successful) {
-            output("Could not load propertries for {}:\n", filename);
-            auto absfilename = std::filesystem::absolute(filename);
+            output("Could not load propertries for {}:\n", file);
+            auto absfilename = std::filesystem::absolute(file);
 
             outputAlways("Parse state:\n{}({}): {}\n", absfilename.string(), result.lineNumber, result.description);
             return 1;
         }
     }
 
+
+    auto v = Notice::GetValueAny(IDR("properties.test.value"));
+    output("RESULT: {} : {}\n", v.GetTypeAsString(), v.GetValueAsString());
     exit(0);
 
 //    PrintHashTree(IDR("properties"));

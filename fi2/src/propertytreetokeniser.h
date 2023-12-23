@@ -38,6 +38,7 @@ namespace nugget::properties {
         bool isEof() {
             return type == Type::eof;
         }
+        std::string ToString();
     };
 
     bool Tokenise(std::function<std::string(size_t)> readFunc, ParseState& parseState, std::vector<Token>& tokenList);

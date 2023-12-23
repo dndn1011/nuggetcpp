@@ -88,7 +88,7 @@ namespace nugget {
         //std::string IDKeepLeaf(const std::string& path);
         const char *IDKeepLeafCStr(const std::string& path);
 
-        const std::string& IDToString(IDType id);
+        std::string IDToString(IDType id);
 
         const std::unordered_set<IDType>* IDGetChildren(IDType id);
 

@@ -28,6 +28,15 @@ namespace nugget {
 				b == other.b &&
 				a == other.a;
 		}
+		Color operator+(const Color& other) const {
+			return Color{ other.r + r,other.g + g,other.b + b,other.a + a };
+		}
+		Color operator*(const Color& other) const {
+			return Color{ other.r * r,other.g * g,other.b * b,other.a * a };
+		}
+		Color operator/(const Color& other) const {
+			return Color{ other.r / r,other.g / g,other.b / b,other.a / a };
+		}
 		std::string to_string() {
 			return to_string_imp(*this);
 		}
@@ -56,10 +65,7 @@ namespace nugget {
 		}
 		std::vector<Vector3f> data;
 	};
-
-}
-
-namespace sf {
-	class Color;
-	Color ToPlatform(nugget::Color in);
+	struct Exception {
+		std::string description;
+	};
 }

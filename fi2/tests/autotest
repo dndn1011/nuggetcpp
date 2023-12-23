@@ -1,0 +1,23 @@
+
+EXE=../../x64/Debug/fi2.exe
+PDB="${EXE%/*}"/fi2.pdb
+
+while true 
+do
+if [ "$PDB" -nt TOUCH ]
+then
+	touch TOUCH
+	sleep 1
+	cp "$EXE" .
+	./fi2.exe test.pt | grep RESULT: | sed 's/[\r]//;s/.*RESULT: //' > out
+	if ! diff out test.expected > out2
+	then
+		cat out2
+		notepad out2 &
+		for i in 1 2 3 ; do printf "\a\n"; sleep 1 ; done
+	else
+		echo OK
+	fi
+fi
+sleep 1
+done
