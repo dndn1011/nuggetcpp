@@ -187,16 +187,32 @@ namespace nugget::gl {
     };
 
     void ApplyRenderingData() {
-        auto vertices = Notice::GetVector3fList(IDR("properties.render.object.section.verts"));
-        size_t vsize = vertices.data.size()*3;
-        std::vector<float> verts;
-        for (auto&& x : vertices.data) {
-            verts.push_back(x.x);
-            verts.push_back(x.y);
-            verts.push_back(x.z);
+        std::vector<IDType> children;
+        Notice::GetChildrenOfType(IDR("properties.render.scene"), ValueAny::Type::IDType, children);
+        std::vector<float> vertData;
+        for (auto&& x : children) {         // each object
+            IDType id = Notice::GetID(x);   // points to the data
+            std::vector<IDType> childSections;
+            Notice::GetChildrenWithNodeExisting(id, ID("verts"), childSections);
+            for (auto&& y : childSections) {   // each section
+                IDType verts = IDR(y, ID("verts"));
+                Vector3fList vertices;
+                if (Notice::GetVector3fList(verts, vertices)) {
+                    size_t vsize = vertices.data.size() * 3;
+                    for (auto&& z : vertices.data) {
+                        vertData.push_back(z.x);
+                        vertData.push_back(z.y);
+                        vertData.push_back(z.z);
+                    }
+                } else {
+                    assert(0);
+                }
+            }
         }
 
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float)*vsize, verts.data());
+        auto vsize = vertData.size();
+
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float)*vsize, vertData.data());
         glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * vsize, sizeof(uvCoords), uvCoords);
         glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * vsize + sizeof(uvCoords), sizeof(colours), colours);
 
@@ -237,14 +253,14 @@ namespace nugget::gl {
         }
 
 
-        std::vector<Notice::Handler> handlers;
-        Notice::RegisterHandlerOnChildren(Notice::Handler(IDR("properties.shaders.biquad"), [](IDType id) {
-            CompileShaderFromProperties(IDR("properties.shaders.biquad"));
-            }), handlers);
+//        std::vector<Notice::Handler> handlers;
+//        Notice::RegisterHandlerOnChildren(Notice::Handler(IDR("properties.shaders.biquad"), [](IDType id) {
+//            CompileShaderFromProperties(IDR("properties.shaders.biquad"));
+//            }), handlers);
 
-        Notice::RegisterHandler(Notice::Handler(IDR("properties.render.object.section.verts"), [](IDType id) {
-            ApplyRenderingData();
-            }));
+//        Notice::RegisterHandler(Notice::Handler(IDR("properties.render.object.section.verts"), [](IDType id) {
+//            ApplyRenderingData();
+//            }));
 
         CompileShaderFromProperties(IDR("properties.shaders.biquad"));
 

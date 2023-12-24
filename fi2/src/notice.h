@@ -37,6 +37,7 @@ namespace nugget {
 		void*           GetPointer(IDType id);
 		Dimension       GetDimension(IDType id);
 		const Vector3fList& GetVector3fList(IDType id);
+		bool GetVector3fList(IDType id, Vector3fList& result);
 
 		std::string GetValueAsString(IDType id);
 		std::string GetValueTypeAsString(const ValueAny& var);
@@ -68,6 +69,7 @@ namespace nugget {
 		bool KeyExists(IDType id);
 
 		bool GetChildren(IDType, std::vector<IDType>& fill);
+		bool GetChildrenOfType(IDType, ValueAny::Type, std::vector<IDType>& fill);
 		bool GetChildrenWithNodeExisting(IDType id, IDType leaf, std::vector<IDType>& fill);
 		bool GetChildrenWithNodeOfValue(IDType id, IDType leaf, ValueAny value, std::vector<IDType>& fill);
 	}

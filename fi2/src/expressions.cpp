@@ -66,6 +66,8 @@ namespace nugget::expressions {
             case Token::Type::multiply:
             case Token::Type::divide:
                 return 2;
+            case Token::Type::uMinus:
+                return 200;
             case Token::Type::at:
                 return 100;
             default:
@@ -107,7 +109,8 @@ namespace nugget::expressions {
 
         void InfixToPostfix() {
             std::vector<bool> inFunction;
-            for (const auto& token : input) {
+            for(size_t i = 0;i<input.size();i++) {
+                const auto& token = input[i];
                 switch (token.type) {
                     case Token::Type::integer:
                     case Token::Type::percent:
@@ -124,11 +127,17 @@ namespace nugget::expressions {
                     case Token::Type::at: {
                         ProcessOperator(token);
                     } break;
+                    case Token::Type::minus: {
+                        if (i == 0 || !IsValue(input[i].type)) {
+                            ProcessOperator(Token{ .type = Token::Type::uMinus,.text = "-" });
+                        } else {
+                            ProcessOperator(token);
+                        }
+                    } break;
                     case Token::Type::comma:
                     case Token::Type::plus:
                     case Token::Type::dot:
                     case Token::Type::doubleColon:
-                    case Token::Type::minus:
                     case Token::Type::multiply:
                     case Token::Type::divide: {
                         ProcessOperator(token);
@@ -211,6 +220,16 @@ namespace nugget::expressions {
                 }
             },
             {
+                ID("vector3f"),
+                [](const std::span<ValueAny>& args) {
+                    check(args.size() == 3,"Incorrect number of arguments");
+                    float x = Expression::ConvertType(args[0], ValueAny::Type::float_).GetValueAsFloat();
+                    float y = Expression::ConvertType(args[1], ValueAny::Type::float_).GetValueAsFloat();
+                    float z = Expression::ConvertType(args[2], ValueAny::Type::float_).GetValueAsFloat();
+                    return ValueAny(Vector3f(x,y,z));
+                }
+            },
+            {
                 ID("ref"),
                 [&](const std::span<ValueAny>& args) {
                     check(args.size() == 1,"Incorrect number of arguments");
@@ -221,7 +240,33 @@ namespace nugget::expressions {
                         return ValueAny(Exception{ .description = std::format("Could not find property '{}'",IDToString(id)) });
                     }
                 }
+            },
+            {
+                ID("concat"),
+                [&](const std::span<ValueAny>& args) {
+                    check(args.size() == 2,"Incorrect number of arguments");
+                    switch (args[0].GetType()) {
+                        case ValueAny::Type::Vector3fList: {
+                            switch (args[1].GetType()) {
+                                case ValueAny::Type::Vector3fList: {
+                                    Vector3fList c(args[0].GetValueAsVector3fList());
+                                    for (auto&& x : args[1].GetValueAsVector3fList().data) {
+                                        c.data.push_back(x);
+                                    }
+                                    return ValueAny(c);
+                                } break;
+                                default: {
+                                    return ValueAny(Exception{ .description = std::format("Unsupported types for concat '{}' and '{}'",args[0].GetTypeAsString(),args[1].GetTypeAsString()) });
+                                } break;
+                            }
+                        } break;
+                        default: {
+                            return ValueAny(Exception{ .description = std::format("Unsupported types for concat '{}' and '{}'",args[0].GetTypeAsString(),args[1].GetTypeAsString()) });
+                        } break;
+                    }
+                }
             }
+
         };
 
         static inline std::unordered_map<ConversionPair, std::function<ValueAny(const ValueAny &from)>> converters =
@@ -329,9 +374,8 @@ namespace nugget::expressions {
             if (converters.contains(cp)) {
                 return converters.at(cp)(a);
             } else {
-                check(0, "cannot convert {} to {}\n", a.GetTypeAsString(), ValueAny::GetTypeAsString(type));
+                return ValueAny(Exception{ .description = format("cannot convert {} to {}\n", a.GetTypeAsString(), ValueAny::GetTypeAsString(type)) });
             }
-            return {};
         }
 
         ValueAny::Type GetPromotedType(ValueAny::Type a, ValueAny::Type b) {
@@ -346,6 +390,7 @@ namespace nugget::expressions {
                 ValueAny::Type::IDType,
                 ValueAny::Type::pointer,
                 ValueAny::Type::dimension,
+                ValueAny::Type::Vector3f,
                 ValueAny::Type::Vector3fList,
             };
 
@@ -393,6 +438,63 @@ namespace nugget::expressions {
 #define EXPR_OP EXPR_DOUBLE_COLON
 #include "expressions_operators.h"
 
+        /////////////////////////
+        // specialist
+        ValueAny Vector3ListOp(const std::span<ValueAny> values,int operation) {
+            check(values.size() == 2, "Should be two args");
+            ValueAny a = values[0];
+            ValueAny b = values[1];
+            check(a.GetType() == ValueAny::Type::Vector3fList || b.GetType() == ValueAny::Type::Vector3fList, "one type needs to be Vector3fList");
+            if (a.GetType() != ValueAny::Type::Vector3fList) {
+                auto c = a;   // a always the main type
+                a = b;
+                b = c;
+            }
+            switch (b.GetType()) {
+                case ValueAny::Type::Vector3fList: {
+                    auto& al = a.GetValueAsVector3fList();
+                    auto& bl = b.GetValueAsVector3fList();
+                    check(al.data.size() == bl.data.size(), "sizes must be the same");
+                    Vector3fList out;
+                    for (size_t i = 0; i < al.data.size(); i++) {
+                        switch (operation) {
+                            case EXPR_PLUS:
+                            out.data.push_back(al.data[i] + bl.data[i]);
+                            break;
+                            case EXPR_MULTIPLY:
+                            out.data.push_back(al.data[i] * bl.data[i]);
+                            break;
+                            default:
+                            assert(0);
+                        }
+                    }
+                    return ValueAny(out);
+                } break;
+                case ValueAny::Type::Vector3f: {
+                    auto& al = a.GetValueAsVector3fList();
+                    auto& bv = b.GetValueAsVector3f();
+                    Vector3fList out;
+                    for (size_t i = 0; i < al.data.size(); i++) {
+                        switch (operation) {
+                            case EXPR_PLUS:
+                            out.data.push_back(al.data[i] + bv);
+                            break;
+                            case EXPR_MULTIPLY:
+                            out.data.push_back(al.data[i] * bv);
+                            break;
+                            default:
+                            assert(0);
+                        }
+                    }
+                    return ValueAny(out);
+                } break;
+                default: {
+                    return ValueAny(Exception{ .description = std::format("Unsupprted operation, EXPR_OP={}, types: {} and {}\n",
+                        operation, values[0].GetTypeAsString(), values[1].GetTypeAsString()) });
+                }
+            }
+        }
+
         // unary
         ValueAny IndirectValue(const std::span<ValueAny> values) {
             const ValueAny& v = values[0];
@@ -428,15 +530,52 @@ namespace nugget::expressions {
                     case Token::Type::string:
                     case Token::Type::integer: {
                         const ValueAny& v = ParseToken(output[point++]);
+                        if (v.IsException()) {
+                            assert(0);
+                        }
                         accumulation.emplace_back(v);
                     } break;
                     case Token::Type::function: {
                         const ValueAny& v = ParseToken(output[point++]);
+                        if (v.IsException()) {
+                            assert(0);
+                        }
                         functionMarkers.push_back(accumulation.size());
                         accumulation.emplace_back(v);
                     } break;
                     case Token::Type::dollar: {
                         const auto& r = IndirectValue(accumulation.GetArrayLast(1));
+                        if (r.IsException()) {
+                            assert(0);
+                        }
+                        accumulation.Pop(1);
+                        accumulation.emplace_back(r);
+                        point++;
+                    } break;
+                    case Token::Type::uMinus: {
+                        const ValueAny& v = accumulation[accumulation.size()-1];
+                        ValueAny r;
+                        switch (v.GetType()) { 
+                            case ValueAny::Type::float_: {
+                                r = ValueAny(-v.GetValueAsFloat());
+                            } break;
+                            case ValueAny::Type::int32_t_: {
+                                r = ValueAny(-v.GetValueAsInt32());
+                            } break;
+                            case ValueAny::Type::int64_t_: {
+                                r = ValueAny(-v.GetValueAsInt64());
+                            } break;
+                            case ValueAny::Type::Vector3f: {
+                                auto& w = v.GetValueAsVector3f();
+                                r = ValueAny(Vector3f(-w.x, -w.y, -w.z));
+                            } break;
+                            default: {
+                                r = ValueAny(Exception{ .description = std::format("Could notm apply unary minus to type '{}'",v.GetTypeAsString()) });
+                            } break;
+                        }
+                        if (r.IsException()) {
+                            return ValueAny(r);
+                        }
                         accumulation.Pop(1);
                         accumulation.emplace_back(r);
                         point++;
@@ -472,30 +611,68 @@ namespace nugget::expressions {
                     } break;
                     case Token::Type::doubleColon: {
                         const auto& r = DoubleColon(accumulation.GetArrayLast(2));
+                        if (r.IsException()) {
+                            assert(0);
+                        }
                         accumulation.Pop(2);
                         accumulation.emplace_back(r);
                         point++;
                     } break;
                     case Token::Type::dot: {
                         const auto& r = Dot(accumulation.GetArrayLast(2));
+                        if (r.IsException()) {
+                            assert(0);
+                        }
                         accumulation.Pop(2);
                         accumulation.emplace_back(r);
                         point++;
                     } break;
-                    case Token::Type::plus: {
-                        const auto& r = Plus(accumulation.GetArrayLast(2));
-                        accumulation.Pop(2);
-                        accumulation.emplace_back(r);
+                    case Token::Type::plus:
+                    case Token::Type::minus: {
+                        if (accumulation.size()>1 && accumulation[accumulation.size() - 2].GetType() == ValueAny::Type::Vector3fList
+                            ||
+                            accumulation[accumulation.size() - 1].GetType() == ValueAny::Type::Vector3fList) {
+                            const auto& r = Vector3ListOp(accumulation.GetArrayLast(2),EXPR_PLUS);
+                            if (r.IsException()) {
+                                return r;
+                            }
+                            accumulation.Pop(2);
+                            accumulation.emplace_back(r);
+                        } else {
+                            const auto& r = Plus(accumulation.GetArrayLast(2));
+                            if (r.IsException()) {
+                                assert(0);
+                            }
+                            accumulation.Pop(2);
+                            accumulation.emplace_back(r);
+                        }
                         point++;
                     } break;
                     case Token::Type::multiply: {
-                        const auto& r = Multiply(accumulation.GetArrayLast(2));
-                        accumulation.Pop(2);
-                        accumulation.emplace_back(r);
+                        if (accumulation.size()> 1 && accumulation[accumulation.size() - 2].GetType() == ValueAny::Type::Vector3fList
+                            ||
+                            accumulation[accumulation.size() - 1].GetType() == ValueAny::Type::Vector3fList) {
+                            const auto& r = Vector3ListOp(accumulation.GetArrayLast(2),EXPR_MULTIPLY);
+                            if (r.IsException()) {
+                                assert(0);
+                            }
+                            accumulation.Pop(2);
+                            accumulation.emplace_back(r);
+                        } else {
+                            const auto& r = Multiply(accumulation.GetArrayLast(2));
+                            if (r.IsException()) {
+                                assert(0);
+                            }
+                            accumulation.Pop(2);
+                            accumulation.emplace_back(r);
+                        }
                         point++;
                     } break;
                     case Token::Type::divide: {
                         const auto& r = Divide(accumulation.GetArrayLast(2));
+                        if (r.IsException()) {
+                            assert(0);
+                        }
                         accumulation.Pop(2);
                         accumulation.emplace_back(r);
                         point++;

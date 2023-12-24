@@ -13,8 +13,14 @@ ValueAny EXPR_NAME(const std::span<ValueAny> values) {
                 ValueAny::Type promote = GetPromotedType(vt, wt);
                 if (vt == promote) {
                     w = ConvertType(w, vt);
+                    if (w.IsException()) {
+                        assert(0);
+                    }
                 } else {
                     v = ConvertType(v, promote);
+                    if (v.IsException()) {
+                        assert(0);
+                    }
                 }
                 //                check(0, "mismatch of types: need to convert {} and {} promotion should be to {}\n",w.GetTypeAsString(),v.GetTypeAsString(),ValueAny::GetTypeAsString(promote));
             }
@@ -41,7 +47,7 @@ ValueAny EXPR_NAME(const std::span<ValueAny> values) {
             }
 #endif
             default: {
-                check(0, "not implemented for types");
+                check(0, "not implemented for types: EXPR_OP={}, type: {}\n", EXPR_OP, v.GetTypeAsString());
             }
         }
     }

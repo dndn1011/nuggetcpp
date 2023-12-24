@@ -1,6 +1,5 @@
-@b = 111;
-test {
-	a = 10+1+@b;
-	value = ref(@here.a);
-}
 
+test {
+	b = 2 * -1;
+	value = 10;
+}

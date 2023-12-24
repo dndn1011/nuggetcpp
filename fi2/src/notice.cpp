@@ -201,6 +201,16 @@ namespace nugget {
 			auto& v = data.valueEntries.at(id);
 			return v.value.GetValueAsVector3fList();
 		}
+		bool GetVector3fList(IDType id, Vector3fList& result) {
+			if (KeyExists(id)) {
+				auto& v = GetValueAny(id);
+				if (v.GetType() == ValueAny::Type::Vector3fList) {
+					result = v.GetValueAsVector3fList();
+					return true;
+				}
+			}
+			return false;
+		}
 		const ValueAny& GetValueAny(IDType id) {
 			if (KeyExists(id)) {
 				return data.valueEntries[id].value;
@@ -245,10 +255,10 @@ namespace nugget {
 		template void Set<Color>(IDType id, const Color& value);
 		template void Set<float>(IDType id, const float& value);
 		template void Set<ValueAny>(IDType id, const ValueAny& value);
-		//template void Set<Vertices>(IDType id, const Vertices& value);
 		template void Set<Dimension>(IDType id, const Dimension& value);
 		template void Set<IDType>(IDType id, const IDType& value);
 		template void Set<Vector3fList>(IDType id, const Vector3fList& value);
+		template void Set<Vector3f>(IDType id, const Vector3f& value);
 
 		void RegisterHandler(const Handler &handler) {
 			check(KeyExists(handler.changeId), "Could not find node for handler registration: {}\n", IDToString(handler.changeId));
@@ -276,6 +286,23 @@ namespace nugget {
 					for (const auto& x : *set) {
 						if (KeyExists(x)) {
 							fill.push_back(x);
+						}
+					}
+				}
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		bool GetChildrenOfType(IDType id, ValueAny::Type type,std::vector<IDType>& fill) {
+			if (KeyExists(id)) {
+				if (auto set = identifier::IDGetChildren(id)) {
+					for (const auto& x : *set) {
+						if (KeyExists(x)) {
+							if (Notice::GetValueAny(x).GetType() == type) {
+								fill.push_back(x);
+							}
 						}
 					}
 				}

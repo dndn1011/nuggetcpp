@@ -160,6 +160,16 @@ namespace nugget::properties {
                     },
                 },
                 {
+                    "Vector3f",[&]() {
+                        assert(initaliserList.size() == 3);
+                        float x = Expression::ConvertType(initaliserList[0], ValueAny::Type::float_).GetValueAsFloat();
+                        float y = Expression::ConvertType(initaliserList[1], ValueAny::Type::float_).GetValueAsFloat();
+                        float z = Expression::ConvertType(initaliserList[2], ValueAny::Type::float_).GetValueAsFloat();
+                        IDType id = IDR(IDR(currentPathName), currentValueName);
+                        Notice::Set(id,Vector3f(x, y, z));
+                    },
+                },
+                {
                     "Vector3fList",[&]() {
                         size_t size = initaliserList.size();
                         assert(size / 3 * 3 == size);
@@ -384,7 +394,7 @@ namespace nugget::properties {
         while (GetCurrentToken().type != Token::Type::comma && GetCurrentToken().type != Token::Type::closeBrace) {
             ex.AddToken(GetCurrentToken());
             if (!NextToken()) {
-                return {};
+                return ValueAny(Exception{ .description = std::format("Could not parse initialiser expression\n") });
             }
         }
         // must not consume the next token, "push back"
@@ -645,6 +655,9 @@ namespace nugget::properties {
                         nameOfNodeIsSet__:
                             switch (pdata.NextTokenType()) {
                                 /////////////////////////////////////////////
+                                case Token::Type::equals: {
+                                    goto assignmentAfterType__;
+                                } break;
                                 case Token::Type::identifier: {
                                     pdata.SetCurrentDerivationOrType();
                                     switch (pdata.NextTokenType()) {
@@ -662,11 +675,16 @@ namespace nugget::properties {
                                                     // object initialiser
                                                 expectInitialiserValue__:
                                                     pdata.NextToken();
-                                                    ValueAny any = pdata.ParseInitialiserExpressionToValue();
-                                                    if(any.IsVoid()) {
-                                                        return false;
+                                                    if (pdata.GetCurrentToken().type == Token::Type::closeBrace) {
+                                                        // blank value, ignore
+                                                        goto endOfInitialiser__;
+                                                    } else {
+                                                        ValueAny any = pdata.ParseInitialiserExpressionToValue();
+                                                        if (any.IsException()) {
+                                                            return false;
+                                                        }
+                                                        pdata.AddValueToInitialiserList(any);
                                                     }
-                                                    pdata.AddValueToInitialiserList(any);
 #if 0
                                                     switch (pdata.NextTokenType()) {
                                                         case Token::Type::integer: {
@@ -674,7 +692,7 @@ namespace nugget::properties {
                                                         } break;
                                                         case Token::Type::float_: {
                                                             pdata.AddValueToInitialiserList();
-                                                        } break;
+                                                        } break; 
                                                         default: {
                                                             output("vvvvvvvvvvvvvvvvvvv\n");
                                                             parseState.description = std::format("Unexpected token: {} {}", pdata.GetCurrentToken().TypeAsString(), pdata.GetCurrentToken().text);
@@ -687,6 +705,7 @@ namespace nugget::properties {
                                                             goto expectInitialiserValue__;
                                                         } break;
                                                         case Token::Type::closeBrace: {
+                                                            endOfInitialiser__:
                                                             if (!pdata.ParseInitialiserList()) {
                                                                 return false;
                                                             }

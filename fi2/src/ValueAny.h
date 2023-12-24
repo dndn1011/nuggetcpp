@@ -17,8 +17,9 @@ namespace nugget {
 		explicit ValueAny(identifier::IDType v);
 		explicit ValueAny(void* v);
 		explicit ValueAny(const nugget::ui::Dimension& v);
-		explicit ValueAny(const Vector3fList& v);
 		explicit ValueAny(const Exception& v);
+		explicit ValueAny(const Vector3fList& v);
+		explicit ValueAny(const Vector3f& v);
 
 		ValueAny(const ValueAny& other);
 
@@ -42,6 +43,7 @@ namespace nugget {
 			deleted,
 			dimension,
 			Vector3fList,
+			Vector3f,
 			Exception,
 		};
 		static std::string GetTypeAsString(ValueAny::Type type);
@@ -56,6 +58,7 @@ namespace nugget {
 		void* GetValueAsPointer() const;
 		nugget::ui::Dimension GetValueAsDimension() const;
 		const Vector3fList& GetValueAsVector3fList() const;
+		const Vector3f& GetValueAsVector3f() const;
 		const Exception& GetValueAsException() const;
 
 		void SetValue(std::string val);
@@ -69,6 +72,7 @@ namespace nugget {
 		void SetValue(void* ptr);
 		void SetValue(const nugget::ui::Dimension& dim);
 		void SetValue(const Vector3fList& verts);
+		void SetValue(const Vector3f& verts);
 		void SetValue(const Exception& exception);
 		void SetValueVoid();
 
@@ -97,6 +101,7 @@ namespace nugget {
 			nugget::ui::Dimension* dimensionPtr;
 
 			Vector3fList* vector3fListPtr;
+			Vector3f* vector3fPtr;
 		} data = {};
 
 		Type type = Type::void_;

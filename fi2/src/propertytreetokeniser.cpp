@@ -24,6 +24,7 @@ namespace nugget::properties {
         {"Color",Type::Color},
         {"dimension",Type::dimension},
         {"Vector3fList",Type::Vector3fList},
+        {"Vector3f",Type::Vector3f},
     };
 
     Token TokenisebyRegex(Token::Type type, const std::string regex, const std::string& next, size_t& point, bool& ok, size_t lineNumber) {
@@ -305,9 +306,15 @@ namespace nugget::properties {
                         ok = true;
                         tokenList.push_back(Token{ Token::Type::at,std::string(next.substr(0, 1)),parseState.lineNumber });
                     } break;
-                    case '0': case '1': case '2': case '3': case '4':
-                    case '5': case '6': case '7': case '8': case '9':
                     case '-': {
+                        //////////////////////////////////////////////
+                        // minus operator
+                        point += 1;
+                        ok = true;
+                        tokenList.push_back(Token{ Token::Type::minus,std::string(next.substr(0, 1)),parseState.lineNumber });
+                    } break;
+                    case '0': case '1': case '2': case '3': case '4':
+                    case '5': case '6': case '7': case '8': case '9': {    
                         //////////////////////////////////////////////
                         // precentage?
                         auto tpc = TokenisePercentage(Token::Type::percent, next, point, ok, parseState.lineNumber);
