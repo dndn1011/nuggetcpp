@@ -488,7 +488,7 @@ shaders {
 
 test {
     A = 0;
-    B = 12;
+    B = 18;
 }
 
 @root=properties;
@@ -509,7 +509,17 @@ testobj {
         shader = shaders.biquad;
         v : Vector3f = { 0.25,0.0,0.0 };
         s : Vector3f = { 0.1,0.1,0.1 };
-        verts = concat(   ref(@root.quad.verts)*ref(@here.s) - ref(@here.v)  , ref(@root.quad.verts)*ref(@here.s) + ref(@here.v)  );
+
+        v1 = ref(@root.quad.verts)*ref(@here.s) - ref(@here.v) * 2.5;
+        v2 = ref(@root.quad.verts)*ref(@here.s) - ref(@here.v) * 0.0;
+        v3 = ref(@root.quad.verts)*ref(@here.s) - ref(@here.v) * -2.5;
+        verts = concat(ref(@here.v1),ref(@here.v2),ref(@here.v3));
+
+//        verts = concat(ref(@root.quad.verts)*ref(@here.s) - ref(@here.v)
+//        , ref(@root.quad.verts)*ref(@here.s) + ref(@here.v) *1.25
+//        , ref(@root.quad.verts)*ref(@here.s) + ref(@here.v) *0.5
+//        );
+        //verts = ref(@root.quad.verts) * ref(@here.s) - ref(@here.v);
     }
 }
 render {

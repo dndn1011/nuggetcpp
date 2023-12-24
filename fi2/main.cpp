@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
             outputAlways("Parse state:\n{}({}): {}\n", absfilename.string(), result.lineNumber, result.description);
             return 1;
         }
-    }
+    }   
 
 
     auto v = Notice::GetValueAny(IDR("properties.test.value"));

@@ -75,11 +75,12 @@ namespace nugget::expressions {
             }
         }
 
-        int IsValue(Token::Type type) {
+        int IsUnaryCheck(Token::Type type) {  // check previous token
             switch (type) {
-            case Token::Type::integer:
-            case Token::Type::float_:
-            case Token::Type::identifier:
+                case Token::Type::divide:
+                case Token::Type::minus:
+                case Token::Type::plus:
+                case Token::Type::multiply:
                 return true;
             default:
                 return false;
@@ -128,7 +129,7 @@ namespace nugget::expressions {
                         ProcessOperator(token);
                     } break;
                     case Token::Type::minus: {
-                        if (i == 0 || !IsValue(input[i].type)) {
+                        if (i == 0 || IsUnaryCheck(input[i-1].type)) {
                             ProcessOperator(Token{ .type = Token::Type::uMinus,.text = "-" });
                         } else {
                             ProcessOperator(token);
@@ -155,10 +156,13 @@ namespace nugget::expressions {
                         operatorStack.push(token);
                     } break;
                     case Token::Type::closeParen: {
+                        if (inFunction.size() < 1) {
+                            assert(0);
+                        }
                         if (inFunction.back()) {
                             ProcessOperator(token);
+                            inFunction.pop_back();
                         }
-                        inFunction.pop_back();
                         while (!operatorStack.empty() &&
                             operatorStack.top().type != Token::Type::openParen) {
                             output.push_back(operatorStack.top());
@@ -244,14 +248,16 @@ namespace nugget::expressions {
             {
                 ID("concat"),
                 [&](const std::span<ValueAny>& args) {
-                    check(args.size() == 2,"Incorrect number of arguments");
+                    check(args.size() > 0,"no arguments?");
                     switch (args[0].GetType()) {
                         case ValueAny::Type::Vector3fList: {
                             switch (args[1].GetType()) {
                                 case ValueAny::Type::Vector3fList: {
                                     Vector3fList c(args[0].GetValueAsVector3fList());
-                                    for (auto&& x : args[1].GetValueAsVector3fList().data) {
-                                        c.data.push_back(x);
+                                    for (int i = 1; i < args.size();i++) {
+                                        for (auto&& x : args[i].GetValueAsVector3fList().data) {
+                                            c.data.push_back(x);
+                                        }
                                     }
                                     return ValueAny(c);
                                 } break;
@@ -311,6 +317,15 @@ namespace nugget::expressions {
                 [](const ValueAny& from) {
                 float v = (float)from.GetValueAsInt64();
                     return ValueAny(Color{v,v,v,v});
+                }
+            },
+            {
+                {
+                    ValueAny::Type::float_, ValueAny::Type::Vector3f
+                },
+                [](const ValueAny& from) {
+                float v = (float)from.GetValueAsFloat();
+                    return ValueAny(Vector3f{v,v,v});
                 }
             },
         };
@@ -420,6 +435,11 @@ namespace nugget::expressions {
 #define EXPR_OP EXPR_PLUS
 #include "expressions_operators.h"
 
+#define EXPR_OPERATOR -
+#define EXPR_NAME Minus
+#define EXPR_OP EXPR_MINUS
+#include "expressions_operators.h"
+
 #define EXPR_OPERATOR *
 #define EXPR_NAME Multiply
 #define EXPR_OP EXPR_MULTIPLY
@@ -477,13 +497,16 @@ namespace nugget::expressions {
                     for (size_t i = 0; i < al.data.size(); i++) {
                         switch (operation) {
                             case EXPR_PLUS:
-                            out.data.push_back(al.data[i] + bv);
-                            break;
+                                out.data.push_back(al.data[i] + bv);
+                                break;
+                            case EXPR_MINUS:
+                                out.data.push_back(al.data[i] - bv);
+                                break;
                             case EXPR_MULTIPLY:
-                            out.data.push_back(al.data[i] * bv);
-                            break;
+                                out.data.push_back(al.data[i] * bv);
+                                break;
                             default:
-                            assert(0);
+                                assert(0);
                         }
                     }
                     return ValueAny(out);
@@ -570,7 +593,7 @@ namespace nugget::expressions {
                                 r = ValueAny(Vector3f(-w.x, -w.y, -w.z));
                             } break;
                             default: {
-                                r = ValueAny(Exception{ .description = std::format("Could notm apply unary minus to type '{}'",v.GetTypeAsString()) });
+                                r = ValueAny(Exception{ .description = std::format("Could not apply unary minus to type '{}'",v.GetTypeAsString()) });
                             } break;
                         }
                         if (r.IsException()) {
@@ -627,12 +650,11 @@ namespace nugget::expressions {
                         accumulation.emplace_back(r);
                         point++;
                     } break;
-                    case Token::Type::plus:
-                    case Token::Type::minus: {
-                        if (accumulation.size()>1 && accumulation[accumulation.size() - 2].GetType() == ValueAny::Type::Vector3fList
+                    case Token::Type::plus: {
+                        if (accumulation.size() > 1 && accumulation[accumulation.size() - 2].GetType() == ValueAny::Type::Vector3fList
                             ||
                             accumulation[accumulation.size() - 1].GetType() == ValueAny::Type::Vector3fList) {
-                            const auto& r = Vector3ListOp(accumulation.GetArrayLast(2),EXPR_PLUS);
+                            const auto& r = Vector3ListOp(accumulation.GetArrayLast(2), EXPR_PLUS);
                             if (r.IsException()) {
                                 return r;
                             }
@@ -640,6 +662,26 @@ namespace nugget::expressions {
                             accumulation.emplace_back(r);
                         } else {
                             const auto& r = Plus(accumulation.GetArrayLast(2));
+                            if (r.IsException()) {
+                                assert(0);
+                            }
+                            accumulation.Pop(2);
+                            accumulation.emplace_back(r);
+                        }
+                        point++;
+                        } break;
+                    case Token::Type::minus: {
+                        if (accumulation.size()>1 && accumulation[accumulation.size() - 2].GetType() == ValueAny::Type::Vector3fList
+                            ||
+                            accumulation[accumulation.size() - 1].GetType() == ValueAny::Type::Vector3fList) {
+                            const auto& r = Vector3ListOp(accumulation.GetArrayLast(2),EXPR_MINUS);
+                            if (r.IsException()) {
+                                return r;
+                            }
+                            accumulation.Pop(2);
+                            accumulation.emplace_back(r);
+                        } else {
+                            const auto& r = Minus(accumulation.GetArrayLast(2));
                             if (r.IsException()) {
                                 assert(0);
                             }
@@ -661,7 +703,7 @@ namespace nugget::expressions {
                         } else {
                             const auto& r = Multiply(accumulation.GetArrayLast(2));
                             if (r.IsException()) {
-                                assert(0);
+                                return r;
                             }
                             accumulation.Pop(2);
                             accumulation.emplace_back(r);

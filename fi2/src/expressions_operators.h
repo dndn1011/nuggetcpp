@@ -14,7 +14,7 @@ ValueAny EXPR_NAME(const std::span<ValueAny> values) {
                 if (vt == promote) {
                     w = ConvertType(w, vt);
                     if (w.IsException()) {
-                        assert(0);
+                        return ValueAny(Exception{ .description = std::format("Could not convert '{}' to '{}'\n",ValueAny::GetTypeAsString(wt),ValueAny::GetTypeAsString(vt)) });
                     }
                 } else {
                     v = ConvertType(v, promote);
@@ -34,7 +34,10 @@ ValueAny EXPR_NAME(const std::span<ValueAny> values) {
             case ValueAny::Type::int64_t_: {
                 return ValueAny(v.GetValueAsInt64() EXPR_OPERATOR w.GetValueAsInt64());
             }
-#if EXPR_OP != EXPR_MULTIPLY && EXPR_OP != EXPR_DIVIDE
+            case ValueAny::Type::Vector3f: {
+                return ValueAny(v.GetValueAsVector3f() EXPR_OPERATOR w.GetValueAsVector3f());
+            }
+#if EXPR_OP == EXPR_PLUS
             case ValueAny::Type::string: {
                 return ValueAny(v.GetValueAsString() EXPR_OPERATOR w.GetValueAsString());
             }
@@ -42,6 +45,8 @@ ValueAny EXPR_NAME(const std::span<ValueAny> values) {
             case ValueAny::Type::float_: {
                 return ValueAny(v.GetValueAsFloat() EXPR_OPERATOR w.GetValueAsFloat());
             }
+#endif
+#if EXPR_OP == EXPR_MULTIPLY
             case ValueAny::Type::Color: {
                 return ValueAny(v.GetValueAsColor() EXPR_OPERATOR w.GetValueAsColor());
             }
