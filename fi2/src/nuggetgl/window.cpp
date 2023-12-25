@@ -159,22 +159,6 @@ namespace nugget::gl {
 
                      0.5,0,0,1,  // tl
                      0,0.5,0,1,  // br
-
-                     1,0,0,1,
-                     0,1,0,1,
-                     0,0,1,1,
-                     1,1,0,1,
-
-                     0.5,0,0,1,  // tl
-                     0,0.5,0,1,  // br
-   
-                     1,0,0,1,
-                     0,1,0,1,
-                     0,0,1,1,
-                     1,1,0,1,
-
-                     0.5,0,0,1,  // tl
-                     0,0.5,0,1,  // br
     };
     float uvCoords[] = {
         0.0f, 1.0f,  // tr
@@ -206,6 +190,8 @@ namespace nugget::gl {
         std::vector<IDType> children;
         Notice::GetChildrenOfType(IDR("properties.render.scene"), ValueAny::Type::IDType, children);
         std::vector<float> vertData;
+        std::vector<float> uvData;
+        std::vector<float> colsData;
         for (auto&& x : children) {         // each object
             IDType id = Notice::GetID(x);   // points to the data
             std::vector<IDType> childSections;
@@ -214,7 +200,6 @@ namespace nugget::gl {
                 IDType verts = IDR(y, ID("verts"));
                 Vector3fList vertices;
                 if (Notice::GetVector3fList(verts, vertices)) {
-                    size_t vsize = vertices.data.size() * 3;
                     for (auto&& z : vertices.data) {
                         vertData.push_back(z.x);
                         vertData.push_back(z.y);
@@ -223,14 +208,38 @@ namespace nugget::gl {
                 } else {
                     assert(0);
                 }
+                IDType uvsid = IDR(y, ID("uvs"));
+                Vector2fList uvs;
+                if (Notice::GetVector2fList(uvsid, uvs)) {
+                    for (auto&& z : uvs.data) {
+                        uvData.push_back(z.x);
+                        uvData.push_back(z.y);
+                    }
+                } else {
+                    assert(0);
+                }
+                IDType colsid = IDR(y, ID("cols"));
+                ColorList cols;
+                if (Notice::GetColorList(colsid, cols)) {
+                    for (auto&& z : cols.data) {
+                        colsData.push_back(z.r);
+                        colsData.push_back(z.g);
+                        colsData.push_back(z.b);
+                        colsData.push_back(z.a);
+                    }
+                } else {
+                    assert(0);
+                }
             }
         }
 
         auto vsize = vertData.size();
+        auto usize = uvData.size();
+        auto csize = colsData.size();
 
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float)*vsize, vertData.data());
-        glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * vsize, sizeof(uvCoords), uvCoords);
-        glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * vsize + sizeof(uvCoords), sizeof(colours), colours);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * vsize, vertData.data());
+        glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * vsize, sizeof(float) * usize, uvData.data());
+        glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * vsize + sizeof(float) * usize, sizeof(float)*csize, colsData.data());
 
         // Set up vertex attributes
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -241,7 +250,7 @@ namespace nugget::gl {
         glEnableVertexAttribArray(1);
 
         // Set the attribute pointers for the vertex colours
-        glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)((sizeof(float) * vsize) + sizeof(uvCoords)));
+        glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)((sizeof(float) * vsize) + sizeof(float)*usize));
         glEnableVertexAttribArray(2);
 
     }

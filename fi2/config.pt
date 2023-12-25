@@ -488,7 +488,7 @@ shaders {
 
 test {
     A = 0;
-    B = 18;
+    B = 6;
 }
 
 @root=properties;
@@ -502,6 +502,24 @@ quad {
         0, 0, 0,
         0, 0, 0,
     };
+    uvs : Vector2fList = {
+        0.0f, 1.0f,  // tr
+        1.0f, 1.0f,  // br
+        0.0f, 0.0f,  // tl
+        1.0f, 0.0f,  // bl
+
+        1.0f, 0.0f,
+        0.0f, 1.0f, 
+    };
+    cols : ColorList = {
+        1,0,0,1,
+        0,1,0,1,
+        0,0,1,1,
+        1,1,0,1,
+
+        0.5,0,0,1,
+        0,0.5,0,1,
+    };
 }
 
 testobj {
@@ -513,7 +531,12 @@ testobj {
         v1 = ref(@root.quad.verts)*ref(@here.s) - ref(@here.v) * 2.5;
         v2 = ref(@root.quad.verts)*ref(@here.s) - ref(@here.v) * 0.0;
         v3 = ref(@root.quad.verts)*ref(@here.s) - ref(@here.v) * -2.5;
-        verts = concat(ref(@here.v1),ref(@here.v2),ref(@here.v3));
+        u1 = ref(@root.quad.uvs);
+//        verts = concat(ref(@here.v1),ref(@here.v2),ref(@here.v3));
+
+        verts = ref(@root.quad.verts);
+        uvs = ref(@root.quad.uvs);
+        cols = ref(@root.quad.cols);
 
 //        verts = concat(ref(@root.quad.verts)*ref(@here.s) - ref(@here.v)
 //        , ref(@root.quad.verts)*ref(@here.s) + ref(@here.v) *1.25

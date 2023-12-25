@@ -234,6 +234,15 @@ namespace nugget::expressions {
                 }
             },
             {
+                ID("vector2f"),
+                [](const std::span<ValueAny>& args) {
+                    check(args.size() == 2,"Incorrect number of arguments");
+                    float x = Expression::ConvertType(args[0], ValueAny::Type::float_).GetValueAsFloat();
+                    float y = Expression::ConvertType(args[1], ValueAny::Type::float_).GetValueAsFloat();
+                    return ValueAny(Vector2f(x,y));
+                }
+            },
+            {
                 ID("ref"),
                 [&](const std::span<ValueAny>& args) {
                     check(args.size() == 1,"Incorrect number of arguments");
@@ -251,23 +260,47 @@ namespace nugget::expressions {
                     check(args.size() > 0,"no arguments?");
                     switch (args[0].GetType()) {
                         case ValueAny::Type::Vector3fList: {
-                            switch (args[1].GetType()) {
-                                case ValueAny::Type::Vector3fList: {
-                                    Vector3fList c(args[0].GetValueAsVector3fList());
-                                    for (int i = 1; i < args.size();i++) {
-                                        for (auto&& x : args[i].GetValueAsVector3fList().data) {
-                                            c.data.push_back(x);
+                            Vector3fList c(args[0].GetValueAsVector3fList());
+                            if (args.size() > 1) {
+                                switch (args[1].GetType()) {
+                                    case ValueAny::Type::Vector3fList: {
+                                        for (int i = 1; i < args.size(); i++) {
+                                            for (auto&& x : args[i].GetValueAsVector3fList().data) {
+                                                c.data.push_back(x);
+                                            }
                                         }
-                                    }
-                                    return ValueAny(c);
-                                } break;
-                                default: {
-                                    return ValueAny(Exception{ .description = std::format("Unsupported types for concat '{}' and '{}'",args[0].GetTypeAsString(),args[1].GetTypeAsString()) });
-                                } break;
+                                    } break;
+                                    default: {
+                                        return ValueAny(Exception{ .description = std::format("Unsupported types for concat '{}' and '{}'",args[0].GetTypeAsString(),args[1].GetTypeAsString()) });
+                                    } break;
+                                }
                             }
+                            return ValueAny(c);
+                        } break;
+                        case ValueAny::Type::Vector2fList: {
+                            Vector2fList c(args[0].GetValueAsVector2fList());
+                            if (args.size() > 1) {
+                                switch (args[1].GetType()) {
+                                    case ValueAny::Type::Vector2fList: {
+                                        for (int i = 1; i < args.size(); i++) {
+                                            for (auto&& x : args[i].GetValueAsVector2fList().data) {
+                                                c.data.push_back(x);
+                                            }
+                                        }
+                                    } break;
+                                    default: {
+                                        return ValueAny(Exception{ .description = std::format("Unsupported types for concat '{}' and '{}'",args[0].GetTypeAsString(),args[1].GetTypeAsString()) });
+                                    } break;
+                                }
+                            }
+                            return ValueAny(c);
                         } break;
                         default: {
-                            return ValueAny(Exception{ .description = std::format("Unsupported types for concat '{}' and '{}'",args[0].GetTypeAsString(),args[1].GetTypeAsString()) });
+                            if (args.size() > 1) {
+                                return ValueAny(Exception{ .description = std::format("Unsupported types for concat '{}' and '{}'",args[0].GetTypeAsString(),args[1].GetTypeAsString()) });
+                            } else {
+                                return ValueAny(Exception{ .description = std::format("Unsupported type for concat '{}'",args[0].GetTypeAsString()) });
+                            }
                         } break;
                     }
                 }

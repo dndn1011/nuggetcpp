@@ -148,44 +148,91 @@ namespace nugget::properties {
         };
 
         std::unordered_map<std::string, std::function<void()>> objectInitialisers = {
-                {
-                    "Color",[&]() {
-                        assert(initaliserList.size() == 4);
-                        float r = Expression::ConvertType(initaliserList[0], ValueAny::Type::float_).GetValueAsFloat();
-                        float g = Expression::ConvertType(initaliserList[1], ValueAny::Type::float_).GetValueAsFloat();
-                        float b = Expression::ConvertType(initaliserList[2], ValueAny::Type::float_).GetValueAsFloat();
-                        float a = Expression::ConvertType(initaliserList[3], ValueAny::Type::float_).GetValueAsFloat();
-                        IDType id = IDR(IDR(currentPathName), currentValueName);
-                        Notice::Set(id,Color(r, g, b, a));
-                    },
+            {
+                "Color",[&]() {
+                    assert(initaliserList.size() == 4);
+                    float r = Expression::ConvertType(initaliserList[0], ValueAny::Type::float_).GetValueAsFloat();
+                    float g = Expression::ConvertType(initaliserList[1], ValueAny::Type::float_).GetValueAsFloat();
+                    float b = Expression::ConvertType(initaliserList[2], ValueAny::Type::float_).GetValueAsFloat();
+                    float a = Expression::ConvertType(initaliserList[3], ValueAny::Type::float_).GetValueAsFloat();
+                    IDType id = IDR(IDR(currentPathName), currentValueName);
+                    Notice::Set(id,Color(r, g, b, a));
                 },
-                {
-                    "Vector3f",[&]() {
-                        assert(initaliserList.size() == 3);
-                        float x = Expression::ConvertType(initaliserList[0], ValueAny::Type::float_).GetValueAsFloat();
-                        float y = Expression::ConvertType(initaliserList[1], ValueAny::Type::float_).GetValueAsFloat();
-                        float z = Expression::ConvertType(initaliserList[2], ValueAny::Type::float_).GetValueAsFloat();
-                        IDType id = IDR(IDR(currentPathName), currentValueName);
-                        Notice::Set(id,Vector3f(x, y, z));
-                    },
+            },
+            {
+                "ColorList",[&]() {
+                    size_t size = initaliserList.size();
+                    assert(size / 4 * 4 == size);
+                    ColorList cols;
+                    for (int i = 0; i < size; i += 4) {
+                        auto v0 = initaliserList[i + 0];
+                        auto v1 = initaliserList[i + 1];
+                        auto v2 = initaliserList[i + 2];
+                        auto v3 = initaliserList[i + 3];
+                        cols.data.push_back(Color {
+                            Expression::ConvertType(v0,ValueAny::Type::float_).GetValueAsFloat(),
+                            Expression::ConvertType(v1,ValueAny::Type::float_).GetValueAsFloat(),
+                            Expression::ConvertType(v2,ValueAny::Type::float_).GetValueAsFloat(),
+                            Expression::ConvertType(v3,ValueAny::Type::float_).GetValueAsFloat()
+                            });
+                    }
+                    IDType id = IDR(IDR(currentPathName), currentValueName);
+                    Notice::Set(id, cols);
                 },
-                {
-                    "Vector3fList",[&]() {
-                        size_t size = initaliserList.size();
-                        assert(size / 3 * 3 == size);
-                        Vector3fList verts;
-                        for (int i = 0; i < size; i += 3) {
-                            auto v0 = initaliserList[i+0];
-                            auto v1 = initaliserList[i+1];
-                            auto v2 = initaliserList[i+2];
-                            verts.data.push_back(Vector3f{
-                                Expression::ConvertType(v0,ValueAny::Type::float_).GetValueAsFloat(),
-                                Expression::ConvertType(v1,ValueAny::Type::float_).GetValueAsFloat(),
-                                Expression::ConvertType(v2,ValueAny::Type::float_).GetValueAsFloat()
-                                });
-                        }
-                        IDType id = IDR(IDR(currentPathName), currentValueName);
-                        Notice::Set(id,verts);
+            },
+            {
+                "Vector3f",[&]() {
+                    assert(initaliserList.size() == 3);
+                    float x = Expression::ConvertType(initaliserList[0], ValueAny::Type::float_).GetValueAsFloat();
+                    float y = Expression::ConvertType(initaliserList[1], ValueAny::Type::float_).GetValueAsFloat();
+                    float z = Expression::ConvertType(initaliserList[2], ValueAny::Type::float_).GetValueAsFloat();
+                    IDType id = IDR(IDR(currentPathName), currentValueName);
+                    Notice::Set(id,Vector3f(x, y, z));
+                },
+            },
+            {
+                "Vector3fList",[&]() {
+                    size_t size = initaliserList.size();
+                    assert(size / 3 * 3 == size);
+                    Vector3fList verts;
+                    for (int i = 0; i < size; i += 3) {
+                        auto v0 = initaliserList[i + 0];
+                        auto v1 = initaliserList[i + 1];
+                        auto v2 = initaliserList[i + 2];
+                        verts.data.push_back(Vector3f{
+                            Expression::ConvertType(v0,ValueAny::Type::float_).GetValueAsFloat(),
+                            Expression::ConvertType(v1,ValueAny::Type::float_).GetValueAsFloat(),
+                            Expression::ConvertType(v2,ValueAny::Type::float_).GetValueAsFloat()
+                            });
+                    }
+                    IDType id = IDR(IDR(currentPathName), currentValueName);
+                    Notice::Set(id,verts);
+                }
+            },
+            {
+                "Vector2f",[&]() {
+                    assert(initaliserList.size() == 3);
+                    float x = Expression::ConvertType(initaliserList[0], ValueAny::Type::float_).GetValueAsFloat();
+                    float y = Expression::ConvertType(initaliserList[1], ValueAny::Type::float_).GetValueAsFloat();
+                    IDType id = IDR(IDR(currentPathName), currentValueName);
+                    Notice::Set(id,Vector2f(x, y));
+                }
+            },
+            {
+                "Vector2fList",[&]() {
+                    size_t size = initaliserList.size();
+                    assert(size / 2 * 2 == size);
+                    Vector2fList verts;
+                    for (int i = 0; i < size; i += 2) {
+                        auto v0 = initaliserList[i + 0];
+                        auto v1 = initaliserList[i + 1];
+                        verts.data.push_back(Vector2f{
+                            Expression::ConvertType(v0,ValueAny::Type::float_).GetValueAsFloat(),
+                            Expression::ConvertType(v1,ValueAny::Type::float_).GetValueAsFloat()
+                            });
+                    }
+                    IDType id = IDR(IDR(currentPathName), currentValueName);
+                    Notice::Set(id,verts);
                 }
             }
         };

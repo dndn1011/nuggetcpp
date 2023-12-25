@@ -18,7 +18,10 @@ namespace nugget {
 	ValueAny::ValueAny(void* ptr) : type(Type::pointer), data{ .ptr = ptr } {}
 	ValueAny::ValueAny(const nugget::ui::Dimension& v) : type(Type::dimension), data{ .dimensionPtr = new nugget::ui::Dimension(v) } {}
 	ValueAny::ValueAny(const Vector3fList& v) : type(Type::Vector3fList), data{ .vector3fListPtr = new Vector3fList(v) } {}
-	ValueAny::ValueAny(const Vector3f& v) : type(Type::Vector3f), data{ .vector3fPtr = new Vector3f(v) } {	}
+	ValueAny::ValueAny(const Vector2fList& v) : type(Type::Vector2fList), data{ .vector2fListPtr = new Vector2fList(v) } {}
+	ValueAny::ValueAny(const ColorList& v) : type(Type::ColorList), data{ .colorListPtr = new ColorList(v) } {}
+	ValueAny::ValueAny(const Vector3f& v) : type(Type::Vector3f), data{ .vector3fPtr = new Vector3f(v) } {}
+	ValueAny::ValueAny(const Vector2f& v) : type(Type::Vector2f), data{ .vector2fPtr = new Vector2f(v) } {}
 	ValueAny::ValueAny(const Exception& v) : type(Type::Exception), data{ .exceptionPtr = new Exception(v) } {}
 
 	ValueAny::ValueAny(const ValueAny& other) {
@@ -66,6 +69,12 @@ namespace nugget {
 			case ValueAny::Type::Vector3fList: {
 				return *data.vector3fListPtr == *other.data.vector3fListPtr;
 			} break;
+			case ValueAny::Type::Vector2fList: {
+				return *data.vector2fListPtr == *other.data.vector2fListPtr;
+			} break;
+			case ValueAny::Type::ColorList: {
+				return *data.colorListPtr == *other.data.colorListPtr;
+			} break;
 			default: {
 				assert(0);
 			} break;
@@ -111,7 +120,12 @@ namespace nugget {
 		} break;
 		case ValueAny::Type::Vector3fList: {
 			return data.vector3fListPtr->to_string();
-			return "<unsupported>";
+		} break;
+		case ValueAny::Type::Vector2fList: {
+			return data.vector2fListPtr->to_string();
+		} break;
+		case ValueAny::Type::ColorList: {
+			return data.colorListPtr->to_string();
 		} break;
 		case ValueAny::Type::void_: {
 			return "<void>";
@@ -164,9 +178,21 @@ namespace nugget {
 		assert(type == Type::Vector3fList);
 		return *data.vector3fListPtr;
 	}
+	const Vector2fList& ValueAny::GetValueAsVector2fList() const {
+		assert(type == Type::Vector2fList);
+		return *data.vector2fListPtr;
+	}
+	const ColorList& ValueAny::GetValueAsColorList() const {
+		assert(type == Type::ColorList);
+		return *data.colorListPtr;
+	}
 	const Vector3f& ValueAny::GetValueAsVector3f() const {
 		assert(type == Type::Vector3f);
 		return *data.vector3fPtr;
+	}
+	const Vector2f& ValueAny::GetValueAsVector2f() const {
+		assert(type == Type::Vector3f);
+		return *data.vector2fPtr;
 	}
 	void ValueAny::SetValue(std::string val) {
 		assert(type == Type::string);
@@ -227,6 +253,27 @@ namespace nugget {
 			delete 	data.vector3fPtr;
 		}
 		data.vector3fPtr = new Vector3f(v);
+	}
+	void ValueAny::SetValue(const Vector2fList& verts) {
+		assert(type == Type::Vector2fList);
+		if (data.vector2fListPtr != nullptr) {
+			delete 	data.vector2fListPtr;
+		}
+		data.vector2fListPtr = new Vector2fList(verts);
+	}
+	void ValueAny::SetValue(const ColorList& verts) {
+		assert(type == Type::ColorList);
+		if (data.colorListPtr != nullptr) {
+			delete 	data.colorListPtr;
+		}
+		data.colorListPtr = new ColorList(verts);
+	}
+	void ValueAny::SetValue(const Vector2f& v) {
+		assert(type == Type::Vector2f);
+		if (data.vector2fListPtr != nullptr) {
+			delete 	data.vector2fPtr;
+		}
+		data.vector2fPtr = new Vector2f(v);
 	}
 	void ValueAny::SetValueVoid() {
 		type = Type::void_;
@@ -332,6 +379,15 @@ namespace nugget {
 			case Type::Vector3f: {
 				data.vector3fPtr = new Vector3f(*other.data.vector3fPtr);
 			} break;
+			case Type::Vector2fList: {
+				data.vector2fListPtr = new Vector2fList(*other.data.vector2fListPtr);
+			} break;
+			case Type::Vector2f: {
+				data.vector2fPtr = new Vector2f(*other.data.vector2fPtr);
+			} break;
+			case Type::ColorList: {
+				data.colorListPtr = new ColorList(*other.data.colorListPtr);
+			} break;
 			case Type::pointer: {
 				data.ptr = other.data.ptr;
 			} break;
@@ -355,6 +411,9 @@ namespace nugget {
 		{ValueAny::Type::IDType,"IDType"},
 		{ValueAny::Type::Vector3fList,"Vector3fList"},
 		{ValueAny::Type::Vector3f,"Vector3f"},
+		{ValueAny::Type::Vector2fList,"Vector2fList"},
+		{ValueAny::Type::ColorList,"ColorList"},
+		{ValueAny::Type::Vector2f,"Vector2f"},
 		{ValueAny::Type::Exception,"Exception"},
 	};
 

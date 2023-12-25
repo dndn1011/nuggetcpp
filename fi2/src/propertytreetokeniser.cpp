@@ -23,7 +23,10 @@ namespace nugget::properties {
         {"string",Type::string},
         {"Color",Type::Color},
         {"dimension",Type::dimension},
+        {"Vector2fList",Type::Vector2fList},
         {"Vector3fList",Type::Vector3fList},
+        {"ColorList",Type::ColorList},
+        {"Vector2f",Type::Vector2f},
         {"Vector3f",Type::Vector3f},
     };
 

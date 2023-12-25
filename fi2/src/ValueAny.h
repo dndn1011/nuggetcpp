@@ -19,7 +19,10 @@ namespace nugget {
 		explicit ValueAny(const nugget::ui::Dimension& v);
 		explicit ValueAny(const Exception& v);
 		explicit ValueAny(const Vector3fList& v);
+		explicit ValueAny(const Vector2fList& v);
+		explicit ValueAny(const ColorList& v);
 		explicit ValueAny(const Vector3f& v);
+		explicit ValueAny(const Vector2f& v);
 
 		ValueAny(const ValueAny& other);
 
@@ -43,6 +46,9 @@ namespace nugget {
 			deleted,
 			dimension,
 			Vector3fList,
+			Vector2fList,
+			ColorList,
+			Vector2f,
 			Vector3f,
 			Exception,
 		};
@@ -58,6 +64,9 @@ namespace nugget {
 		void* GetValueAsPointer() const;
 		nugget::ui::Dimension GetValueAsDimension() const;
 		const Vector3fList& GetValueAsVector3fList() const;
+		const Vector2fList& GetValueAsVector2fList() const;
+		const ColorList& GetValueAsColorList() const;
+		const Vector2f& GetValueAsVector2f() const;
 		const Vector3f& GetValueAsVector3f() const;
 		const Exception& GetValueAsException() const;
 
@@ -71,8 +80,11 @@ namespace nugget {
 		void SetValue(const ValueAny& val);
 		void SetValue(void* ptr);
 		void SetValue(const nugget::ui::Dimension& dim);
-		void SetValue(const Vector3fList& verts);
-		void SetValue(const Vector3f& verts);
+		void SetValue(const Vector3fList& vects);
+		void SetValue(const Vector2fList& vects);
+		void SetValue(const ColorList& vects);
+		void SetValue(const Vector3f& vect);
+		void SetValue(const Vector2f& vect);
 		void SetValue(const Exception& exception);
 		void SetValueVoid();
 
@@ -101,7 +113,10 @@ namespace nugget {
 			nugget::ui::Dimension* dimensionPtr;
 
 			Vector3fList* vector3fListPtr;
+			Vector2fList* vector2fListPtr;
+			ColorList* colorListPtr;
 			Vector3f* vector3fPtr;
+			Vector2f* vector2fPtr;
 		} data = {};
 
 		Type type = Type::void_;

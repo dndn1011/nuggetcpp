@@ -211,6 +211,26 @@ namespace nugget {
 			}
 			return false;
 		}
+		bool nugget::Notice::GetVector2fList(IDType id, Vector2fList& result) {
+			if (KeyExists(id)) {
+				auto& v = GetValueAny(id);
+				if (v.GetType() == ValueAny::Type::Vector2fList) {
+					result = v.GetValueAsVector2fList();
+					return true;
+				}
+			}
+			return false;
+		}
+		bool nugget::Notice::GetColorList(IDType id, ColorList& result) {
+			if (KeyExists(id)) {
+				auto& v = GetValueAny(id);
+				if (v.GetType() == ValueAny::Type::ColorList) {
+					result = v.GetValueAsColorList();
+					return true;
+				}
+			}
+			return false;
+		}
 		const ValueAny& GetValueAny(IDType id) {
 			if (KeyExists(id)) {
 				return data.valueEntries[id].value;
@@ -259,6 +279,9 @@ namespace nugget {
 		template void Set<IDType>(IDType id, const IDType& value);
 		template void Set<Vector3fList>(IDType id, const Vector3fList& value);
 		template void Set<Vector3f>(IDType id, const Vector3f& value);
+		template void Set<Vector2fList>(IDType id, const Vector2fList& value);
+		template void Set<ColorList>(IDType id, const ColorList& value);
+		template void Set<Vector2f>(IDType id, const Vector2f& value);
 
 		void RegisterHandler(const Handler &handler) {
 			check(KeyExists(handler.changeId), "Could not find node for handler registration: {}\n", IDToString(handler.changeId));
