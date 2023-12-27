@@ -6,7 +6,7 @@
 namespace nugget {
 	using namespace identifier;
 
-	ValueAny::ValueAny() {}
+	ValueAny::ValueAny() : type(Type::void_) {}
 
 	ValueAny::ValueAny(int32_t v) : type(Type::int32_t_), data{ .int32_t_ = v } {}
 	ValueAny::ValueAny(int64_t v) : type(Type::int64_t_), data{ .int64_t_ = v } {}
@@ -25,15 +25,18 @@ namespace nugget {
 	ValueAny::ValueAny(const Exception& v) : type(Type::Exception), data{ .exceptionPtr = new Exception(v) } {}
 
 	ValueAny::ValueAny(const ValueAny& other) {
+		assert(other.NotDeleted());
 		CopyFrom(other);
 	}
 
 	ValueAny& ValueAny::operator=(const ValueAny& other) {
+		assert(other.NotDeleted() && NotDeleted());
 		CopyFrom(other);
 		return *this;
 	}
 
 	bool ValueAny::operator==(const ValueAny& other) const {
+		assert(other.NotDeleted() && NotDeleted());
 		if (type != other.type) {
 			return false;
 		}
@@ -72,6 +75,12 @@ namespace nugget {
 			case ValueAny::Type::Vector2fList: {
 				return *data.vector2fListPtr == *other.data.vector2fListPtr;
 			} break;
+			case ValueAny::Type::Vector3f: {
+				return *data.vector3fPtr == *other.data.vector3fPtr;
+			} break;
+			case ValueAny::Type::Vector2f: {
+				return *data.vector2fPtr == *other.data.vector2fPtr;
+			} break;
 			case ValueAny::Type::ColorList: {
 				return *data.colorListPtr == *other.data.colorListPtr;
 			} break;
@@ -84,6 +93,7 @@ namespace nugget {
 	}
 
 	std::string ValueAny::GetTypeAsString() const {
+		assert(NotDeleted());
 		assert(typeStringLookup.contains(type));
 		return typeStringLookup.at(type);
 	}
@@ -93,6 +103,7 @@ namespace nugget {
 		return typeStringLookup.at(type);
 	}
 	std::string ValueAny::GetValueAsString() const {
+		assert(NotDeleted());
 		switch (type) {
 		case ValueAny::Type::int32_t_: {
 			return std::to_string(data.int32_t_);
@@ -137,60 +148,74 @@ namespace nugget {
 		return "<undefined>";
 	}
 	Color ValueAny::GetValueAsColor() const {
+		assert(NotDeleted());
 		assert(type == Type::Color);
 		return *data.colorPtr;
 	}
 	const Exception &ValueAny::GetValueAsException() const {
+		assert(NotDeleted()); 
 		assert(type == Type::Exception);
 		return *data.exceptionPtr;
 	}
 	IDType ValueAny::GetValueAsIDType() const {
+		assert(NotDeleted()); 
 		assert(type == Type::IDType);
 		return data.idType;
 	}
 	int32_t ValueAny::GetValueAsInt32() const {
+		assert(NotDeleted());
 		assert(type == Type::int32_t_);
 		return data.int32_t_;
 	}
 	int64_t ValueAny::GetValueAsInt64() const {
+		assert(NotDeleted());
 		assert(type == Type::int64_t_);
 		return data.int64_t_;
 	}
 	uint64_t ValueAny::GetValueAsUint64() const {
+		assert(NotDeleted());
 		assert(type == Type::int64_t_);
 		return data.int64_t_;
 	}
 	float ValueAny::GetValueAsFloat() const {
+		assert(NotDeleted());
 		assert(type == Type::float_);
 		return data.float_;
 	}
 	void* ValueAny::GetValueAsPointer() const {
+		assert(NotDeleted());
 		assert(type == Type::pointer);
 		return data.ptr;
 	}
 	nugget::ui::Dimension ValueAny::GetValueAsDimension() const
 	{
+		assert(NotDeleted());
 		assert(type == Type::dimension);
 		return *data.dimensionPtr;
 	}
 	
 	const Vector3fList& ValueAny::GetValueAsVector3fList() const {
+		assert(NotDeleted());
 		assert(type == Type::Vector3fList);
 		return *data.vector3fListPtr;
 	}
 	const Vector2fList& ValueAny::GetValueAsVector2fList() const {
+		assert(NotDeleted());
 		assert(type == Type::Vector2fList);
 		return *data.vector2fListPtr;
 	}
 	const ColorList& ValueAny::GetValueAsColorList() const {
+		assert(NotDeleted());
 		assert(type == Type::ColorList);
 		return *data.colorListPtr;
 	}
 	const Vector3f& ValueAny::GetValueAsVector3f() const {
+		assert(NotDeleted());
 		assert(type == Type::Vector3f);
 		return *data.vector3fPtr;
 	}
 	const Vector2f& ValueAny::GetValueAsVector2f() const {
+		assert(NotDeleted());
 		assert(type == Type::Vector3f);
 		return *data.vector2fPtr;
 	}
@@ -206,18 +231,30 @@ namespace nugget {
 		data.int32_t_ = val;
 	}
 	void ValueAny::SetValue(int64_t val) {
+		if (type == Type::deleted) {
+			type = Type::int64_t_;
+		}
 		assert(type == Type::int64_t_);
 		data.int64_t_ = val;
 	}
 	void ValueAny::SetValue(uint64_t val) {
+		if (type == Type::deleted) {
+			type = Type::uint64_t_;
+		}
 		assert(type == Type::uint64_t_);
 		data.uint64_t_ = val;
 	}
 	void ValueAny::SetValue(float val) {
+		if (type == Type::deleted) {
+			type = Type::float_;
+		}
 		assert(type == Type::float_);
 		data.float_ = val;
 	}
 	void ValueAny::SetValue(const Color& colorIn) {
+		if (type == Type::deleted) {
+			type = Type::Color;
+		}
 		assert(type == Type::Color);
 		if (data.colorPtr != nullptr) {
 			delete 	data.colorPtr;
@@ -225,15 +262,24 @@ namespace nugget {
 		data.colorPtr = new Color(colorIn);
 	}
 	void ValueAny::SetValue(identifier::IDType id) {
+		if (type == Type::deleted) {
+			type = Type::IDType;
+		}
 		assert(type == Type::IDType);
 		data.idType = id;
 	}
 	void ValueAny::SetValue(void* val) {
+		if (type == Type::deleted) {
+			type = Type::pointer;
+		}
 		assert(type == Type::pointer);
 		data.ptr = val;
 	}
 	void ValueAny::SetValue(const nugget::ui::Dimension& dim)
 	{
+		if (type == Type::deleted) {
+			type = Type::dimension;
+		}
 		assert(type == Type::dimension);
 		if (data.dimensionPtr != nullptr) {
 			delete 	data.dimensionPtr;
@@ -241,6 +287,9 @@ namespace nugget {
 		data.dimensionPtr = new nugget::ui::Dimension(dim);
 	}
 	void ValueAny::SetValue(const Vector3fList& verts) {
+		if (type == Type::deleted) {
+			type = Type::Vector3fList;
+		}
 		assert(type == Type::Vector3fList);
 		if (data.vector3fListPtr != nullptr) {
 			delete 	data.vector3fListPtr;
@@ -248,6 +297,9 @@ namespace nugget {
 		data.vector3fListPtr = new Vector3fList(verts);
 	}
 	void ValueAny::SetValue(const Vector3f& v) {
+		if (type == Type::deleted) {
+			type = Type::Vector3f;
+		}
 		assert(type == Type::Vector3f);
 		if (data.vector3fListPtr != nullptr) {
 			delete 	data.vector3fPtr;
@@ -255,6 +307,9 @@ namespace nugget {
 		data.vector3fPtr = new Vector3f(v);
 	}
 	void ValueAny::SetValue(const Vector2fList& verts) {
+		if (type == Type::deleted) {
+			type = Type::Vector2fList;
+		}
 		assert(type == Type::Vector2fList);
 		if (data.vector2fListPtr != nullptr) {
 			delete 	data.vector2fListPtr;
@@ -262,6 +317,9 @@ namespace nugget {
 		data.vector2fListPtr = new Vector2fList(verts);
 	}
 	void ValueAny::SetValue(const ColorList& verts) {
+		if (type == Type::deleted) {
+			type = Type::ColorList;
+		}
 		assert(type == Type::ColorList);
 		if (data.colorListPtr != nullptr) {
 			delete 	data.colorListPtr;
@@ -269,6 +327,9 @@ namespace nugget {
 		data.colorListPtr = new ColorList(verts);
 	}
 	void ValueAny::SetValue(const Vector2f& v) {
+		if (type == Type::deleted) {
+			type = Type::Vector2f;
+		}
 		assert(type == Type::Vector2f);
 		if (data.vector2fListPtr != nullptr) {
 			delete 	data.vector2fPtr;
@@ -283,14 +344,16 @@ namespace nugget {
 	}
 
 	bool ValueAny::IsVoid() const {
+		assert(NotDeleted());
 		return type == Type::void_;
 	}
 
 	bool ValueAny::IsException() const {
+		assert(NotDeleted());
 		return type == Type::Exception;
 	}
 
-	bool ValueAny::NotDeleted()
+	bool ValueAny::NotDeleted() const
 	{
 		return type != Type::deleted;;
 	}
@@ -298,7 +361,6 @@ namespace nugget {
 	void ValueAny::MarkDeleted() {
 		type = Type::deleted;
 	}
-
 
 	ValueAny::~ValueAny() {
 		switch (type) {
@@ -316,6 +378,7 @@ namespace nugget {
 	}
 
 	void ValueAny::CopyFrom(const ValueAny& other) {
+		assert(other.NotDeleted());
 		switch (type) {
 			case Type::Color: {
 				if (data.colorPtr) {
@@ -337,11 +400,37 @@ namespace nugget {
 					delete data.vector3fListPtr;
 				}
 			} break;
+			case Type::Vector3f: {
+				if (data.vector3fPtr) {
+					delete data.vector3fPtr;
+				}
+			} break;
+			case Type::ColorList: {
+				if (data.colorListPtr) {
+					delete data.colorListPtr;
+				}
+			} break;
+			case Type::Vector2fList: {
+				if (data.vector2fListPtr) {
+					delete data.vector2fListPtr;
+				}
+			} break;
 			case Type::Exception: {
 				if (data.exceptionPtr) {
 					delete data.exceptionPtr;
 				}
 			} break;
+			case Type::deleted:
+			case Type::void_:
+			case Type::int64_t_:
+			case Type::uint64_t_:
+			case Type::int32_t_:
+			case Type::IDType:
+			case Type::pointer:
+			case Type::float_: {
+			} break;
+			default: {
+				assert(0);			}
 		}
 
 		type = other.type;

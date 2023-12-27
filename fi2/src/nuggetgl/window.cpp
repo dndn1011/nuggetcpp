@@ -46,7 +46,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 namespace nugget::gl {
     using namespace identifier;
 
-    GLuint VAO;
     HDC hdc;
 
     void triangle_test();
@@ -91,6 +90,16 @@ namespace nugget::gl {
         return 0;
     }
 
+    struct Renderable {
+        GLenum primitive;
+        GLuint buffer;
+        GLint start;
+        GLsizei length;
+        GLuint shader;
+    };
+
+    Renderable renderable;
+
     void Update() {
         // Initialize OpenGL state
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -98,15 +107,16 @@ namespace nugget::gl {
 
 
         // Use the shader program
-        glUseProgram((GLuint)Notice::GetInt64(IDR("properties.shaders.biquad.program.glid")));
+        glUseProgram(renderable.shader);
 
         // Bind the VAO
-        glBindVertexArray(VAO);
+        glBindVertexArray(renderable.buffer);
 
         // Draw the triangle
         glDrawArrays(GL_TRIANGLES_ADJACENCY,
-            (GLsizei)Notice::GetInt64(IDR("properties.test.A")),
-            (GLsizei)Notice::GetInt64(IDR("properties.test.B")));
+            renderable.start,
+            renderable.length
+        );
 
         GLenum error = glGetError();
         if (error != GL_NO_ERROR) {
@@ -218,7 +228,7 @@ namespace nugget::gl {
                 } else {
                     assert(0);
                 }
-                IDType colsid = IDR(y, ID("cols"));
+                IDType colsid = IDR(y, ID("colors"));
                 ColorList cols;
                 if (Notice::GetColorList(colsid, cols)) {
                     for (auto&& z : cols.data) {
@@ -256,6 +266,7 @@ namespace nugget::gl {
     }
 
     void triangle_test() {
+        GLuint VAO;
 
         // Vertex Array Object (VAO)
 //        glGenVertexArrays(1, &VAO);
@@ -277,18 +288,49 @@ namespace nugget::gl {
             ApplyRenderingData();
         }
 
+        std::unordered_map<IDType, GLenum> primitiveMap = {
+            { ID("GL_TRIANGLES_ADJACENCY"),GL_TRIANGLES_ADJACENCY }
+        };
 
-//        std::vector<Notice::Handler> handlers;
-//        Notice::RegisterHandlerOnChildren(Notice::Handler(IDR("properties.shaders.biquad"), [](IDType id) {
-//            CompileShaderFromProperties(IDR("properties.shaders.biquad"));
-//            }), handlers);
+        std::vector<Notice::Handler> handlers;
+        Notice::RegisterHandlerOnChildren(Notice::Handler(IDR("properties.shaders.biquad"), [](IDType id) {
+            CompileShaderFromProperties(IDR("properties.shaders.biquad"));
+            }), handlers);
 
-//        Notice::RegisterHandler(Notice::Handler(IDR("properties.render.object.section.verts"), [](IDType id) {
-//            ApplyRenderingData();
-//            }));
+        IDType vid = IDR("properties.testobj.section.verts");
+        IDType uid = IDR("properties.testobj.section.uvs");
+        IDType cid = IDR("properties.testobj.section.colors");
+        IDType startid = IDR("properties.testobj.section.start");
+        IDType lengthid = IDR("properties.testobj.section.length");
+        IDType primid = IDR("properties.testobj.section.primitive");
+        IDType shaderid = IDR("properties.testobj.section.shader");
+
+        Notice::RegisterHandler(Notice::Handler(vid, [](IDType vid) {
+            ApplyRenderingData();
+            }));
+        Notice::RegisterHandler(Notice::Handler(uid, [](IDType uid) {
+            ApplyRenderingData();
+            }));
+        Notice::RegisterHandler(Notice::Handler(cid, [](IDType cid) {
+            ApplyRenderingData();
+            }));
+        Notice::RegisterHandler(Notice::Handler(startid, [](IDType startid) {
+            renderable.start = (GLint)Notice::GetInt64(startid);
+            }));
+        Notice::RegisterHandler(Notice::Handler(lengthid, [](IDType lengthid) {
+            renderable.length = (GLint)Notice::GetInt64(lengthid);
+            }));
+        Notice::RegisterHandler(Notice::Handler(primid, [&](IDType primid) {
+            renderable.primitive = primitiveMap.at(Notice::GetID(primid));
+            }));
 
         CompileShaderFromProperties(IDR("properties.shaders.biquad"));
 
+        renderable.buffer = VAO;
+        renderable.length = (GLsizei)Notice::GetInt64(lengthid);
+        renderable.start = (GLint)Notice::GetInt64(startid);
+        renderable.primitive = primitiveMap.at(Notice::GetID(primid));
+        renderable.shader = (GLuint) Notice::GetInt64(IDR(Notice::GetID(shaderid), IDR("program", IDR("glid"))));
 
         // Enable backface culling
 //        glEnable(GL_CULL_FACE);

@@ -442,6 +442,7 @@ shaders {
 
         layout (triangles_adjacency) in;
         layout (triangle_strip, max_vertices = 4) out;
+        layout (triangle_strip, max_vertices = 4) out;
 
         in vec2 uv_g[6];
         out vec2 uv_f;
@@ -479,6 +480,7 @@ shaders {
                     vec4 c = mix(a,b,uv_f.x);
 
                     FragColor = c;
+//                    FragColor = vec4(1,0,0,1)
 
                 }
 
@@ -488,10 +490,10 @@ shaders {
 
 test {
     A = 0;
-    B = 6;
+    B = 18;
 }
 
-@root=properties;
+@root=@here;
 
 quad {
     verts : Vector3fList = {
@@ -499,8 +501,9 @@ quad {
         0.25, -0.25, 0,
         -0.25, 0.25, 0,
         -0.25, -0.25, 0,
-        0, 0, 0,
-        0, 0, 0,
+
+
+        0, 0, 0, 0, 0, 0,
     };
     uvs : Vector2fList = {
         0.0f, 1.0f,  // tr
@@ -508,41 +511,46 @@ quad {
         0.0f, 0.0f,  // tl
         1.0f, 0.0f,  // bl
 
-        1.0f, 0.0f,
-        0.0f, 1.0f, 
+        0,0,0,0
     };
-    cols : ColorList = {
+    colors : ColorList = {
         1,0,0,1,
         0,1,0,1,
         0,0,1,1,
         1,1,0,1,
 
-        0.5,0,0,1,
-        0,0.5,0,1,
+        0,0,0,0,0,0,0,0,
     };
 }
 
 testobj {
     section {
-        shader = shaders.biquad;
+        shader = @root.shaders.biquad;
+        primitive = GL_TRIANGLES_ADJACENCY;
+        start = 0;
+        length = 24;
+
         v : Vector3f = { 0.25,0.0,0.0 };
-        s : Vector3f = { 0.1,0.1,0.1 };
+        s : Vector3f = { 0.3,0.3,0.3 };
 
         v1 = ref(@root.quad.verts)*ref(@here.s) - ref(@here.v) * 2.5;
         v2 = ref(@root.quad.verts)*ref(@here.s) - ref(@here.v) * 0.0;
         v3 = ref(@root.quad.verts)*ref(@here.s) - ref(@here.v) * -2.5;
         u1 = ref(@root.quad.uvs);
-//        verts = concat(ref(@here.v1),ref(@here.v2),ref(@here.v3));
 
-        verts = ref(@root.quad.verts);
-        uvs = ref(@root.quad.uvs);
-        cols = ref(@root.quad.cols);
+        verts = concat(ref(@here.v1),ref(@here.v2),ref(@here.v3));
+        uvs = concat(ref(@root.quad.uvs),ref(@root.quad.uvs),ref(@root.quad.uvs));
+        colors = concat(ref(@root.quad.colors),ref(@root.quad.colors),ref(@root.quad.colors));
 
-//        verts = concat(ref(@root.quad.verts)*ref(@here.s) - ref(@here.v)
-//        , ref(@root.quad.verts)*ref(@here.s) + ref(@here.v) *1.25
-//        , ref(@root.quad.verts)*ref(@here.s) + ref(@here.v) *0.5
-//        );
-        //verts = ref(@root.quad.verts) * ref(@here.s) - ref(@here.v);
+//        verts = ref(@root.quad.verts);
+//        uvs = ref(@root.quad.uvs);
+//        colors = ref(@root.quad.colors);
+
+        //verts = concat(ref(@root.quad.verts)*ref(@here.s) - ref(@here.v)
+        //, ref(@root.quad.verts)*ref(@here.s) + ref(@here.v) *1.25
+        //, ref(@root.quad.verts)*ref(@here.s) + ref(@here.v) *0.5
+        //);
+//       verts = ref(@root.quad.verts) * ref(@here.s) + ref(@here.v);
     }
 }
 render {

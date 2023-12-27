@@ -24,6 +24,7 @@ namespace nugget {
 			static inline size_t uniqueId;
 		};
 
+//		using Entry = std::pair<ValueAny, std::vector<Handler>>;
 
 
 		std::string		GetString(IDType id);

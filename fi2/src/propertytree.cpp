@@ -30,7 +30,7 @@
 #include "utils/TimeSampler.h"
 #include "utils/StableVector.h"
 
-#pragma optimize("", off)
+//#pragma optimize("", off)
 
 namespace nugget::properties {
     struct ConversionPair {
@@ -247,12 +247,13 @@ namespace nugget::properties {
                     currentTypeName = Notice::GetValueTypeAsString(value);
                     assert(currentTypeName != "");
                 } else {
-                    parseState.description = std::format("Do not have type information for initialiser list");
+                    parseState.description =
+                        std::format("Do not have type information for initialiser list for {}", IDToString(id));
                     SetLineNumberToToken();
                     return false;
                 }
             }
-            output("-----------------> {}\n", currentTypeName);
+//            output("-----------------> {} {}\n", IDToString(IDR(IDR(currentPathName), currentValueName)), currentTypeName);
             check(objectInitialisers.contains(currentTypeName), "type not supported for initialiser list\n");
             objectInitialisers[currentTypeName]();
 
@@ -470,7 +471,8 @@ namespace nugget::properties {
             return false;
         }
         std::string path = IDCombineStrings(currentPathName, currentValueName);
-        Notice::Set<ValueAny>(IDR(path), any);
+        IDType toid = IDR(path);
+        Notice::Set<ValueAny>(toid, any);
         return true;
     }
 
@@ -611,6 +613,7 @@ namespace nugget::properties {
                 if (!value.IsVoid()) {
                     auto& fromValue = Notice::GetValueAny(IDR(fromPath));
                     Notice::Set(IDR(toPath), fromValue);
+//                    output("Inherit value {}->{}\n", fromPath, toPath);
                 } else {
                     auto r = CopyNodes(IDCombineStrings(fromstr, leaf.data()), IDCombineStrings(tostr, leaf.data()));
                     if (!r) {
@@ -622,6 +625,7 @@ namespace nugget::properties {
         }
 
         bool CopyDerivation() {
+//            output("Inherit {}, {}\n", currentDerivedName, currentPathName);
             if (CurrentDerivedNameSet()) {
                 return CopyNodes(currentDerivedName, currentPathName);
             }

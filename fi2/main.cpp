@@ -43,6 +43,25 @@ struct FileWatcher {
     std::filesystem::file_time_type mtime;
 };
 
+void ReloadPt(std::string filename) {
+    //            Notice::LockNotifications();
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    Notice::Remove(IDR("properties2"));
+    auto result = properties::LoadPropertyTree("properties2", filename);
+    if (result.successful) {
+        nugget::ui::entity::UpdateEntity(IDR("properties"), IDR("properties2"));
+        nugget::ui::entity::CreateEntity(IDR("properties.main"));
+        nugget::ui::entity::ManageGeometry(IDR("properties.main"));
+    } else {
+        auto absfilename = std::filesystem::absolute(filename);
+
+        output("Parse state:\n{}({}): {}\n", absfilename.string(), result.lineNumber, result.description);
+        output("Could not load propertries for {}: {}\n", filename.c_str(), result.description.c_str());
+    }
+    //            Notice::UnlockNotifications();
+}
+
+
 static const std::string filename = "config.pt";
 int main(int argc, char* argv[]) {
     std::string file = filename;
@@ -59,7 +78,6 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     }   
-
 
     auto v = Notice::GetValueAny(IDR("properties.test.value"));
     output("RESULT: {} : {}\n", v.GetTypeAsString(), v.GetValueAsString());
@@ -112,21 +130,7 @@ int main(int argc, char* argv[]) {
 
     nugget::ui::Exec([&watcher]() {
         if (watcher.Check()) {
-//            Notice::LockNotifications();
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            Notice::Remove(IDR("properties2"));
-            auto result = properties::LoadPropertyTree("properties2",filename);
-            if (result.successful) {
-                nugget::ui::entity::UpdateEntity(IDR("properties"), IDR("properties2"));
-                nugget::ui::entity::CreateEntity(IDR("properties.main"));
-                nugget::ui::entity::ManageGeometry(IDR("properties.main"));
-            } else {
-                auto absfilename = std::filesystem::absolute(filename);
-
-                output("Parse state:\n{}({}): {}\n", absfilename.string(), result.lineNumber, result.description);
-                output("Could not load propertries for {}: {}\n",filename.c_str(),result.description.c_str());
-            }
-    //            Notice::UnlockNotifications();
+            ReloadPt(filename);
         }
         });
 

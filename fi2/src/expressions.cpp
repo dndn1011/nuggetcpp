@@ -277,6 +277,24 @@ namespace nugget::expressions {
                             }
                             return ValueAny(c);
                         } break;
+                        case ValueAny::Type::ColorList: {
+                            ColorList c(args[0].GetValueAsColorList());
+                            if (args.size() > 1) {
+                                switch (args[1].GetType()) {
+                                    case ValueAny::Type::ColorList: {
+                                        for (int i = 1; i < args.size(); i++) {
+                                            for (auto&& x : args[i].GetValueAsColorList().data) {
+                                                c.data.push_back(x);
+                                            }
+                                        }
+                                    } break;
+                                    default: {
+                                        return ValueAny(Exception{ .description = std::format("Unsupported types for concat '{}' and '{}'",args[0].GetTypeAsString(),args[1].GetTypeAsString()) });
+                                    } break;
+                                }
+                            }
+                            return ValueAny(c);
+                        } break;
                         case ValueAny::Type::Vector2fList: {
                             Vector2fList c(args[0].GetValueAsVector2fList());
                             if (args.size() > 1) {
@@ -566,7 +584,7 @@ namespace nugget::expressions {
         // unary
         ValueAny ExpandParseVariable(const std::span<ValueAny> values, std::function<ValueAny(IDType)> expandParseVars) {
             const ValueAny& v = values[0];
-            output("{}\n", v.GetValueAsString());
+//            output("{}\n", v.GetValueAsString());
             auto id = v.GetValueAsIDType();
             return expandParseVars(id);
         }
@@ -637,7 +655,7 @@ namespace nugget::expressions {
                         point++;
                     } break;
                     case Token::Type::at: {
-                        output("at: {} : {}", accumulation.GetArrayLast(1)[0].GetTypeAsString(), accumulation.GetArrayLast(1)[0].GetValueAsString());
+//                        output("at: {} : {}", accumulation.GetArrayLast(1)[0].GetTypeAsString(), accumulation.GetArrayLast(1)[0].GetValueAsString());
                         const auto& r = ExpandParseVariable(accumulation.GetArrayLast(1),expandParseVars);
                         if (r.IsException()) {
                             return r;

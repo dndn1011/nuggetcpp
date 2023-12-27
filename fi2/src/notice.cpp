@@ -12,7 +12,7 @@
 
 #include "Notice.h"
 #include "debug.h"
-
+#include "utils/utils.h"
 
 
 namespace nugget {
@@ -20,43 +20,23 @@ namespace nugget {
 		using namespace identifier;
 
 		bool notifyLock = false;
-
-		struct ValueEntry {
-			ValueEntry() {}
-
-			ValueEntry(const ValueEntry& other) = delete;
-			ValueEntry(const ValueEntry&& other) = delete;
-
-			ValueEntry& operator=(const ValueEntry& other) {
-				value = other.value;
-				return *this;
-			};
-			
-			ValueEntry& operator=(ValueEntry&& other) noexcept {
-				value = std::move(other.value);
-				return *this;
-			}
-
-			ValueEntry(const ValueAny& any) {
-				value = any;
-			}
-
-			ValueAny value;
-			std::vector<Handler> handlers;
-		};
 		 
 		struct Data {
-			std::unordered_map<IDType, ValueEntry> valueEntries;
+			std::unordered_map<IDType, ValueAny> valueEntries;
+			std::unordered_map<IDType, std::vector<Handler>> handlers;
 			std::unordered_set<IDType> changes;
 		};
 
 		static Data data;
 
 		// pass in both id and the entry to save another lookup
-		void Notify(IDType id, const ValueEntry&entry) {
+		void Notify(IDType id) {
 			if (!notifyLock) {
-				for (auto& x : entry.handlers) {
-					x.func(x.changeId);
+				if (data.handlers.contains(id)) {
+					auto& list = data.handlers.at(id);
+					for (auto& x : list) {
+						x.func(x.changeId);
+					}
 				}
 			} else {
 				data.changes.insert(id);
@@ -67,7 +47,7 @@ namespace nugget {
 		{
 			if (KeyExists(id)) {
 				const auto& entry = data.valueEntries.at(id);
-				if (entry.value.GetType() == ValueAny::Type::void_) {  // if it is a parent node
+				if (entry.GetType() == ValueAny::Type::void_) {  // if it is a parent node
 					std::vector<IDType> children;
 					if (GetChildren(id, children/*fill*/)) {
 						// mark all children deleted first
@@ -75,13 +55,13 @@ namespace nugget {
 							Remove(x);
 						}
 						// notify parent then mark parent deleted
-						Notify(id, entry);
-						data.valueEntries.at(id).value.MarkDeleted();
+						Notify(id);
+						data.valueEntries.at(id).MarkDeleted();
 					} else {
 						assert(0);
 					}
 				} else {
-					data.valueEntries.at(id).value.MarkDeleted();
+					data.valueEntries.at(id).MarkDeleted();
 				}
 			}
 		}
@@ -92,8 +72,8 @@ namespace nugget {
 			// when unlocking, fire off the pending notifications
 			for (auto& x : data.changes) {
 				assert(KeyExists(x));
-				auto& entry = data.valueEntries[x];
-				for (auto& y : entry.handlers) {
+				auto& entry = data.handlers[x];
+				for (auto& y : entry) {
 					y.func(y.changeId);
 				}
 			}
@@ -104,7 +84,7 @@ namespace nugget {
 		std::string GetValueAsString(IDType id) {
 			if (KeyExists(id)) {
 				auto &v = data.valueEntries.at(id);
-				return v.value.GetValueAsString();
+				return v.GetValueAsString();
 			} else {
 				return "<undefined>";
 			}
@@ -117,89 +97,89 @@ namespace nugget {
 		bool IsValueTypeInteger64(IDType id) {
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
-			return v.value.GetType() == ValueAny::Type::int64_t_;
+			return v.GetType() == ValueAny::Type::int64_t_;
 		}
 		bool IsValueTypeUnsignedInteger64(IDType id) {
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
-			return v.value.GetType() == ValueAny::Type::uint64_t_;
+			return v.GetType() == ValueAny::Type::uint64_t_;
 		}
 		bool IsValueTypeInteger32(IDType id) {
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
-			return v.value.GetType() == ValueAny::Type::int32_t_;
+			return v.GetType() == ValueAny::Type::int32_t_;
 		}
 		bool IsValueTypeFloat(IDType id) {
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
-			return v.value.GetType() == ValueAny::Type::float_;
+			return v.GetType() == ValueAny::Type::float_;
 		}
 		bool IsValueTypeString(IDType id) {
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
-			return v.value.GetType() == ValueAny::Type::string;
+			return v.GetType() == ValueAny::Type::string;
 		}
 		bool IsValueTypeIdentifier(IDType id) {
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
-			return v.value.GetType() == ValueAny::Type::IDType;
+			return v.GetType() == ValueAny::Type::IDType;
 		}
 		bool IsValueTypeColor(IDType id) {
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
-			return v.value.GetType() == ValueAny::Type::Color;
+			return v.GetType() == ValueAny::Type::Color;
 		}
 		bool IsValueTypeDimension(IDType id) {
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
-			return v.value.GetType() == ValueAny::Type::dimension;
+			return v.GetType() == ValueAny::Type::dimension;
 		}
 		std::string GetString(IDType id) {
 			assert(KeyExists(id));
 			auto &v = data.valueEntries.at(id);
-			return v.value.GetValueAsString();
+			return v.GetValueAsString();
 		}
 		int32_t GetInt32(IDType id) {
 			assert(KeyExists(id));
 			auto &v = data.valueEntries.at(id);
-			return v.value.GetValueAsInt32();
+			return v.GetValueAsInt32();
 		}
 		int64_t GetInt64(IDType id) {
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
-			return v.value.GetValueAsInt64();
+			return v.GetValueAsInt64();
 		}
 		uint64_t GetUint64(IDType id) {
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
-			return v.value.GetValueAsUint64();
+			return v.GetValueAsUint64();
 		}
 		float GetFloat(IDType id) {
 			assert(KeyExists(id));
 			auto &v = data.valueEntries.at(id);
-			return v.value.GetValueAsFloat();
+			return v.GetValueAsFloat();
 		}
 		IDType GetID(IDType id) {
 			assert(KeyExists(id));
 			auto &v = data.valueEntries.at(id);
-			return v.value.GetValueAsIDType();
+			return v.GetValueAsIDType();
 		}
 		void* GetPointer(IDType id) {
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
-			return  v.value.GetValueAsPointer();
+			return  v.GetValueAsPointer();
 		}
 		Dimension GetDimension(IDType id)
 		{
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
-			return v.value.GetValueAsDimension();
+			return v.GetValueAsDimension();
 		}
 		const Vector3fList& GetVector3fList(IDType id)
 		{
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
-			return v.value.GetValueAsVector3fList();
+			return v.GetValueAsVector3fList();
 		}
 		bool GetVector3fList(IDType id, Vector3fList& result) {
 			if (KeyExists(id)) {
@@ -233,16 +213,16 @@ namespace nugget {
 		}
 		const ValueAny& GetValueAny(IDType id) {
 			if (KeyExists(id)) {
-				return data.valueEntries[id].value;
+				return data.valueEntries[id];
 			}
 			assert(0);
-			return data.valueEntries[id].value;
+			return data.valueEntries[id];
 		}
 		nugget::Color GetColor(IDType id) {
 			if (KeyExists(id)) {
 				auto &v = data.valueEntries[id];
-				assert(v.value.GetType() == ValueAny::Type::Color);
-				return v.value.GetValueAsColor();
+				assert(v.GetType() == ValueAny::Type::Color);
+				return v.GetValueAsColor();
 			} else {
 				return nugget::Color(0.5, 0.5, 0.5, 1);
 			}
@@ -251,20 +231,25 @@ namespace nugget {
 		void SetVoid(IDType id)
 		{
 			auto& entry = data.valueEntries[id];
-			entry.value.SetValueVoid();
+			entry.SetValueVoid();
 		}
 
 		template <typename T>
 		void Set(IDType id, const T& value) {
-			if (KeyExists(id)) {
-				auto& entry = data.valueEntries[id];
-				auto currentValue = entry.value;
-				entry.value.SetValue(value);
-				if (currentValue != ValueAny(value)) {
-					Notify(id, entry);
+			if (data.valueEntries.contains(id)) {
+				const auto& currentValue = data.valueEntries.at(id);
+				if (currentValue.GetType() != ValueAny::Type::deleted) {
+					bool diff = (currentValue != ValueAny(value));
+					data.valueEntries[id].SetValue(value);
+					if (diff) {
+						Notify(id);
+					}
+				} else {
+					data.valueEntries[id].SetValue(value);
 				}
 			} else {
-				data.valueEntries[id] = ValueEntry(ValueAny(value));
+				auto r = data.valueEntries.emplace(id,value);
+				check(r.second, ("Emplace failed"));
 			}
 		}
 
@@ -284,8 +269,10 @@ namespace nugget {
 		template void Set<Vector2f>(IDType id, const Vector2f& value);
 
 		void RegisterHandler(const Handler &handler) {
-			check(KeyExists(handler.changeId), "Could not find node for handler registration: {}\n", IDToString(handler.changeId));
-			data.valueEntries.at(handler.changeId).handlers.push_back(handler);
+			if (!data.handlers.contains(handler.changeId)) {
+				data.handlers[handler.changeId] = {};
+			}
+			data.handlers.at(handler.changeId).push_back(handler);
 		}
 		void RegisterHandlerOnChildren(const Handler &handler,std::vector<Handler> &out) {
 			std::vector<IDType> children;
@@ -300,7 +287,14 @@ namespace nugget {
 
 		// Check key exists and is not marked deleted
 		bool KeyExists(IDType id) {
-			return data.valueEntries.contains(id) && data.valueEntries.at(id).value.NotDeleted();
+			if (!data.valueEntries.contains(id)) {
+				return false;
+			}
+			if (!data.valueEntries.at(id).NotDeleted()) {
+//				output("Node deleted: {}\n", IDToString(id));
+				return false;
+			}
+			return true;
 		}
 
 		bool GetChildren(IDType id, std::vector<IDType>& fill) {

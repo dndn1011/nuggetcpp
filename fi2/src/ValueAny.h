@@ -91,7 +91,7 @@ namespace nugget {
 		bool IsVoid() const;
 		bool IsException() const;
 
-		bool NotDeleted();
+		bool NotDeleted() const;
 
 		void MarkDeleted();
 

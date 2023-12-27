@@ -6,7 +6,7 @@
 #include <unordered_set>
 #include <format>
 #include "debug.h"
-#pragma optimize("", off)
+//#pragma optimize("", off)
 
 namespace nugget {
 	namespace identifier {
