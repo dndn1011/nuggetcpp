@@ -1,5 +1,35 @@
 
-test {
-	b = 2 * -1;
-	value = 10;
+	struct Vector3f {
+		float x, y, z;
+		bool operator==(const Vector3f& other) const {
+			return x == other.x && y == other.y && z == other.z;
+		}
+		Vector3f operator+(const Vector3f& other) const {
+			return Vector3f(x + other.x, y + other.y, z + other.z);
+		}
+		Vector3f operator-(const Vector3f& other) const {
+			return Vector3f(x - other.x, y - other.y, z - other.z);
+		}
+		Vector3f operator*(const Vector3f& other) const {
+			return Vector3f(x * other.x, y * other.y, z * other.z);
+		}
+		std::string to_string() const {
+			return to_string_imp(*this);
+		}
+	private:
+		static std::string to_string_imp(const Vector3f& obj);
+	};
+
+
+class {
+}
+
+testClass : class {
+	name = Vector3f;
+	members {
+		x = float;
+		y = float;
+		z = float;
+	}
+
 }

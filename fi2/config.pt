@@ -7,6 +7,10 @@ app {
     }
 }
 
+assets {
+    textures = "assets/textures";
+}
+
 geom {
     cx : float = 0;
     cy : float = 0;
@@ -17,7 +21,6 @@ geom {
     w : dimension = 40.0;
     h : dimension = 40.0;
 }
-
 container { 
     geom : geom {
          x=10;
@@ -486,11 +489,6 @@ shaders {
 
 >>;
     }
-}
-
-test {
-    A = 0;
-    B = 18;
 }
 
 @root=@here;

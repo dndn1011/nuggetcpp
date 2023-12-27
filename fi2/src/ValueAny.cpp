@@ -377,6 +377,7 @@ namespace nugget {
 		return type;
 	}
 
+
 	void ValueAny::CopyFrom(const ValueAny& other) {
 		assert(other.NotDeleted());
 		switch (type) {

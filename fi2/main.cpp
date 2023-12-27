@@ -15,6 +15,8 @@
 #include "src/debug.h"
 #include "nuggetgl/gl.h"
 
+#include "system.h"
+
 using namespace nugget;
 using namespace nugget::identifier;
 
@@ -64,6 +66,7 @@ void ReloadPt(std::string filename) {
 
 static const std::string filename = "config.pt";
 int main(int argc, char* argv[]) {
+
     std::string file = filename;
     if (argc > 1) {
         file = std::string(argv[1]);
@@ -79,8 +82,10 @@ int main(int argc, char* argv[]) {
         }
     }   
 
-    auto v = Notice::GetValueAny(IDR("properties.test.value"));
-    output("RESULT: {} : {}\n", v.GetTypeAsString(), v.GetValueAsString());
+    nugget::system::Init();
+
+//    auto v = Notice::GetValueAny(IDR("properties.test.value"));
+//    output("RESULT: {} : {}\n", v.GetTypeAsString(), v.GetValueAsString());
 
 //    PrintHashTree(IDR("properties"));
 

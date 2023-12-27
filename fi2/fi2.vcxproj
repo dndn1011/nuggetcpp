@@ -151,7 +151,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="external\stb_image.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\asset\asset.cpp" />
+    <ClCompile Include="src\asset\png.cpp" />
     <ClCompile Include="src\Color_plat.cpp" />
     <ClCompile Include="src\debug.cpp" />
     <ClCompile Include="src\expressions.cpp" />
@@ -176,6 +179,9 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="src\propertytreetokeniser.cpp" />
+    <ClCompile Include="src\serialise.h" />
+    <ClCompile Include="src\serialse.cpp" />
+    <ClCompile Include="src\system.cpp" />
     <ClCompile Include="src\types.cpp" />
     <ClCompile Include="src\ui.cpp" />
     <ClCompile Include="src\uientities.cpp" />
@@ -188,10 +194,17 @@
   <ItemGroup>
     <None Include="config.pt" />
     <None Include="config2.pt" />
+    <None Include="sqlite3.def" />
+    <None Include="sqlite3.dll" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="external\stb_image.h" />
+    <ClInclude Include="sqlite3.h" />
+    <ClInclude Include="src\asset\asset.h" />
+    <ClInclude Include="src\asset\png.h" />
     <ClInclude Include="src\expressions.h" />
     <ClInclude Include="src\expressions_operators.h" />
+    <ClInclude Include="src\network.h" />
     <ClInclude Include="src\nuggetgl\gl.h" />
     <ClInclude Include="src\nuggetgl\gldefs.h" />
     <ClInclude Include="src\debug.h" />
@@ -199,6 +212,7 @@
     <ClInclude Include="src\nuggetgl\glinternal.h" />
     <ClInclude Include="src\propertytree.h" />
     <ClInclude Include="src\propertytreetokeniser.h" />
+    <ClInclude Include="src\system.h" />
     <ClInclude Include="src\ui.h" />
     <ClInclude Include="src\uientities.h" />
     <ClInclude Include="src\ui_imp.h" />
@@ -207,6 +221,9 @@
     <ClInclude Include="src\utils\TimeSampler.h" />
     <ClInclude Include="src\utils\utils.h" />
     <ClInclude Include="src\ValueAny.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="sqlite3.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
