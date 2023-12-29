@@ -7,10 +7,16 @@ app {
     }
 }
 
-assets {
-    textures = "assets/textures";
+database {
+    service = sqlite3;
+    file = "database/db.sqlite3";
 }
 
+assets {
+    config {
+        textures = "assets/textures";
+    }
+}
 geom {
     cx : float = 0;
     cy : float = 0;

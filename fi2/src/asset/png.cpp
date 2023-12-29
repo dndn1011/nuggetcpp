@@ -12,4 +12,9 @@ namespace nugget::asset {
 			return false;
 		}
 	}
+	PNGImage::~PNGImage() {
+		if (data) {
+			stbi_image_free(data);
+		}
+	}
 }

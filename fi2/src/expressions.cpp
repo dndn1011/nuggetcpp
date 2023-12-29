@@ -216,10 +216,10 @@ namespace nugget::expressions {
                 ID("Color"),
                 [](const std::span<ValueAny>& args) {
                     check(args.size() == 4,"Incorrect number of arguments");
-                    float r = Expression::ConvertType(args[0], ValueAny::Type::float_).GetValueAsFloat();
-                    float g = Expression::ConvertType(args[1], ValueAny::Type::float_).GetValueAsFloat();
-                    float b = Expression::ConvertType(args[2], ValueAny::Type::float_).GetValueAsFloat();
-                    float a = Expression::ConvertType(args[3], ValueAny::Type::float_).GetValueAsFloat();
+                    float r = Expression::ConvertType(args[0], ValueAny::Type::float_).AsFloat();
+                    float g = Expression::ConvertType(args[1], ValueAny::Type::float_).AsFloat();
+                    float b = Expression::ConvertType(args[2], ValueAny::Type::float_).AsFloat();
+                    float a = Expression::ConvertType(args[3], ValueAny::Type::float_).AsFloat();
                     return ValueAny(Color(r, g, b, a));
                 }
             },
@@ -227,9 +227,9 @@ namespace nugget::expressions {
                 ID("vector3f"),
                 [](const std::span<ValueAny>& args) {
                     check(args.size() == 3,"Incorrect number of arguments");
-                    float x = Expression::ConvertType(args[0], ValueAny::Type::float_).GetValueAsFloat();
-                    float y = Expression::ConvertType(args[1], ValueAny::Type::float_).GetValueAsFloat();
-                    float z = Expression::ConvertType(args[2], ValueAny::Type::float_).GetValueAsFloat();
+                    float x = Expression::ConvertType(args[0], ValueAny::Type::float_).AsFloat();
+                    float y = Expression::ConvertType(args[1], ValueAny::Type::float_).AsFloat();
+                    float z = Expression::ConvertType(args[2], ValueAny::Type::float_).AsFloat();
                     return ValueAny(Vector3f(x,y,z));
                 }
             },
@@ -237,8 +237,8 @@ namespace nugget::expressions {
                 ID("vector2f"),
                 [](const std::span<ValueAny>& args) {
                     check(args.size() == 2,"Incorrect number of arguments");
-                    float x = Expression::ConvertType(args[0], ValueAny::Type::float_).GetValueAsFloat();
-                    float y = Expression::ConvertType(args[1], ValueAny::Type::float_).GetValueAsFloat();
+                    float x = Expression::ConvertType(args[0], ValueAny::Type::float_).AsFloat();
+                    float y = Expression::ConvertType(args[1], ValueAny::Type::float_).AsFloat();
                     return ValueAny(Vector2f(x,y));
                 }
             },
@@ -246,7 +246,7 @@ namespace nugget::expressions {
                 ID("ref"),
                 [&](const std::span<ValueAny>& args) {
                     check(args.size() == 1,"Incorrect number of arguments");
-                    IDType id = args[0].GetValueAsIDType();
+                    IDType id = args[0].AsIDType();
                     if (Notice::KeyExists(id)) {
                         return Notice::GetValueAny(id);
                     } else {
@@ -260,54 +260,54 @@ namespace nugget::expressions {
                     check(args.size() > 0,"no arguments?");
                     switch (args[0].GetType()) {
                         case ValueAny::Type::Vector3fList: {
-                            Vector3fList c(args[0].GetValueAsVector3fList());
+                            Vector3fList c(args[0].AsVector3fList());
                             if (args.size() > 1) {
                                 switch (args[1].GetType()) {
                                     case ValueAny::Type::Vector3fList: {
                                         for (int i = 1; i < args.size(); i++) {
-                                            for (auto&& x : args[i].GetValueAsVector3fList().data) {
+                                            for (auto&& x : args[i].AsVector3fList().data) {
                                                 c.data.push_back(x);
                                             }
                                         }
                                     } break;
                                     default: {
-                                        return ValueAny(Exception{ .description = std::format("Unsupported types for concat '{}' and '{}'",args[0].GetTypeAsString(),args[1].GetTypeAsString()) });
+                                        return ValueAny(Exception{ .description = std::format("Unsupported types for concat '{}' and '{}'",args[0].TypeAsString(),args[1].TypeAsString()) });
                                     } break;
                                 }
                             }
                             return ValueAny(c);
                         } break;
                         case ValueAny::Type::ColorList: {
-                            ColorList c(args[0].GetValueAsColorList());
+                            ColorList c(args[0].AsColorList());
                             if (args.size() > 1) {
                                 switch (args[1].GetType()) {
                                     case ValueAny::Type::ColorList: {
                                         for (int i = 1; i < args.size(); i++) {
-                                            for (auto&& x : args[i].GetValueAsColorList().data) {
+                                            for (auto&& x : args[i].AsColorList().data) {
                                                 c.data.push_back(x);
                                             }
                                         }
                                     } break;
                                     default: {
-                                        return ValueAny(Exception{ .description = std::format("Unsupported types for concat '{}' and '{}'",args[0].GetTypeAsString(),args[1].GetTypeAsString()) });
+                                        return ValueAny(Exception{ .description = std::format("Unsupported types for concat '{}' and '{}'",args[0].TypeAsString(),args[1].TypeAsString()) });
                                     } break;
                                 }
                             }
                             return ValueAny(c);
                         } break;
                         case ValueAny::Type::Vector2fList: {
-                            Vector2fList c(args[0].GetValueAsVector2fList());
+                            Vector2fList c(args[0].AsVector2fList());
                             if (args.size() > 1) {
                                 switch (args[1].GetType()) {
                                     case ValueAny::Type::Vector2fList: {
                                         for (int i = 1; i < args.size(); i++) {
-                                            for (auto&& x : args[i].GetValueAsVector2fList().data) {
+                                            for (auto&& x : args[i].AsVector2fList().data) {
                                                 c.data.push_back(x);
                                             }
                                         }
                                     } break;
                                     default: {
-                                        return ValueAny(Exception{ .description = std::format("Unsupported types for concat '{}' and '{}'",args[0].GetTypeAsString(),args[1].GetTypeAsString()) });
+                                        return ValueAny(Exception{ .description = std::format("Unsupported types for concat '{}' and '{}'",args[0].TypeAsString(),args[1].TypeAsString()) });
                                     } break;
                                 }
                             }
@@ -315,9 +315,9 @@ namespace nugget::expressions {
                         } break;
                         default: {
                             if (args.size() > 1) {
-                                return ValueAny(Exception{ .description = std::format("Unsupported types for concat '{}' and '{}'",args[0].GetTypeAsString(),args[1].GetTypeAsString()) });
+                                return ValueAny(Exception{ .description = std::format("Unsupported types for concat '{}' and '{}'",args[0].TypeAsString(),args[1].TypeAsString()) });
                             } else {
-                                return ValueAny(Exception{ .description = std::format("Unsupported type for concat '{}'",args[0].GetTypeAsString()) });
+                                return ValueAny(Exception{ .description = std::format("Unsupported type for concat '{}'",args[0].TypeAsString()) });
                             }
                         } break;
                     }
@@ -333,7 +333,7 @@ namespace nugget::expressions {
                     ValueAny::Type::int64_t_, ValueAny::Type::float_
                 },
                 [](const ValueAny& from) {
-                    return ValueAny((float)from.GetValueAsInt64());
+                    return ValueAny((float)from.AsInt64());
                 },
             },
             {
@@ -342,7 +342,7 @@ namespace nugget::expressions {
                 },
                 [](const ValueAny& from) {
                     // raw float dimension
-                    return ValueAny(Dimension(from.GetValueAsFloat()));
+                    return ValueAny(Dimension(from.AsFloat()));
                 }
             },
             {
@@ -350,7 +350,7 @@ namespace nugget::expressions {
                     ValueAny::Type::int64_t_, ValueAny::Type::dimension
                 },
                 [](const ValueAny& from) {
-                    return ValueAny(Dimension((float)from.GetValueAsInt64()));
+                    return ValueAny(Dimension((float)from.AsInt64()));
                 }
             },
             {
@@ -358,7 +358,7 @@ namespace nugget::expressions {
                     ValueAny::Type::int64_t_, ValueAny::Type::string
                 },
                 [](const ValueAny& from) {
-                    return ValueAny(std::format("{}",from.GetValueAsInt64()));
+                    return ValueAny(std::format("{}",from.AsInt64()));
                 }
             },
             {
@@ -366,7 +366,7 @@ namespace nugget::expressions {
                     ValueAny::Type::int64_t_, ValueAny::Type::Color
                 },
                 [](const ValueAny& from) {
-                float v = (float)from.GetValueAsInt64();
+                float v = (float)from.AsInt64();
                     return ValueAny(Color{v,v,v,v});
                 }
             },
@@ -375,7 +375,7 @@ namespace nugget::expressions {
                     ValueAny::Type::float_, ValueAny::Type::Vector3f
                 },
                 [](const ValueAny& from) {
-                float v = (float)from.GetValueAsFloat();
+                float v = (float)from.AsFloat();
                     return ValueAny(Vector3f{v,v,v});
                 }
             },
@@ -440,7 +440,7 @@ namespace nugget::expressions {
             if (converters.contains(cp)) {
                 return converters.at(cp)(a);
             } else {
-                return ValueAny(Exception{ .description = format("cannot convert {} to {}\n", a.GetTypeAsString(), ValueAny::GetTypeAsString(type)) });
+                return ValueAny(Exception{ .description = format("cannot convert {} to {}\n", a.TypeAsString(), ValueAny::TypeAsString(type)) });
             }
         }
 
@@ -523,8 +523,8 @@ namespace nugget::expressions {
             }
             switch (b.GetType()) {
                 case ValueAny::Type::Vector3fList: {
-                    auto& al = a.GetValueAsVector3fList();
-                    auto& bl = b.GetValueAsVector3fList();
+                    auto& al = a.AsVector3fList();
+                    auto& bl = b.AsVector3fList();
                     check(al.data.size() == bl.data.size(), "sizes must be the same");
                     Vector3fList out;
                     for (size_t i = 0; i < al.data.size(); i++) {
@@ -542,8 +542,8 @@ namespace nugget::expressions {
                     return ValueAny(out);
                 } break;
                 case ValueAny::Type::Vector3f: {
-                    auto& al = a.GetValueAsVector3fList();
-                    auto& bv = b.GetValueAsVector3f();
+                    auto& al = a.AsVector3fList();
+                    auto& bv = b.AsVector3f();
                     Vector3fList out;
                     for (size_t i = 0; i < al.data.size(); i++) {
                         switch (operation) {
@@ -564,7 +564,7 @@ namespace nugget::expressions {
                 } break;
                 default: {
                     return ValueAny(Exception{ .description = std::format("Unsupprted operation, EXPR_OP={}, types: {} and {}\n",
-                        operation, values[0].GetTypeAsString(), values[1].GetTypeAsString()) });
+                        operation, values[0].TypeAsString(), values[1].TypeAsString()) });
                 }
             }
         }
@@ -573,8 +573,8 @@ namespace nugget::expressions {
         ValueAny IndirectValue(const std::span<ValueAny> values) {
             const ValueAny& v = values[0];
             check(v.GetType() == ValueAny::Type::IDType, "Must be an IDType");
-            const ValueAny& w = Notice::GetValueAny(v.GetValueAsIDType());
-            const IDType wid = w.GetValueAsIDType();
+            const ValueAny& w = Notice::GetValueAny(v.AsIDType());
+            const IDType wid = w.AsIDType();
             if (Notice::KeyExists(wid)) {
                 return Notice::GetValueAny(wid);
             }
@@ -585,7 +585,7 @@ namespace nugget::expressions {
         ValueAny ExpandParseVariable(const std::span<ValueAny> values, std::function<ValueAny(IDType)> expandParseVars) {
             const ValueAny& v = values[0];
 //            output("{}\n", v.GetValueAsString());
-            auto id = v.GetValueAsIDType();
+            auto id = v.AsIDType();
             return expandParseVars(id);
         }
 
@@ -631,20 +631,20 @@ namespace nugget::expressions {
                         ValueAny r;
                         switch (v.GetType()) { 
                             case ValueAny::Type::float_: {
-                                r = ValueAny(-v.GetValueAsFloat());
+                                r = ValueAny(-v.AsFloat());
                             } break;
                             case ValueAny::Type::int32_t_: {
-                                r = ValueAny(-v.GetValueAsInt32());
+                                r = ValueAny(-v.AsInt32());
                             } break;
                             case ValueAny::Type::int64_t_: {
-                                r = ValueAny(-v.GetValueAsInt64());
+                                r = ValueAny(-v.AsInt64());
                             } break;
                             case ValueAny::Type::Vector3f: {
-                                auto& w = v.GetValueAsVector3f();
+                                auto& w = v.AsVector3f();
                                 r = ValueAny(Vector3f(-w.x, -w.y, -w.z));
                             } break;
                             default: {
-                                r = ValueAny(Exception{ .description = std::format("Could not apply unary minus to type '{}'",v.GetTypeAsString()) });
+                                r = ValueAny(Exception{ .description = std::format("Could not apply unary minus to type '{}'",v.TypeAsString()) });
                             } break;
                         }
                         if (r.IsException()) {
@@ -667,7 +667,7 @@ namespace nugget::expressions {
                     case Token::Type::closeParen: {
                         size_t i = functionMarkers.back();
                         functionMarkers.pop_back();
-                        IDType className = accumulation[i].GetValueAsIDType();
+                        IDType className = accumulation[i].AsIDType();
                         if (!functions.contains(className)) {
                             return ValueAny(Exception{ .description = std::format("Could not find function '{}'",IDToString(className)) });
                         } else {

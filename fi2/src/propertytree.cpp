@@ -151,10 +151,10 @@ namespace nugget::properties {
             {
                 "Color",[&]() {
                     assert(initaliserList.size() == 4);
-                    float r = Expression::ConvertType(initaliserList[0], ValueAny::Type::float_).GetValueAsFloat();
-                    float g = Expression::ConvertType(initaliserList[1], ValueAny::Type::float_).GetValueAsFloat();
-                    float b = Expression::ConvertType(initaliserList[2], ValueAny::Type::float_).GetValueAsFloat();
-                    float a = Expression::ConvertType(initaliserList[3], ValueAny::Type::float_).GetValueAsFloat();
+                    float r = Expression::ConvertType(initaliserList[0], ValueAny::Type::float_).AsFloat();
+                    float g = Expression::ConvertType(initaliserList[1], ValueAny::Type::float_).AsFloat();
+                    float b = Expression::ConvertType(initaliserList[2], ValueAny::Type::float_).AsFloat();
+                    float a = Expression::ConvertType(initaliserList[3], ValueAny::Type::float_).AsFloat();
                     IDType id = IDR(IDR(currentPathName), currentValueName);
                     Notice::Set(id,Color(r, g, b, a));
                 },
@@ -170,10 +170,10 @@ namespace nugget::properties {
                         auto v2 = initaliserList[i + 2];
                         auto v3 = initaliserList[i + 3];
                         cols.data.push_back(Color {
-                            Expression::ConvertType(v0,ValueAny::Type::float_).GetValueAsFloat(),
-                            Expression::ConvertType(v1,ValueAny::Type::float_).GetValueAsFloat(),
-                            Expression::ConvertType(v2,ValueAny::Type::float_).GetValueAsFloat(),
-                            Expression::ConvertType(v3,ValueAny::Type::float_).GetValueAsFloat()
+                            Expression::ConvertType(v0,ValueAny::Type::float_).AsFloat(),
+                            Expression::ConvertType(v1,ValueAny::Type::float_).AsFloat(),
+                            Expression::ConvertType(v2,ValueAny::Type::float_).AsFloat(),
+                            Expression::ConvertType(v3,ValueAny::Type::float_).AsFloat()
                             });
                     }
                     IDType id = IDR(IDR(currentPathName), currentValueName);
@@ -183,9 +183,9 @@ namespace nugget::properties {
             {
                 "Vector3f",[&]() {
                     assert(initaliserList.size() == 3);
-                    float x = Expression::ConvertType(initaliserList[0], ValueAny::Type::float_).GetValueAsFloat();
-                    float y = Expression::ConvertType(initaliserList[1], ValueAny::Type::float_).GetValueAsFloat();
-                    float z = Expression::ConvertType(initaliserList[2], ValueAny::Type::float_).GetValueAsFloat();
+                    float x = Expression::ConvertType(initaliserList[0], ValueAny::Type::float_).AsFloat();
+                    float y = Expression::ConvertType(initaliserList[1], ValueAny::Type::float_).AsFloat();
+                    float z = Expression::ConvertType(initaliserList[2], ValueAny::Type::float_).AsFloat();
                     IDType id = IDR(IDR(currentPathName), currentValueName);
                     Notice::Set(id,Vector3f(x, y, z));
                 },
@@ -200,9 +200,9 @@ namespace nugget::properties {
                         auto v1 = initaliserList[i + 1];
                         auto v2 = initaliserList[i + 2];
                         verts.data.push_back(Vector3f{
-                            Expression::ConvertType(v0,ValueAny::Type::float_).GetValueAsFloat(),
-                            Expression::ConvertType(v1,ValueAny::Type::float_).GetValueAsFloat(),
-                            Expression::ConvertType(v2,ValueAny::Type::float_).GetValueAsFloat()
+                            Expression::ConvertType(v0,ValueAny::Type::float_).AsFloat(),
+                            Expression::ConvertType(v1,ValueAny::Type::float_).AsFloat(),
+                            Expression::ConvertType(v2,ValueAny::Type::float_).AsFloat()
                             });
                     }
                     IDType id = IDR(IDR(currentPathName), currentValueName);
@@ -212,8 +212,8 @@ namespace nugget::properties {
             {
                 "Vector2f",[&]() {
                     assert(initaliserList.size() == 3);
-                    float x = Expression::ConvertType(initaliserList[0], ValueAny::Type::float_).GetValueAsFloat();
-                    float y = Expression::ConvertType(initaliserList[1], ValueAny::Type::float_).GetValueAsFloat();
+                    float x = Expression::ConvertType(initaliserList[0], ValueAny::Type::float_).AsFloat();
+                    float y = Expression::ConvertType(initaliserList[1], ValueAny::Type::float_).AsFloat();
                     IDType id = IDR(IDR(currentPathName), currentValueName);
                     Notice::Set(id,Vector2f(x, y));
                 }
@@ -227,8 +227,8 @@ namespace nugget::properties {
                         auto v0 = initaliserList[i + 0];
                         auto v1 = initaliserList[i + 1];
                         verts.data.push_back(Vector2f{
-                            Expression::ConvertType(v0,ValueAny::Type::float_).GetValueAsFloat(),
-                            Expression::ConvertType(v1,ValueAny::Type::float_).GetValueAsFloat()
+                            Expression::ConvertType(v0,ValueAny::Type::float_).AsFloat(),
+                            Expression::ConvertType(v1,ValueAny::Type::float_).AsFloat()
                             });
                     }
                     IDType id = IDR(IDR(currentPathName), currentValueName);
@@ -466,7 +466,7 @@ namespace nugget::properties {
             }
         );
         if (any.IsException()) {
-            auto e = any.GetValueAsException();
+            auto e = any.AsException();
             parseState.description = std::format("Could not evaluate expression: {}", e.description);
             return false;
         }

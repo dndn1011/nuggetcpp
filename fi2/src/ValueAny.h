@@ -7,7 +7,6 @@
 namespace nugget {
 	struct ValueAny {
 		ValueAny();
-
 		explicit ValueAny(int32_t v);
 		explicit ValueAny(int64_t v);
 		explicit ValueAny(uint64_t v);
@@ -25,11 +24,8 @@ namespace nugget {
 		explicit ValueAny(const Vector2f& v);
 
 		ValueAny(const ValueAny& other);
-
 		ValueAny& operator=(const ValueAny& other);
-		
 		bool operator==(const ValueAny& other) const;
-
 		ValueAny(const ValueAny&& other) = delete;
 
 		enum class Type {
@@ -52,41 +48,42 @@ namespace nugget {
 			Vector3f,
 			Exception,
 		};
-		static std::string GetTypeAsString(ValueAny::Type type);
-		std::string GetTypeAsString() const;
-		std::string GetValueAsString() const;
-		Color GetValueAsColor() const;
-		identifier::IDType GetValueAsIDType() const;
-		int32_t GetValueAsInt32() const;
-		int64_t GetValueAsInt64() const;
-		uint64_t GetValueAsUint64() const;
-		float GetValueAsFloat() const;
-		void* GetValueAsPointer() const;
-		nugget::ui::Dimension GetValueAsDimension() const;
-		const Vector3fList& GetValueAsVector3fList() const;
-		const Vector2fList& GetValueAsVector2fList() const;
-		const ColorList& GetValueAsColorList() const;
-		const Vector2f& GetValueAsVector2f() const;
-		const Vector3f& GetValueAsVector3f() const;
-		const Exception& GetValueAsException() const;
 
-		void SetValue(std::string val);
-		void SetValue(int32_t val);
-		void SetValue(int64_t val);
-		void SetValue(uint64_t val);
-		void SetValue(float val);
-		void SetValue(const Color& colorIn);
-		void SetValue(identifier::IDType id);
-		void SetValue(const ValueAny& val);
-		void SetValue(void* ptr);
-		void SetValue(const nugget::ui::Dimension& dim);
-		void SetValue(const Vector3fList& vects);
-		void SetValue(const Vector2fList& vects);
-		void SetValue(const ColorList& vects);
-		void SetValue(const Vector3f& vect);
-		void SetValue(const Vector2f& vect);
-		void SetValue(const Exception& exception);
-		void SetValueVoid();
+		static std::string TypeAsString(ValueAny::Type type);
+		std::string TypeAsString() const;
+		std::string AsString() const;
+		Color AsColor() const;
+		identifier::IDType AsIDType() const;
+		int32_t AsInt32() const;
+		int64_t AsInt64() const;
+		uint64_t AsUint64() const;
+		float AsFloat() const;
+		void* AsPointer() const;
+		nugget::ui::Dimension AsDimension() const;
+		const Vector3fList& AsVector3fList() const;
+		const Vector2fList& AsVector2fList() const;
+		const ColorList& AsColorList() const;
+		const Vector2f& AsVector2f() const;
+		const Vector3f& AsVector3f() const;
+		const Exception& AsException() const;
+
+		void Set(std::string val);
+		void Set(int32_t val);
+		void Set(int64_t val);
+		void Set(uint64_t val);
+		void Set(float val);
+		void Set(const Color& colorIn);
+		void Set(identifier::IDType id);
+		void Set(const ValueAny& val);
+		void Set(void* ptr);
+		void Set(const nugget::ui::Dimension& dim);
+		void Set(const Vector3fList& vects);
+		void Set(const Vector2fList& vects);
+		void Set(const ColorList& vects);
+		void Set(const Vector3f& vect);
+		void Set(const Vector2f& vect);
+		void Set(const Exception& exception);
+		void SetVoid();
 
 		bool IsVoid() const;
 		bool IsException() const;

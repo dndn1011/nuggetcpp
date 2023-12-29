@@ -38,15 +38,15 @@ namespace nugget {
 		void*           GetPointer(IDType id);
 		Dimension       GetDimension(IDType id);
 		const Vector3fList& GetVector3fList(IDType id);
-		bool GetVector3fList(IDType id, Vector3fList& result);
+		bool GetVector3fList(IDType id, Vector3fList& result);  
 		const Vector2fList& GetVector2fList(IDType id);
 		bool GetVector2fList(IDType id, Vector2fList& result);
 		const ColorList& GetColorList(IDType id);
 		bool GetColorList(IDType id, ColorList& result);
 
-		std::string GetValueAsString(IDType id);
+		std::string AsString(IDType id);
 		std::string GetValueTypeAsString(const ValueAny& var);
-
+		 
 		template <typename T>
 		void Set(IDType id, const T& value);
 

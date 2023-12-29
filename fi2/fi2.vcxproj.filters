@@ -93,6 +93,9 @@
     <ClCompile Include="src\asset\png.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\database\db.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="config.pt" />
@@ -157,7 +160,7 @@
     <ClInclude Include="src\network.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sqlite3.h">
+    <ClInclude Include="external\sqlite3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\asset\asset.h">
@@ -172,8 +175,11 @@
     <ClInclude Include="src\asset\png.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\database\db.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="sqlite3.lib" />
+    <Library Include="external\sqlite3.lib" />
   </ItemGroup>
 </Project>

@@ -156,6 +156,7 @@
     <ClCompile Include="src\asset\asset.cpp" />
     <ClCompile Include="src\asset\png.cpp" />
     <ClCompile Include="src\Color_plat.cpp" />
+    <ClCompile Include="src\database\db.cpp" />
     <ClCompile Include="src\debug.cpp" />
     <ClCompile Include="src\expressions.cpp" />
     <ClCompile Include="src\filereader.cpp" />
@@ -199,9 +200,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\stb_image.h" />
-    <ClInclude Include="sqlite3.h" />
+    <ClInclude Include="external\sqlite3.h" />
     <ClInclude Include="src\asset\asset.h" />
     <ClInclude Include="src\asset\png.h" />
+    <ClInclude Include="src\database\db.h" />
     <ClInclude Include="src\expressions.h" />
     <ClInclude Include="src\expressions_operators.h" />
     <ClInclude Include="src\network.h" />
@@ -223,7 +225,7 @@
     <ClInclude Include="src\ValueAny.h" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="sqlite3.lib" />
+    <Library Include="external\sqlite3.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

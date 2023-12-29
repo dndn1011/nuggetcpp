@@ -81,17 +81,17 @@ namespace nugget {
 			notifyLock = false;
 		}
 
-		std::string GetValueAsString(IDType id) {
+		std::string AsString(IDType id) {
 			if (KeyExists(id)) {
 				auto &v = data.valueEntries.at(id);
-				return v.GetValueAsString();
+				return v.AsString();
 			} else {
 				return "<undefined>";
 			}
 		}
 
 		std::string GetValueTypeAsString(const ValueAny& var) {
-			return  var.GetTypeAsString();
+			return  var.TypeAsString();
 		}
 
 		bool IsValueTypeInteger64(IDType id) {
@@ -137,55 +137,55 @@ namespace nugget {
 		std::string GetString(IDType id) {
 			assert(KeyExists(id));
 			auto &v = data.valueEntries.at(id);
-			return v.GetValueAsString();
+			return v.AsString();
 		}
 		int32_t GetInt32(IDType id) {
 			assert(KeyExists(id));
 			auto &v = data.valueEntries.at(id);
-			return v.GetValueAsInt32();
+			return v.AsInt32();
 		}
 		int64_t GetInt64(IDType id) {
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
-			return v.GetValueAsInt64();
+			return v.AsInt64();
 		}
 		uint64_t GetUint64(IDType id) {
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
-			return v.GetValueAsUint64();
+			return v.AsUint64();
 		}
 		float GetFloat(IDType id) {
 			assert(KeyExists(id));
 			auto &v = data.valueEntries.at(id);
-			return v.GetValueAsFloat();
+			return v.AsFloat();
 		}
 		IDType GetID(IDType id) {
 			assert(KeyExists(id));
 			auto &v = data.valueEntries.at(id);
-			return v.GetValueAsIDType();
+			return v.AsIDType();
 		}
 		void* GetPointer(IDType id) {
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
-			return  v.GetValueAsPointer();
+			return  v.AsPointer();
 		}
 		Dimension GetDimension(IDType id)
 		{
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
-			return v.GetValueAsDimension();
+			return v.AsDimension();
 		}
 		const Vector3fList& GetVector3fList(IDType id)
 		{
 			assert(KeyExists(id));
 			auto& v = data.valueEntries.at(id);
-			return v.GetValueAsVector3fList();
+			return v.AsVector3fList();
 		}
 		bool GetVector3fList(IDType id, Vector3fList& result) {
 			if (KeyExists(id)) {
 				auto& v = GetValueAny(id);
 				if (v.GetType() == ValueAny::Type::Vector3fList) {
-					result = v.GetValueAsVector3fList();
+					result = v.AsVector3fList();
 					return true;
 				}
 			}
@@ -195,7 +195,7 @@ namespace nugget {
 			if (KeyExists(id)) {
 				auto& v = GetValueAny(id);
 				if (v.GetType() == ValueAny::Type::Vector2fList) {
-					result = v.GetValueAsVector2fList();
+					result = v.AsVector2fList();
 					return true;
 				}
 			}
@@ -205,7 +205,7 @@ namespace nugget {
 			if (KeyExists(id)) {
 				auto& v = GetValueAny(id);
 				if (v.GetType() == ValueAny::Type::ColorList) {
-					result = v.GetValueAsColorList();
+					result = v.AsColorList();
 					return true;
 				}
 			}
@@ -222,7 +222,7 @@ namespace nugget {
 			if (KeyExists(id)) {
 				auto &v = data.valueEntries[id];
 				assert(v.GetType() == ValueAny::Type::Color);
-				return v.GetValueAsColor();
+				return v.AsColor();
 			} else {
 				return nugget::Color(0.5, 0.5, 0.5, 1);
 			}
@@ -231,7 +231,7 @@ namespace nugget {
 		void SetVoid(IDType id)
 		{
 			auto& entry = data.valueEntries[id];
-			entry.SetValueVoid();
+			entry.SetVoid();
 		}
 
 		template <typename T>
@@ -240,12 +240,12 @@ namespace nugget {
 				const auto& currentValue = data.valueEntries.at(id);
 				if (currentValue.GetType() != ValueAny::Type::deleted) {
 					bool diff = (currentValue != ValueAny(value));
-					data.valueEntries[id].SetValue(value);
+					data.valueEntries[id].Set(value);
 					if (diff) {
 						Notify(id);
 					}
 				} else {
-					data.valueEntries[id].SetValue(value);
+					data.valueEntries[id].Set(value);
 				}
 			} else {
 				auto r = data.valueEntries.emplace(id,value);

@@ -6,6 +6,7 @@ namespace nugget::asset {
 		int width;
 		int height;
 		int channels;
+		~PNGImage();
 	};
 
 	bool LoadPNG(std::string filename, PNGImage& png);

@@ -14,7 +14,7 @@ ValueAny EXPR_NAME(const std::span<ValueAny> values) {
                 if (vt == promote) {
                     w = ConvertType(w, vt);
                     if (w.IsException()) {
-                        return ValueAny(Exception{ .description = std::format("Could not convert '{}' to '{}'\n",ValueAny::GetTypeAsString(wt),ValueAny::GetTypeAsString(vt)) });
+                        return ValueAny(Exception{ .description = std::format("Could not convert '{}' to '{}'\n",ValueAny::TypeAsString(wt),ValueAny::TypeAsString(vt)) });
                     }
                 } else {
                     v = ConvertType(v, promote);
@@ -28,31 +28,31 @@ ValueAny EXPR_NAME(const std::span<ValueAny> values) {
         switch (v.GetType()) {
 #if EXPR_OP == EXPR_DOT || EXPR_OP == EXPR_DOUBLE_COLON
             case ValueAny::Type::IDType: {
-                return ValueAny(IDR(v.GetValueAsIDType(), w.GetValueAsIDType()));
+                return ValueAny(IDR(v.AsIDType(), w.AsIDType()));
             }
 #else
             case ValueAny::Type::int64_t_: {
-                return ValueAny(v.GetValueAsInt64() EXPR_OPERATOR w.GetValueAsInt64());
+                return ValueAny(v.AsInt64() EXPR_OPERATOR w.AsInt64());
             }
             case ValueAny::Type::Vector3f: {
-                return ValueAny(v.GetValueAsVector3f() EXPR_OPERATOR w.GetValueAsVector3f());
+                return ValueAny(v.AsVector3f() EXPR_OPERATOR w.AsVector3f());
             }
 #if EXPR_OP == EXPR_PLUS
             case ValueAny::Type::string: {
-                return ValueAny(v.GetValueAsString() EXPR_OPERATOR w.GetValueAsString());
+                return ValueAny(v.AsString() EXPR_OPERATOR w.AsString());
             }
 #endif
             case ValueAny::Type::float_: {
-                return ValueAny(v.GetValueAsFloat() EXPR_OPERATOR w.GetValueAsFloat());
+                return ValueAny(v.AsFloat() EXPR_OPERATOR w.AsFloat());
             }
 #endif
 #if EXPR_OP == EXPR_MULTIPLY
             case ValueAny::Type::Color: {
-                return ValueAny(v.GetValueAsColor() EXPR_OPERATOR w.GetValueAsColor());
+                return ValueAny(v.AsColor() EXPR_OPERATOR w.AsColor());
             }
 #endif
             default: {
-                check(0, "not implemented for types: EXPR_OP={}, type: {}\n", EXPR_OP, v.GetTypeAsString());
+                check(0, "not implemented for types: EXPR_OP={}, type: {}\n", EXPR_OP, v.TypeAsString());
             }
         }
     }
