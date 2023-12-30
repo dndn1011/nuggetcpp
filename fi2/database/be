@@ -1,0 +1,9 @@
+A=$(cygpath 'C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe')
+
+B=/home/dino/git/nuggetcpp/sqlite3_extensions
+
+cd "$B"
+"$A" sqlite3_extensions.vcxproj	/p:Configuration=Debug /p:Platform=x64
+
+
+

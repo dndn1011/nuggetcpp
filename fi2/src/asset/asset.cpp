@@ -44,9 +44,24 @@ namespace nugget::asset {
         }
     }
 
+    void CollectAssetMetadata(IDType node) {
+        std::vector<IDType> children;
+        Notice::GetChildrenWithNodeExisting(node, ID("path"), children);
+        for (auto&& x : children) {
+            IDType idPath = IDR(x, "path");
+            IDType idType = IDR(x, "type");
+            IDType idDescription = IDR(x, "description");
+            const std::string &path = Notice::GetString(idPath);
+            const std::string &type = Notice::GetString(idType);
+            const std::string &description = Notice::GetString(idDescription);
+            db::AddAssetMeta(IDToString(GetLeaf(x)), path, type, description);
+        }
+    }
+
     void Init() {
         std::string textureDir = Notice::GetString(ID("properties.assets.config.textures"));
         CollectFiles(textureDir);
+        CollectAssetMetadata(ID("properties.assets.meta"));
     }
 
 
