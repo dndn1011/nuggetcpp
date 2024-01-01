@@ -4,17 +4,12 @@
 #include "png.h"
 
 namespace nugget::asset {
-	bool LoadPNG(std::string filename, PNGImage& png) {
-		png.data = stbi_load(filename.c_str(), &png.width, &png.height, &png.channels, 0);
-		if (png.data != nullptr) {
+	bool Load(std::string filename, TextureData& tex) {
+		tex.data = stbi_load(filename.c_str(), &tex.width, &tex.height, &tex.channels, 0);
+		if (tex.data != nullptr) {
 			return true;
 		} else {
 			return false;
-		}
-	}
-	PNGImage::~PNGImage() {
-		if (data) {
-			stbi_image_free(data);
 		}
 	}
 }

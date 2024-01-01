@@ -20,7 +20,7 @@ assets {
     }
     meta {
         spaceship {
-            path = "assets/texture/spaceship.png";
+            path = "assets/textures/spaceship.png";
             type = texture;
             description = "test image";
         }
@@ -539,6 +539,8 @@ quad {
 
 testobj {
     section {
+        texture = spaceship;
+
         shader = @root.shaders.biquad;
         primitive = GL_TRIANGLES_ADJACENCY;
         start = 0;

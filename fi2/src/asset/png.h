@@ -1,13 +1,7 @@
 #pragma once
+#include "asset.h"
 
 namespace nugget::asset {
-	struct PNGImage {
-		unsigned char* data;
-		int width;
-		int height;
-		int channels;
-		~PNGImage();
-	};
 
-	bool LoadPNG(std::string filename, PNGImage& png);
+	bool LoadPNG(std::string filename, TextureData& data);
 }

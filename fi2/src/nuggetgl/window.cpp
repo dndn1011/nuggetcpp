@@ -268,6 +268,9 @@ namespace nugget::gl {
     void triangle_test() {
         GLuint VAO;
 
+        IDType asset = Notice::GetID(ID("properties.testobj.section.texture"));
+
+
         // Vertex Array Object (VAO)
 //        glGenVertexArrays(1, &VAO);
 //        glBindVertexArray(VAO);
