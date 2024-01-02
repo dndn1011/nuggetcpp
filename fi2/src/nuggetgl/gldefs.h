@@ -22,6 +22,8 @@ GLDEF(glGetProgramInfoLog, (GLuint program, GLsizei maxLength, GLsizei* length, 
 GLDEF(glDeleteProgram, (GLuint program), void)
 GLDEF(glDetachShader, (GLuint program, GLuint shader), void)
 GLDEF(glBufferSubData, (GLenum target, GLintptr offset, GLsizeiptr size, const void* data), void)
-
+GLDEF(glUniform1i, (GLint location, GLint v), void)
+GLDEF(glGetUniformLocation, (GLuint program, const GLchar* name), GLint)
+GLDEF(glActiveTexture, (GLenum texture), void)
 
 

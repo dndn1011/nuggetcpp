@@ -491,6 +491,7 @@ shaders {
                 in vec4 col_f;
                 out vec4 FragColor;
                 flat in vec4 colv_f[4];
+                uniform sampler2D quadTexture;
 
                 void main()
                 {
@@ -498,9 +499,11 @@ shaders {
                     vec4 b = mix(colv_f[2],colv_f[3],uv_f.y);
                     vec4 c = mix(a,b,uv_f.x);
 
-                    FragColor = c;
-//                    FragColor = vec4(1,0,0,1)
+                    vec2 r = vec2(uv_f.y,-uv_f.x);
 
+    //                FragColor = c;
+   //                 FragColor = vec4(1,0,0,1);
+                        FragColor = texture(quadTexture, r);
                 }
 
 >>;
@@ -546,8 +549,8 @@ testobj {
         start = 0;
         length = 24;
 
-        v : Vector3f = { 0.25,0.0,0.0 };
-        s : Vector3f = { 0.3,0.3,0.3 };
+        v : Vector3f = { 0.5,0.0,0.0 };
+        s : Vector3f = { 2.0,3.5,2.0 };
 
         v1 = ref(@root.quad.verts)*ref(@here.s) - ref(@here.v) * 2.5;
         v2 = ref(@root.quad.verts)*ref(@here.s) - ref(@here.v) * 0.0;

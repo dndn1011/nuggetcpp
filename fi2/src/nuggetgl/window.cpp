@@ -101,17 +101,27 @@ namespace nugget::gl {
 
     Renderable renderable;
 
+    GLuint textureID;
+
     void Update() {
         // Initialize OpenGL state
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-
         // Use the shader program
         glUseProgram(renderable.shader);
 
+
         // Bind the VAO
         glBindVertexArray(renderable.buffer);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+
+        auto loc = glGetUniformLocation(renderable.shader, "quadTexture");
+        glUniform1i(loc , 0);
+
+
 
         // Draw the triangle
         glDrawArrays(GL_TRIANGLES_ADJACENCY,
@@ -270,7 +280,7 @@ namespace nugget::gl {
         GLuint VAO;
 
         IDType asset = Notice::GetID(ID("properties.testobj.section.texture"));
-        const nugget::asset::TextureData &data = nugget::asset::GetTexture(asset);
+        const nugget::asset::TextureData &texture = nugget::asset::GetTexture(asset);
             
 
 
@@ -293,6 +303,15 @@ namespace nugget::gl {
             glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 1200 + sizeof(uvCoords) + sizeof(colours), nullptr, GL_STATIC_DRAW);
             ApplyRenderingData();
         }
+
+        glGenTextures(1, &textureID);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, texture.width, texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data);
+        glBindTexture(GL_TEXTURE_2D, 0);
 
         std::unordered_map<IDType, GLenum> primitiveMap = {
             { ID("GL_TRIANGLES_ADJACENCY"),GL_TRIANGLES_ADJACENCY }
