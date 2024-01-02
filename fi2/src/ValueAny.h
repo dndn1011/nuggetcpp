@@ -5,121 +5,136 @@
 #include "identifier.h"
 
 namespace nugget {
-	struct ValueAny {
-		ValueAny();
-		explicit ValueAny(int32_t v);
-		explicit ValueAny(int64_t v);
-		explicit ValueAny(uint64_t v);
-		explicit ValueAny(float v);
-		explicit ValueAny(const Color& v);
-		explicit ValueAny(const std::string& v);
-		explicit ValueAny(identifier::IDType v);
-		explicit ValueAny(void* v);
-		explicit ValueAny(const nugget::ui::Dimension& v);
-		explicit ValueAny(const Exception& v);
-		explicit ValueAny(const Vector3fList& v);
-		explicit ValueAny(const Vector2fList& v);
-		explicit ValueAny(const ColorList& v);
-		explicit ValueAny(const Vector3f& v);
-		explicit ValueAny(const Vector2f& v);
+    struct ValueAny {
+        // Existing constructors
+        ValueAny();
+        explicit ValueAny(int32_t v);
+        explicit ValueAny(int64_t v);
+        explicit ValueAny(uint64_t v);
+        explicit ValueAny(float v);
+        explicit ValueAny(const Color& v);
+        explicit ValueAny(const std::string& v);
+        explicit ValueAny(identifier::IDType v);
+        explicit ValueAny(void* v);
+        explicit ValueAny(const nugget::ui::Dimension& v);
+        explicit ValueAny(const Exception& v);
+        explicit ValueAny(const Vector3fList& v);
+        explicit ValueAny(const Vector2fList& v);
+        explicit ValueAny(const ColorList& v);
+        explicit ValueAny(const Vector3f& v);
+        explicit ValueAny(const Vector2f& v);
+        explicit ValueAny(const Matrix4f& v);
 
-		ValueAny(const ValueAny& other);
-		ValueAny& operator=(const ValueAny& other);
-		bool operator==(const ValueAny& other) const;
-		ValueAny(ValueAny&& other) noexcept;
+        // Copy constructor and assignment operator
+        ValueAny(const ValueAny& other);
+        ValueAny& operator=(const ValueAny& other);
 
-		enum class Type {
-			void_,
-			int32_t_,
-			int64_t_,
-			uint64_t_,
-			float_,
-			factor_,
-			Color,
-			string,
-			IDType,
-			pointer,
-			deleted,
-			dimension,
-			Vector3fList,
-			Vector2fList,
-			ColorList,
-			Vector2f,
-			Vector3f,
-			Exception,
-		};
+        // Move constructor
+        ValueAny(ValueAny&& other) noexcept;
 
-		static std::string TypeAsString(ValueAny::Type type);
-		std::string TypeAsString() const;
-		std::string AsString() const;
-		Color AsColor() const;
-		identifier::IDType AsIDType() const;
-		int32_t AsInt32() const;
-		int64_t AsInt64() const;
-		uint64_t AsUint64() const;
-		float AsFloat() const;
-		void* AsPointer() const;
-		nugget::ui::Dimension AsDimension() const;
-		const Vector3fList& AsVector3fList() const;
-		const Vector2fList& AsVector2fList() const;
-		const ColorList& AsColorList() const;
-		const Vector2f& AsVector2f() const;
-		const Vector3f& AsVector3f() const;
-		const Exception& AsException() const;
+        // Comparison operator
+        bool operator==(const ValueAny& other) const;
 
-		void Set(std::string val);
-		void Set(int32_t val);
-		void Set(int64_t val);
-		void Set(uint64_t val);
-		void Set(float val);
-		void Set(const Color& colorIn);
-		void Set(identifier::IDType id);
-		void Set(const ValueAny& val);
-		void Set(void* ptr);
-		void Set(const nugget::ui::Dimension& dim);
-		void Set(const Vector3fList& vects);
-		void Set(const Vector2fList& vects);
-		void Set(const ColorList& vects);
-		void Set(const Vector3f& vect);
-		void Set(const Vector2f& vect);
-		void Set(const Exception& exception);
-		void SetVoid();
+        // Destructor
+        ~ValueAny();
 
-		bool IsVoid() const;
-		bool IsException() const;
+        // Type enumeration with new Matrix4f type
+        enum class Type {
+            void_,
+            int32_t_,
+            int64_t_,
+            uint64_t_,
+            float_,
+            Color,
+            string,
+            IDType,
+            pointer,
+            dimension,
+            Exception,
+            Vector3fList,
+            Vector2fList,
+            ColorList,
+            Vector3f,
+            Vector2f,
+            Matrix4f,
 
-		bool NotDeleted() const;
+            deleted
+        };
 
-		void MarkDeleted();
+        // Existing methods
+        static std::string TypeAsString(ValueAny::Type type);
+        std::string TypeAsString() const;
+        std::string AsString() const;
+        Color AsColor() const;
+        identifier::IDType AsIDType() const;
+        int32_t AsInt32() const;
+        int64_t AsInt64() const;
+        uint64_t AsUint64() const;
+        float AsFloat() const;
+        void* AsPointer() const;
+        nugget::ui::Dimension AsDimension() const;
+        const Vector3fList& AsVector3fList() const;
+        const Vector2fList& AsVector2fList() const;
+        const ColorList& AsColorList() const;
+        const Vector2f& AsVector2f() const;
+        const Vector3f& AsVector3f() const;
+        const Exception& AsException() const;
+        const Matrix4f& AsMatrix4f() const;
 
-		~ValueAny();
+        // Existing Set methods
+        void Set(std::string val);
+        void Set(int32_t val);
+        void Set(int64_t val);
+        void Set(uint64_t val);
+        void Set(float val);
+        void Set(const Color& colorIn);
+        void Set(identifier::IDType id);
+        void Set(const ValueAny& val);
+        void Set(void* ptr);
+        void Set(const nugget::ui::Dimension& dim);
+        void Set(const Vector3fList& vects);
+        void Set(const Vector2fList& vects);
+        void Set(const ColorList& vects);
+        void Set(const Vector3f& vect);
+        void Set(const Vector2f& vect);
+        void Set(const Exception& exception);
 
-		Type GetType() const;
+        // New Set method for Matrix4f
+        void Set(const Matrix4f& mat);
 
-	private:
-		union Data {
-			int32_t int32_t_;
-			int64_t int64_t_;
-			uint64_t uint64_t_;
-			float float_;
-			Color* colorPtr;
-			Exception* exceptionPtr;
-			std::string* stringPtr;
-			identifier::IDType idType;
-			void* ptr;
-			nugget::ui::Dimension* dimensionPtr;
+        // Additional methods
+        void SetVoid();
+        bool IsVoid() const;
+        bool IsException() const;
+        bool NotDeleted() const;
+        void MarkDeleted();
+        Type GetType() const;
 
-			Vector3fList* vector3fListPtr;
-			Vector2fList* vector2fListPtr;
-			ColorList* colorListPtr;
-			Vector3f* vector3fPtr;
-			Vector2f* vector2fPtr;
-		} data = {};
+    private:
+        // Union Data with new Matrix4f pointer
+        union Data {
+            int32_t int32_t_;
+            int64_t int64_t_;
+            uint64_t uint64_t_;
+            float float_;
+            Color* colorPtr;
+            std::string* stringPtr;
+            identifier::IDType idType;
+            void* ptr;
+            nugget::ui::Dimension* dimensionPtr;
+            Exception* exceptionPtr;
+            Vector3fList* vector3fListPtr;
+            Vector2fList* vector2fListPtr;
+            ColorList* colorListPtr;
+            Vector3f* vector3fPtr;
+            Vector2f* vector2fPtr;
+            Matrix4f* matrix4fPtr;  // Pointer to Matrix4f
+        } data = {};
 
-		Type type = Type::void_;
+        Type type = Type::void_;
 
-		static const std::unordered_map<Type, std::string> typeStringLookup;
+        static const std::unordered_map<Type, std::string> typeStringLookup;
 
-		void CopyFrom(const ValueAny& other);
-	};
+        void CopyFrom(const ValueAny& other);
+    };
 }

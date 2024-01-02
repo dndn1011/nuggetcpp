@@ -3,20 +3,6 @@
 #include "types.h"
 #include <sstream>
 
-	std::string nugget::Color::to_string_imp(const nugget::Color& obj) {
-		std::stringstream ss;
-		ss
-			<< "{"
-			<< std::to_string(obj.r)
-			<< ","
-			<< std::to_string(obj.g)
-			<< ","
-			<< std::to_string(obj.b)
-			<< ","
-			<< std::to_string(obj.a)
-			<< "}";
-		return ss.str();
-	};
 
 namespace sf {
 	uint8_t ConvColRange(float in) {

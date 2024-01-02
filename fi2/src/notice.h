@@ -43,6 +43,7 @@ namespace nugget {
 		bool GetVector2fList(IDType id, Vector2fList& result);
 		const ColorList& GetColorList(IDType id);
 		bool GetColorList(IDType id, ColorList& result);
+		const Matrix4f& GetMatrix4f(IDType id);
 
 		std::string AsString(IDType id);
 		std::string GetValueTypeAsString(const ValueAny& var);
@@ -63,6 +64,7 @@ namespace nugget {
 		bool IsValueTypeColor(IDType id);
 		bool IsValueTypeDimension(IDType id);
 		bool IsValueTypeVertices(IDType id);
+		bool IsValueTypeMatrix4f(IDType id);
 
 		void RegisterHandler(const Handler& handler);
 		void UnregisterHandler(const Handler& handler);

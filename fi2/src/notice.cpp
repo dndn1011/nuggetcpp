@@ -134,6 +134,11 @@ namespace nugget {
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::dimension;
 		}
+		bool IsValueTypeMatrix4f(IDType id) {
+			assert(KeyExists(id));
+			auto& v = data.valueEntries.at(id);
+			return v.GetType() == ValueAny::Type::Matrix4f;
+		}
 		std::string GetString(IDType id) {
 			assert(KeyExists(id));
 			auto &v = data.valueEntries.at(id);
@@ -227,7 +232,11 @@ namespace nugget {
 				return nugget::Color(0.5, 0.5, 0.5, 1);
 			}
 		}
-
+		const Matrix4f& GetMatrix4f(IDType id) {
+			assert(KeyExists(id));
+			auto& v = data.valueEntries.at(id);
+			return v.AsMatrix4f();  // Assuming ValueAny has an AsMatrix4f method
+		}
 		void SetVoid(IDType id)
 		{
 			auto& entry = data.valueEntries[id];
@@ -267,6 +276,7 @@ namespace nugget {
 		template void Set<Vector2fList>(IDType id, const Vector2fList& value);
 		template void Set<ColorList>(IDType id, const ColorList& value);
 		template void Set<Vector2f>(IDType id, const Vector2f& value);
+		template void Set<Matrix4f>(IDType id, const Matrix4f& value);
 
 		void RegisterHandler(const Handler &handler) {
 			if (!data.handlers.contains(handler.changeId)) {

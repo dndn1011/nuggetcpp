@@ -22,6 +22,8 @@ namespace nugget {
 	ValueAny::ValueAny(const ColorList& v) : type(Type::ColorList), data{ .colorListPtr = new ColorList(v) } {}
 	ValueAny::ValueAny(const Vector3f& v) : type(Type::Vector3f), data{ .vector3fPtr = new Vector3f(v) } {}
 	ValueAny::ValueAny(const Vector2f& v) : type(Type::Vector2f), data{ .vector2fPtr = new Vector2f(v) } {}
+	ValueAny::ValueAny(const Matrix4f& v) : type(Type::Matrix4f), data{ .matrix4fPtr = new Matrix4f(v) } {}
+
 	ValueAny::ValueAny(const Exception& v) : type(Type::Exception), data{ .exceptionPtr = new Exception(v) } {}
 
 	ValueAny::ValueAny(const ValueAny& other) {
@@ -161,6 +163,12 @@ namespace nugget {
 		assert(NotDeleted()); 
 		assert(type == Type::Exception);
 		return *data.exceptionPtr;
+	}
+	const Matrix4f& ValueAny::AsMatrix4f() const
+	{
+		assert(NotDeleted());
+		assert(type == Type::Matrix4f);
+		return *data.matrix4fPtr;
 	}
 	IDType ValueAny::AsIDType() const {
 		assert(NotDeleted()); 
@@ -340,6 +348,16 @@ namespace nugget {
 			delete 	data.vector2fPtr;
 		}
 		data.vector2fPtr = new Vector2f(v);
+	}
+	void ValueAny::Set(const Matrix4f& v) {
+		if (type == Type::deleted) {
+			type = Type::Matrix4f;
+		}
+		assert(type == Type::Matrix4f);
+		if (data.matrix4fPtr != nullptr) {
+			delete 	data.matrix4fPtr;
+		}
+		data.matrix4fPtr = new Matrix4f(v);
 	}
 	void ValueAny::SetVoid() {
 		type = Type::void_;
