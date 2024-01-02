@@ -29,6 +29,11 @@ namespace nugget {
 		CopyFrom(other);
 	}
 
+	ValueAny::ValueAny(ValueAny&& other) noexcept {
+		assert(other.NotDeleted());
+		CopyFrom(other);
+	}
+
 	ValueAny& ValueAny::operator=(const ValueAny& other) {
 		assert(other.NotDeleted() && NotDeleted());
 		CopyFrom(other);
@@ -370,6 +375,8 @@ namespace nugget {
 		case Type::Color: {
 			delete data.colorPtr;
 		} break;
+
+			// not clearing some of the types!!  TODO
 		}
 	}
 

@@ -7,6 +7,7 @@
 #include "database/db.h"
 #include <unordered_map>
 #include "../../external/stb_image.h"
+#include "png.h"
 
 namespace nugget::asset {
     using namespace identifier;
@@ -80,11 +81,19 @@ namespace nugget::asset {
         if (textures.contains(id)) {
             return textures.at(id);
         } else {
-            auto r = textures.emplace(id, TextureData{});
-            TextureData& t = r.first->second;
-//            png = new PNGImage();
-//            bool r = LoadPNG(entry.path().string(), *png);
-//            assert(r);  
+            auto re = textures.emplace(std::piecewise_construct, std::forward_as_tuple(id), std::forward_as_tuple());
+            TextureData& t = re.first->second;
+            // look up the texture
+
+            std::string path;
+            bool r = db::LookupAsset(id, path);
+            if (!r) {
+                check(0, "No information available on asset '{}'\n", IDToString(id));
+                return t;
+            }
+            bool rl = Load(path, t);
+            assert(rl);  
+            return t;
         }
     }
 

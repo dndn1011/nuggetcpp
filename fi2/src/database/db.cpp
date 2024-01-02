@@ -7,7 +7,7 @@
 #include "db.h"
 
 namespace nugget::db {
-    using namespace identifier;
+    using namespace nugget::identifier;
     namespace N = Notice;
 
     bool DeleteAllFromTable(const std::string &str);
@@ -53,10 +53,47 @@ namespace nugget::db {
             SQL(sqlite3_bind_text(stmt, num, str.c_str(), -1, SQLITE_STATIC));
             return true;
         }
+        bool Bind(int num, IDType id) {
+            SQL(sqlite3_bind_int64(stmt, num, (int64_t)id));
+            return true;
+        }
         bool Step() {
+            int rc = sqlite3_step(stmt);
+            if (rc != SQLITE_ROW) {
+                return false;
+            }
+            return true;
+        }
+        bool Apply() {
             SQL2(sqlite3_step(stmt), SQLITE_DONE);
             return true;
         }
+
+        bool FetchRow(const std::vector<ValueAny::Type>& types, std::vector<ValueAny>& result) {
+            int col = 0;
+            for (auto&& x : types) {
+                switch (x) {
+                    case ValueAny::Type::int64_t_: {
+                        result.emplace_back(sqlite3_column_int64(stmt, col));
+                    }break;
+                    case ValueAny::Type::string: {
+                        auto text = sqlite3_column_text(stmt, col);
+                        std::string textstr(reinterpret_cast<const char *>(text));
+                        result.push_back(ValueAny(textstr));
+                    }break;
+                    case ValueAny::Type::IDType: {
+                        result.push_back(ValueAny((IDType)sqlite3_column_int64(stmt, col)));
+                    }break;
+                    default: {
+                        check(0, "unhandled type: {}\n", ValueAny::TypeAsString(x));
+                        return false;
+                    }
+                }
+                col++;
+            }
+            return true;
+        }
+
         bool Exec(const std::string& str) {
             SQL(sqlite3_exec(databaseConnection, str.c_str(), 0, 0, nullptr));
             return true;
@@ -83,10 +120,21 @@ namespace nugget::db {
         ERR(sql.Bind(2, path));
         ERR(sql.Bind(3, type));
         ERR(sql.Bind(4, description));
-        ERR(sql.Step());
+        ERR(sql.Apply());
         return true;
     }
 
+    bool LookupAsset(IDType id,std::string &result) {
+        SQLite sql;
+        ERR(sql.Query("select path from asset_meta where ? = nidhash(id)"));
+        ERR(sql.Bind(1, id));
+        ERR(sql.Step());
+        std::vector<ValueAny> results;
+        ERR(sql.FetchRow({ ValueAny::Type::string }, results));
+        result = results[0].AsString();
+        return true;
+    }
+          
     bool AddAsset(std::string path, std::string name, std::string type) {
             // SQL query for insertion
             const char* sqlQuery = "INSERT INTO assets (path, name, type, hash) VALUES (?, ?, ?, nidhash(?))";

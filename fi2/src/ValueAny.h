@@ -26,7 +26,7 @@ namespace nugget {
 		ValueAny(const ValueAny& other);
 		ValueAny& operator=(const ValueAny& other);
 		bool operator==(const ValueAny& other) const;
-		ValueAny(const ValueAny&& other) = delete;
+		ValueAny(ValueAny&& other) noexcept;
 
 		enum class Type {
 			void_,

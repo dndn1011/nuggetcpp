@@ -6,6 +6,7 @@
 #include "shader.h"
 #include "notice.h"
 #include "identifier.h"
+#include "asset/asset.h"
 
 namespace nugget::gl {
     using namespace nugget::identifier;
@@ -77,7 +78,7 @@ namespace nugget::gl {
         ShowWindow(hwnd, SW_SHOW);
 
         SetWindowPos(hwnd, NULL,
-            (int)Notice::GetInt64(IDR("properties.app.window.x")),
+            (int)Notice::GetInt64(ID("properties.app.window.x")),
             (int)Notice::GetInt64(IDR("properties.app.window.y")),
             0, 0, SWP_NOZORDER | SWP_NOSIZE);
 
@@ -269,6 +270,8 @@ namespace nugget::gl {
         GLuint VAO;
 
         IDType asset = Notice::GetID(ID("properties.testobj.section.texture"));
+        const nugget::asset::TextureData &data = nugget::asset::GetTexture(asset);
+            
 
 
         // Vertex Array Object (VAO)
