@@ -355,7 +355,7 @@ namespace nugget::gl {
         renderable.length = (GLsizei)Notice::GetInt64(lengthid);
         renderable.start = (GLint)Notice::GetInt64(startid);
         renderable.primitive = primitiveMap.at(Notice::GetID(primid));
-        renderable.shader = (GLuint) Notice::GetInt64(IDR(Notice::GetID(shaderid), IDR("program", IDR("glid"))));
+        renderable.shader = (GLuint)Notice::GetInt64(IDR({ Notice::GetID(shaderid), IDR("_internal"), IDR("_pglid") }));
 
         // Enable backface culling
 //        glEnable(GL_CULL_FACE);

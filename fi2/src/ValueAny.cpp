@@ -6,7 +6,7 @@
 namespace nugget {
 	using namespace identifier;
 
-	ValueAny::ValueAny() : type(Type::void_) {}
+	ValueAny::ValueAny() : type(Type::parent_) {}
 
 	ValueAny::ValueAny(int32_t v) : type(Type::int32_t_), data{ .int32_t_ = v } {}
 	ValueAny::ValueAny(int64_t v) : type(Type::int64_t_), data{ .int64_t_ = v } {}
@@ -23,6 +23,7 @@ namespace nugget {
 	ValueAny::ValueAny(const Vector3f& v) : type(Type::Vector3f), data{ .vector3fPtr = new Vector3f(v) } {}
 	ValueAny::ValueAny(const Vector2f& v) : type(Type::Vector2f), data{ .vector2fPtr = new Vector2f(v) } {}
 	ValueAny::ValueAny(const Matrix4f& v) : type(Type::Matrix4f), data{ .matrix4fPtr = new Matrix4f(v) } {}
+	ValueAny::ValueAny(const Vector4f& v) : type(Type::Vector4f), data{ .vector4fPtr = new Vector4f(v) } {}
 
 	ValueAny::ValueAny(const Exception& v) : type(Type::Exception), data{ .exceptionPtr = new Exception(v) } {}
 
@@ -70,7 +71,7 @@ namespace nugget {
 			case ValueAny::Type::Color: {
 				return *data.colorPtr == *other.data.colorPtr;
 			} break;
-			case ValueAny::Type::void_: {
+			case ValueAny::Type::parent_: {
 				return true;
 			} break;
 			case ValueAny::Type::dimension: {
@@ -85,8 +86,14 @@ namespace nugget {
 			case ValueAny::Type::Vector3f: {
 				return *data.vector3fPtr == *other.data.vector3fPtr;
 			} break;
+			case ValueAny::Type::Vector4f: {
+				return *data.vector4fPtr == *other.data.vector4fPtr;
+			} break;
 			case ValueAny::Type::Vector2f: {
 				return *data.vector2fPtr == *other.data.vector2fPtr;
+			} break;
+			case ValueAny::Type::Matrix4f: {
+				return *data.matrix4fPtr == *other.data.matrix4fPtr;
 			} break;
 			case ValueAny::Type::ColorList: {
 				return *data.colorListPtr == *other.data.colorListPtr;
@@ -145,7 +152,7 @@ namespace nugget {
 		case ValueAny::Type::ColorList: {
 			return data.colorListPtr->to_string();
 		} break;
-		case ValueAny::Type::void_: {
+		case ValueAny::Type::parent_: {
 			return "<void>";
 		} break;
 		default: {
@@ -154,7 +161,7 @@ namespace nugget {
 		}
 		return "<undefined>";
 	}
-	Color ValueAny::AsColor() const {
+	const Color& ValueAny::AsColor() const {
 		assert(NotDeleted());
 		assert(type == Type::Color);
 		return *data.colorPtr;
@@ -169,6 +176,12 @@ namespace nugget {
 		assert(NotDeleted());
 		assert(type == Type::Matrix4f);
 		return *data.matrix4fPtr;
+	}
+	const Vector4f& ValueAny::AsVector4f() const
+	{
+		assert(NotDeleted());
+		assert(type == Type::Vector4f);
+		return *data.vector4fPtr;
 	}
 	IDType ValueAny::AsIDType() const {
 		assert(NotDeleted()); 
@@ -359,8 +372,18 @@ namespace nugget {
 		}
 		data.matrix4fPtr = new Matrix4f(v);
 	}
-	void ValueAny::SetVoid() {
-		type = Type::void_;
+	void ValueAny::Set(const Vector4f& v) {
+		if (type == Type::deleted) {
+			type = Type::Vector4f;
+		}
+		assert(type == Type::Vector4f);
+		if (data.matrix4fPtr != nullptr) {
+			delete 	data.vector4fPtr;
+		}
+		data.vector4fPtr = new Vector4f(v);
+	}
+	void ValueAny::SetAsParent() {
+		type = Type::parent_;
 	}
 	void ValueAny::Set(const ValueAny& val) {
 		CopyFrom(val);
@@ -368,7 +391,7 @@ namespace nugget {
 
 	bool ValueAny::IsVoid() const {
 		assert(NotDeleted());
-		return type == Type::void_;
+		return type == Type::parent_;
 	}
 
 	bool ValueAny::IsException() const {
@@ -446,8 +469,18 @@ namespace nugget {
 					delete data.exceptionPtr;
 				}
 			} break;
+			case Type::Matrix4f: {
+				if (data.matrix4fPtr) {
+					delete data.matrix4fPtr;
+				}
+			} break;
+			case Type::Vector4f: {
+				if (data.vector4fPtr) {
+					delete data.vector4fPtr;
+				}
+			} break;
 			case Type::deleted:
-			case Type::void_:
+			case Type::parent_:
 			case Type::int64_t_:
 			case Type::uint64_t_:
 			case Type::int32_t_:
@@ -456,7 +489,8 @@ namespace nugget {
 			case Type::float_: {
 			} break;
 			default: {
-				assert(0);			}
+				assert(0);
+			}
 		}
 
 		type = other.type;
@@ -503,10 +537,16 @@ namespace nugget {
 			case Type::ColorList: {
 				data.colorListPtr = new ColorList(*other.data.colorListPtr);
 			} break;
+			case Type::Matrix4f: {
+				data.matrix4fPtr = new Matrix4f(*other.data.matrix4fPtr);
+			} break;
+			case Type::Vector4f: {
+				data.vector4fPtr = new Vector4f(*other.data.vector4fPtr);
+			} break;
 			case Type::pointer: {
 				data.ptr = other.data.ptr;
 			} break;
-			case Type::void_: {
+			case Type::parent_: {
 				/* do nothing */
 			} break;
 			default:
@@ -515,7 +555,7 @@ namespace nugget {
 	}
 	/*static*/
 	const std::unordered_map<ValueAny::Type, std::string> ValueAny::typeStringLookup = {
-		{ValueAny::Type::void_,"void"},
+		{ValueAny::Type::parent_,"void"},
 		{ValueAny::Type::int32_t_,"int32_t_"},
 		{ValueAny::Type::int64_t_,"int64_t_"},
 		{ValueAny::Type::uint64_t_,"uint64_t_"},
@@ -530,6 +570,8 @@ namespace nugget {
 		{ValueAny::Type::ColorList,"ColorList"},
 		{ValueAny::Type::Vector2f,"Vector2f"},
 		{ValueAny::Type::Exception,"Exception"},
+		{ValueAny::Type::Matrix4f,"Matrix4f"},
+		{ValueAny::Type::Matrix4f,"Vector4f"},
 	};
 
 

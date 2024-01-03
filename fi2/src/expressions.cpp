@@ -145,15 +145,20 @@ namespace nugget::expressions {
                     } break;
                     case Token::Type::openParen: {
                         // if previous is an identifier, this us a function call
-                        auto t = output.back();
-                        if (t.type == Token::Type::identifier) { 
-                            output.pop_back();
-                            output.push_back(Token{ .type = Token::Type::function,.text = t.text });
-                            inFunction.push_back(true);
+                        if (output.size() > 0) {
+                            auto t = output.back();
+                            if (t.type == Token::Type::identifier) {
+                                output.pop_back();
+                                output.push_back(Token{ .type = Token::Type::function,.text = t.text });
+                                inFunction.push_back(true);
+                            } else {
+                                inFunction.push_back(false);
+                            }
+                            operatorStack.push(token);
                         } else {
                             inFunction.push_back(false);
+                            operatorStack.push(token);
                         }
-                        operatorStack.push(token);
                     } break;
                     case Token::Type::closeParen: {
                         if (inFunction.size() < 1) {
@@ -521,7 +526,29 @@ namespace nugget::expressions {
                 a = b;
                 b = c;
             }
+
+            float bf = 0;
             switch (b.GetType()) {
+                case ValueAny::Type::float_:
+                    bf = b.AsFloat();
+                    goto scalar_product__;
+                case ValueAny::Type::int64_t_:
+                    bf = (float)b.AsInt64();
+                    scalar_product__:
+                {
+                    const auto& al = a.AsVector3fList();
+                    Vector3fList out;
+                    for (size_t i = 0; i < al.data.size(); i++) {
+                        switch (operation) {
+                            case EXPR_MULTIPLY:
+                                out.data.push_back(al.data[i] * bf);
+                                break;
+                            default:
+                                assert(0);
+                        }
+                    }
+                    return ValueAny(out);
+                }
                 case ValueAny::Type::Vector3fList: {
                     auto& al = a.AsVector3fList();
                     auto& bl = b.AsVector3fList();

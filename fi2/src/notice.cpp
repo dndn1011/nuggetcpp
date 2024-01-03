@@ -47,7 +47,7 @@ namespace nugget {
 		{
 			if (KeyExists(id)) {
 				const auto& entry = data.valueEntries.at(id);
-				if (entry.GetType() == ValueAny::Type::void_) {  // if it is a parent node
+				if (entry.GetType() == ValueAny::Type::parent_) {  // if it is a parent node
 					std::vector<IDType> children;
 					if (GetChildren(id, children/*fill*/)) {
 						// mark all children deleted first
@@ -139,6 +139,12 @@ namespace nugget {
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::Matrix4f;
 		}
+		bool IsValueTypeParent(IDType id) {
+			assert(KeyExists(id));
+			auto& v = data.valueEntries.at(id);
+			return v.GetType() == ValueAny::Type::parent_;
+		}
+
 		std::string GetString(IDType id) {
 			assert(KeyExists(id));
 			auto &v = data.valueEntries.at(id);
@@ -223,13 +229,22 @@ namespace nugget {
 			assert(0);
 			return data.valueEntries[id];
 		}
-		nugget::Color GetColor(IDType id) {
+		const nugget::Color &GetColor(IDType id) {
 			if (KeyExists(id)) {
-				auto &v = data.valueEntries[id];
+				auto& v = data.valueEntries[id];
 				assert(v.GetType() == ValueAny::Type::Color);
 				return v.AsColor();
 			} else {
-				return nugget::Color(0.5, 0.5, 0.5, 1);
+				return Color::defaultValue;
+			}
+		}
+		const nugget::Vector4f& GetVector4f(IDType id) {
+			if (KeyExists(id)) {
+				auto& v = data.valueEntries[id];
+				assert(v.GetType() == ValueAny::Type::Vector4f);
+				return v.AsVector4f();
+			} else {
+				return Vector4f::defaultValue;
 			}
 		}
 		const Matrix4f& GetMatrix4f(IDType id) {
@@ -237,10 +252,10 @@ namespace nugget {
 			auto& v = data.valueEntries.at(id);
 			return v.AsMatrix4f();  // Assuming ValueAny has an AsMatrix4f method
 		}
-		void SetVoid(IDType id)
+		void SetAsParent(IDType id)
 		{
 			auto& entry = data.valueEntries[id];
-			entry.SetVoid();
+			entry.SetAsParent();
 		}
 
 		template <typename T>
@@ -257,6 +272,7 @@ namespace nugget {
 					data.valueEntries[id].Set(value);
 				}
 			} else {
+				check(Notice::IsValueTypeParent(Notice::GetParent(id)), "Cannot make a child of a leaf node: {}\n",IDToString(id));
 				auto r = data.valueEntries.emplace(id,value);
 				check(r.second, ("Emplace failed"));
 			}
@@ -277,6 +293,7 @@ namespace nugget {
 		template void Set<ColorList>(IDType id, const ColorList& value);
 		template void Set<Vector2f>(IDType id, const Vector2f& value);
 		template void Set<Matrix4f>(IDType id, const Matrix4f& value);
+		template void Set<Vector4f>(IDType id, const Vector4f& value);
 
 		void RegisterHandler(const Handler &handler) {
 			if (!data.handlers.contains(handler.changeId)) {

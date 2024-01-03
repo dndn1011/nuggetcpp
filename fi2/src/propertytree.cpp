@@ -150,25 +150,42 @@ namespace nugget::properties {
         std::unordered_map<std::string, std::function<void()>> objectInitialisers = {
             {
                 "Color",[&]() {
-                    assert(initaliserList.size() == 4);
-                    float r = Expression::ConvertType(initaliserList[0], ValueAny::Type::float_).AsFloat();
-                    float g = Expression::ConvertType(initaliserList[1], ValueAny::Type::float_).AsFloat();
-                    float b = Expression::ConvertType(initaliserList[2], ValueAny::Type::float_).AsFloat();
-                    float a = Expression::ConvertType(initaliserList[3], ValueAny::Type::float_).AsFloat();
+                    assert(initialiserList.size() == 4);
+                    float r = Expression::ConvertType(initialiserList[0], ValueAny::Type::float_).AsFloat();
+                    float g = Expression::ConvertType(initialiserList[1], ValueAny::Type::float_).AsFloat();
+                    float b = Expression::ConvertType(initialiserList[2], ValueAny::Type::float_).AsFloat();
+                    float a = Expression::ConvertType(initialiserList[3], ValueAny::Type::float_).AsFloat();
                     IDType id = IDR(IDR(currentPathName), currentValueName);
                     Notice::Set(id,Color(r, g, b, a));
                 },
             },
             {
+                "Matrix4f", [&]() {
+                    check(initialiserList.size() == 16,"Incorrect number of arguments");
+
+                    // Create a 1D array of 16 floats for the 4x4 matrix
+                    float m[16];
+                    for (int i = 0; i < 16; ++i) {
+                        m[i] = Expression::ConvertType(initialiserList[i], ValueAny::Type::float_).AsFloat();
+                    }
+
+                    // Generate an ID for this matrix
+                    IDType id = IDR(IDR(currentPathName), currentValueName);
+
+                    // Set the notice with the matrix
+                    Notice::Set(id, Matrix4f(m));
+                },
+            },
+            {
                 "ColorList",[&]() {
-                    size_t size = initaliserList.size();
+                    size_t size = initialiserList.size();
                     assert(size / 4 * 4 == size);
                     ColorList cols;
                     for (int i = 0; i < size; i += 4) {
-                        auto v0 = initaliserList[i + 0];
-                        auto v1 = initaliserList[i + 1];
-                        auto v2 = initaliserList[i + 2];
-                        auto v3 = initaliserList[i + 3];
+                        auto v0 = initialiserList[i + 0];
+                        auto v1 = initialiserList[i + 1];
+                        auto v2 = initialiserList[i + 2];
+                        auto v3 = initialiserList[i + 3];
                         cols.data.push_back(Color {
                             Expression::ConvertType(v0,ValueAny::Type::float_).AsFloat(),
                             Expression::ConvertType(v1,ValueAny::Type::float_).AsFloat(),
@@ -182,23 +199,34 @@ namespace nugget::properties {
             },
             {
                 "Vector3f",[&]() {
-                    assert(initaliserList.size() == 3);
-                    float x = Expression::ConvertType(initaliserList[0], ValueAny::Type::float_).AsFloat();
-                    float y = Expression::ConvertType(initaliserList[1], ValueAny::Type::float_).AsFloat();
-                    float z = Expression::ConvertType(initaliserList[2], ValueAny::Type::float_).AsFloat();
+                    check(initialiserList.size() == 3,"Incorrect number of arguments");
+                    float x = Expression::ConvertType(initialiserList[0], ValueAny::Type::float_).AsFloat();
+                    float y = Expression::ConvertType(initialiserList[1], ValueAny::Type::float_).AsFloat();
+                    float z = Expression::ConvertType(initialiserList[2], ValueAny::Type::float_).AsFloat();
                     IDType id = IDR(IDR(currentPathName), currentValueName);
                     Notice::Set(id,Vector3f(x, y, z));
                 },
             },
             {
+                "Vector4f",[&]() {
+                    check(initialiserList.size() == 4,"Incorrect number of arguments");
+                    float x = Expression::ConvertType(initialiserList[0], ValueAny::Type::float_).AsFloat();
+                    float y = Expression::ConvertType(initialiserList[1], ValueAny::Type::float_).AsFloat();
+                    float z = Expression::ConvertType(initialiserList[2], ValueAny::Type::float_).AsFloat();
+                    float w = Expression::ConvertType(initialiserList[3], ValueAny::Type::float_).AsFloat();
+                    IDType id = IDR(IDR(currentPathName), currentValueName);
+                    Notice::Set(id,Vector4f(x, y, z, w));
+                },
+            },
+            {
                 "Vector3fList",[&]() {
-                    size_t size = initaliserList.size();
+                    size_t size = initialiserList.size();
                     assert(size / 3 * 3 == size);
                     Vector3fList verts;
                     for (int i = 0; i < size; i += 3) {
-                        auto v0 = initaliserList[i + 0];
-                        auto v1 = initaliserList[i + 1];
-                        auto v2 = initaliserList[i + 2];
+                        auto v0 = initialiserList[i + 0];
+                        auto v1 = initialiserList[i + 1];
+                        auto v2 = initialiserList[i + 2];
                         verts.data.push_back(Vector3f{
                             Expression::ConvertType(v0,ValueAny::Type::float_).AsFloat(),
                             Expression::ConvertType(v1,ValueAny::Type::float_).AsFloat(),
@@ -211,21 +239,21 @@ namespace nugget::properties {
             },
             {
                 "Vector2f",[&]() {
-                    assert(initaliserList.size() == 3);
-                    float x = Expression::ConvertType(initaliserList[0], ValueAny::Type::float_).AsFloat();
-                    float y = Expression::ConvertType(initaliserList[1], ValueAny::Type::float_).AsFloat();
+                    assert(initialiserList.size() == 3);
+                    float x = Expression::ConvertType(initialiserList[0], ValueAny::Type::float_).AsFloat();
+                    float y = Expression::ConvertType(initialiserList[1], ValueAny::Type::float_).AsFloat();
                     IDType id = IDR(IDR(currentPathName), currentValueName);
                     Notice::Set(id,Vector2f(x, y));
                 }
             },
             {
                 "Vector2fList",[&]() {
-                    size_t size = initaliserList.size();
+                    size_t size = initialiserList.size();
                     assert(size / 2 * 2 == size);
                     Vector2fList verts;
                     for (int i = 0; i < size; i += 2) {
-                        auto v0 = initaliserList[i + 0];
-                        auto v1 = initaliserList[i + 1];
+                        auto v0 = initialiserList[i + 0];
+                        auto v1 = initialiserList[i + 1];
                         verts.data.push_back(Vector2f{
                             Expression::ConvertType(v0,ValueAny::Type::float_).AsFloat(),
                             Expression::ConvertType(v1,ValueAny::Type::float_).AsFloat()
@@ -254,10 +282,10 @@ namespace nugget::properties {
                 }
             }
 //            output("-----------------> {} {}\n", IDToString(IDR(IDR(currentPathName), currentValueName)), currentTypeName);
-            check(objectInitialisers.contains(currentTypeName), "type not supported for initialiser list\n");
+            check(objectInitialisers.contains(currentTypeName), "type not supported for initialiser list {}\n", currentTypeName);
             objectInitialisers[currentTypeName]();
 
-            initaliserList.SetSize(0);
+            initialiserList.SetSize(0);
             return true;
         }
 
@@ -326,11 +354,11 @@ namespace nugget::properties {
         void NestWithCurrentBlock() {
             currentPathName = IDCombineStrings(currentPathName, currentBlockName);
             IDType id = identifier::Register(currentPathName);
+            Notice::SetAsParent(id);
             if (nestLevel > 0) {   // we do not bother counting the children of the root
                 childCounts.back()++;
                 Notice::Set(IDR(id, IDR("_seq")), childCounts.back());
             }
-            Notice::SetVoid(id);
             nestLevel++;
             childCounts.push_back(0);
         }
@@ -362,7 +390,7 @@ namespace nugget::properties {
         }
 
         void AddValueToInitialiserList(const ValueAny &val) {
-            initaliserList.emplace_back(val);
+            initialiserList.emplace_back(val);
         }
 
         void ClearType() {
@@ -489,93 +517,6 @@ namespace nugget::properties {
             }
         );
     }
-#if 0
-        [[nodiscard]] bool ParseAssignment() {
-            currentValue = "";
-            for (;;) {
-                if (currentValue == "@") {
-                    point++;
-                    if (point >= list.size()) {   // off end
-                        SetLineNumberToToken();
-                        parseState.description = std::format("unexpected end of input");
-                        return false;
-                    }
-                    ExtendCurrentValue(parseVariables.at(list[point - 1].text));
-                }
-                if (point >= list.size()) {   // off end
-                    SetLineNumberToToken();
-                    parseState.description = std::format("unexpected end of input");
-                    return false;
-                }
-                if (list[point].type == Token::Type::doubleColon) {
-                    point++;
-                    ExtendCurrentValue();
-                }
-                else if (list[point].type == Token::Type::doubleColon) {
-                    point++;
-                    ExtendCurrentValue();
-                }
-                else {
-                    break;
-                }
-                if (point >= list.size()) {   // off end
-                    SetLineNumberToToken();
-                    parseState.description = std::format("unexpected end of input");
-                    return false;
-                }
-                if (list[point].type == Token::Type::identifier) {
-                    point++;
-                    ExtendCurrentValue();
-                }
-                else {
-                    SetLineNumberToToken();
-                    parseState.description = std::format("malformed qualified name");
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        [[nodiscard]] bool TokenIsAssignment() {
-            std::string path = IDCombineStrings(currentPathName, currentValueName);
-            if (!ParseAssignment()) {
-                return false;
-            }
-
-            if (currentValueType == Token::Type::unset) {
-                // we don't know the type from the syntax, check if data already exists and has a type
-                if (Notice::KeyExists(IDR(path))) {
-                    currentValueType = GetTypeOfValue(IDR(path));
-                } else {
-                    currentValueType = list[point - 1].type;
-                }
-            }
-            if (currentValueType != list[point - 1].type) {
-                if (storers.contains({ list[point - 1].type, currentValueType })) {
-                    auto& storer = storers[{ list[point - 1].type, currentValueType }];
-                    storer(currentValue, path);
-                } else {
-                    SetLineNumberToToken();
-                    parseState.description = std::format("type mismatch in assignment: cannot assign {} to {}",
-                        list[point - 1].TypeAsString(), Token::TypeAsString(currentValueType));
-                    return false;
-                }
-            } else {
-                if (parseVariableMode) {
-                    SetCurrentValue();
-                    parseVariables[currentValueName] = currentValue;
-                    parseVariableMode = false;
-                } else {
-                    StoreValue();
-                }
-            }
-            return true;
-        }
-        bool NextTokenIsAssignment() {
-            NextTokenType();
-            return TokenIsAssignment();
-        }
-#endif
 
         [[nodiscard]] bool ExpectSemicolon() {
             if (NextTokenType() != Token::Type::semicolon) {
@@ -593,7 +534,7 @@ namespace nugget::properties {
             IDType fromId = IDR(fromstr);
             IDType toId = IDR(tostr);
             std::vector<IDType> children;
-            Notice::SetVoid(toId);
+            Notice::SetAsParent(toId);
 
             if (auto r = !Notice::GetChildren(fromId, children /*fill*/)) {
                 parseState.description = std::format("The class to Derive from could not be found or is empty: {}", fromstr);
@@ -678,14 +619,14 @@ namespace nugget::properties {
         size_t uniqueNameCounter = 0;
 
 
-        StableVector<ValueAny,100> initaliserList;
+        StableVector<ValueAny,100> initialiserList;
         std::vector<std::string> literalLines;
     };
 }
 
 namespace nugget::properties {
     bool GrammarParse(std::string rootName, std::vector<Token>& list,ParseState &parseState) {
-        Notice::SetVoid(IDR(rootName));
+        Notice::SetAsParent(IDR(rootName));
         GrammarParseData pdata(rootName, list,parseState);
         while (!pdata.AtEnd()) {
             /////////////////////////////////////////////
@@ -874,7 +815,12 @@ namespace nugget::properties {
                             switch (pdata.NextTokenType()) {
                                 case Token::Type::equals: {
                                     pdata.NextToken();
-                                    pdata.parseVariables[IDR(pdata.GetCurrentValueName())] = pdata.ParseExpressionToValue();
+                                    ValueAny val = pdata.ParseExpressionToValue();
+                                    pdata.parseVariables[IDR(pdata.GetCurrentValueName())] = val;
+                                    if (pdata.GetCurrentValueName() == "stop" && val.AsInt64() == 1) {
+                                        parseState.successful = true;
+                                        return false;
+                                    }
                                 } break;
                                 default: {
                                     output("vvvvvvvvvvvvvvvvvvv\n");

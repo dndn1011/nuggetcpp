@@ -28,6 +28,8 @@ namespace nugget::properties {
         {"ColorList",Type::ColorList},
         {"Vector2f",Type::Vector2f},
         {"Vector3f",Type::Vector3f},
+        {"Vector4f",Type::Vector4f},
+        {"Matrix4f",Type::Matrix4f},
     };
 
     Token TokenisebyRegex(Token::Type type, const std::string regex, const std::string& next, size_t& point, bool& ok, size_t lineNumber) {

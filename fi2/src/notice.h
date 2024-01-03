@@ -32,7 +32,7 @@ namespace nugget {
 		int64_t			GetInt64(IDType id);
 		uint64_t		GetUint64(IDType id);
 		float			GetFloat(IDType id);
-		nugget::Color	GetColor(IDType id);
+		const nugget::Color&	GetColor(IDType id);
 		IDType			GetID(IDType id);
 		const ValueAny& GetValueAny(IDType id);
 		void*           GetPointer(IDType id);
@@ -44,6 +44,7 @@ namespace nugget {
 		const ColorList& GetColorList(IDType id);
 		bool GetColorList(IDType id, ColorList& result);
 		const Matrix4f& GetMatrix4f(IDType id);
+		const Vector4f& GetVector4f(IDType id);
 
 		std::string AsString(IDType id);
 		std::string GetValueTypeAsString(const ValueAny& var);
@@ -51,7 +52,7 @@ namespace nugget {
 		template <typename T>
 		void Set(IDType id, const T& value);
 
-		void SetVoid(IDType id);
+		void SetAsParent(IDType id);
 
 		void Remove(IDType id);
 
@@ -64,6 +65,7 @@ namespace nugget {
 		bool IsValueTypeColor(IDType id);
 		bool IsValueTypeDimension(IDType id);
 		bool IsValueTypeVertices(IDType id);
+		bool IsValueTypeParent(IDType id);
 		bool IsValueTypeMatrix4f(IDType id);
 
 		void RegisterHandler(const Handler& handler);

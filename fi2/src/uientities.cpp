@@ -73,12 +73,13 @@ namespace nugget::ui::entity {
 				Notice::Set(to, valueFrom);
 			}
 		} else {
-//			output("Removed {}\n", IDToString(to).c_str());
+			output("Removed {}\n", IDToString(to).c_str());
 			Notice::Remove(to);
 		}
 		std::vector<IDType> children;
 		if (auto r = Notice::GetChildren(to,children /*fill*/)) {
 			for (auto& x : children) {
+		//		output("-------->{}\n", IDToString(x));
 				IDType newFrom = IDR(from, GetLeaf(x));
 				UpdateEntityRecursive(x,newFrom);
 			}

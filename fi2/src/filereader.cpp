@@ -1,5 +1,8 @@
 #include "filereader.h"
-#include <assert.h>
+#include "debug.h"
+
+#include <thread>
+#include <chrono>
 
 namespace nugget {
     FileReader::FileReader(const std::string& filename) : filename(filename), buffer(chunkSize, '\0'), lastReadPosition(std::streampos(0)) {}
@@ -7,7 +10,7 @@ namespace nugget {
     // Read up to 512 bytes from the specified position in the file
     std::string FileReader::readBytesFromPosition(std::streampos position) {
 
-        assert(file.is_open());
+        check(file.is_open(),"file closed?");
 
         std::streampos newPosition = position;
 
@@ -40,7 +43,12 @@ namespace nugget {
     }
 
     void FileReader::Open() {
-        file = std::ifstream(filename, std::ios::binary);
+        int count;
+        for (count = 0, file = std::ifstream(filename, std::ios::binary);
+            !file.is_open() || count > 10;
+            std::this_thread::sleep_for(std::chrono::milliseconds(100)), count++) {
+        }
+        check(file.is_open(), "Could not open file: {}\n", filename);
     }
 
     FileReader::~FileReader() {

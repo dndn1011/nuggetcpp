@@ -24,6 +24,7 @@ namespace nugget {
         explicit ValueAny(const Vector3f& v);
         explicit ValueAny(const Vector2f& v);
         explicit ValueAny(const Matrix4f& v);
+        explicit ValueAny(const Vector4f& v);
 
         // Copy constructor and assignment operator
         ValueAny(const ValueAny& other);
@@ -40,7 +41,7 @@ namespace nugget {
 
         // Type enumeration with new Matrix4f type
         enum class Type {
-            void_,
+            parent_,
             int32_t_,
             int64_t_,
             uint64_t_,
@@ -57,6 +58,7 @@ namespace nugget {
             Vector3f,
             Vector2f,
             Matrix4f,
+            Vector4f,
 
             deleted
         };
@@ -65,7 +67,7 @@ namespace nugget {
         static std::string TypeAsString(ValueAny::Type type);
         std::string TypeAsString() const;
         std::string AsString() const;
-        Color AsColor() const;
+        const Color& AsColor() const;
         identifier::IDType AsIDType() const;
         int32_t AsInt32() const;
         int64_t AsInt64() const;
@@ -80,6 +82,7 @@ namespace nugget {
         const Vector3f& AsVector3f() const;
         const Exception& AsException() const;
         const Matrix4f& AsMatrix4f() const;
+        const Vector4f& AsVector4f() const;
 
         // Existing Set methods
         void Set(std::string val);
@@ -96,14 +99,13 @@ namespace nugget {
         void Set(const Vector2fList& vects);
         void Set(const ColorList& vects);
         void Set(const Vector3f& vect);
+        void Set(const Vector4f& vect);
         void Set(const Vector2f& vect);
         void Set(const Exception& exception);
-
-        // New Set method for Matrix4f
         void Set(const Matrix4f& mat);
 
         // Additional methods
-        void SetVoid();
+        void SetAsParent();
         bool IsVoid() const;
         bool IsException() const;
         bool NotDeleted() const;
@@ -126,12 +128,13 @@ namespace nugget {
             Vector3fList* vector3fListPtr;
             Vector2fList* vector2fListPtr;
             ColorList* colorListPtr;
+            Vector4f* vector4fPtr;
             Vector3f* vector3fPtr;
             Vector2f* vector2fPtr;
             Matrix4f* matrix4fPtr;  // Pointer to Matrix4f
         } data = {};
 
-        Type type = Type::void_;
+        Type type = Type::parent_;
 
         static const std::unordered_map<Type, std::string> typeStringLookup;
 

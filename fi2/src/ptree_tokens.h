@@ -46,6 +46,8 @@ __PTREE_TOKEN(dollar)
 __PTREE_TOKEN(Vector3f)
 __PTREE_TOKEN(Vector2f)
 __PTREE_TOKEN(uMinus)
+__PTREE_TOKEN(Vector4f)
+__PTREE_TOKEN(Matrix4f)
 
 ////////////////////////////////////////
 

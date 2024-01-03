@@ -101,31 +101,35 @@ namespace nugget::gl {
         IDType fragmentNode = IDR(node, ID("fragment"));
         IDType programNode = IDR(node, IDR("program"));
 
-        IDType vertexIdNode = IDR(vertexNode, IDR("glid"));
-        IDType geometryIdNode = IDR(geometryNode, IDR("glid"));
-        IDType fragmentIdNode = IDR(fragmentNode, IDR("glid"));
-        IDType programIdNode = IDR(programNode, IDR("glid"));
+        IDType vertexIdNode = IDR({ node, IDR("_internal"),IDR("_vglid") });
+        IDType geometryIdNode = IDR({ node, IDR("_internal"),IDR("_gglid") });
+        IDType fragmentIdNode = IDR({ node, IDR("_internal"),IDR("_fglid") });
+        IDType programIdNode = IDR({ node, IDR("_internal"),IDR("_pglid") });
         // e.g. properties.shaders.foo.program.glid
 
         if (Notice::KeyExists(programIdNode)) {
-            if (auto id = Notice::GetInt64(programIdNode) != 0) {
-                glDeleteProgram(id);
+            auto id = Notice::GetUint64(programIdNode);
+            if (id) {
+                glDeleteProgram((GLuint)id);
             }
         }
         if (Notice::KeyExists(vertexIdNode)) {
-            if (auto id = Notice::GetInt64(vertexIdNode) != 0) {
-                glDeleteShader(id);
+            auto id = Notice::GetUint64(vertexIdNode);
+            if (id) {
+                glDeleteShader((GLuint)id);
             }
         }
         if (Notice::KeyExists(geometryIdNode)) {
-            if (auto id = Notice::GetInt64(geometryIdNode) != 0) {
-                glDeleteShader(id);
+            auto id = Notice::GetUint64(geometryIdNode);
+            if (id) {
+                glDeleteShader((GLuint)id);
             }
 
         }
         if (Notice::KeyExists(fragmentIdNode)) {
-            if (auto id = Notice::GetInt64(fragmentIdNode) != 0) {
-                glDeleteShader(id);
+            auto id = Notice::GetUint64(fragmentIdNode);
+            if (id) {
+                glDeleteShader((GLuint)id);
             }
         }
 
@@ -133,6 +137,7 @@ namespace nugget::gl {
         std::string geometryShaderSource = Notice::GetString(geometryNode);
         std::string fragmentShaderSource = Notice::GetString(fragmentNode);
 
+            
         // Geometry Shader
         GLuint geometryShader = {};
         geometryShader = CompileShader(geometryShaderSource, GL_GEOMETRY_SHADER);

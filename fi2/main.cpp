@@ -80,7 +80,23 @@ int main(int argc, char* argv[]) {
             outputAlways("Parse state:\n{}({}): {}\n", absfilename.string(), result.lineNumber, result.description);
             return 1;
         }
+
     }   
+
+    std::vector<IDType> list;
+    Notice::GetChildrenWithNodeExisting(ID("properties.tests"), ID("mat"), list);
+    for (auto&& x : list) {
+        Matrix4f mat = Notice::GetMatrix4f(IDR(x, ID("mat")));
+        Vector4f vec = Notice::GetVector4f(IDR(x, ID("vec")));
+        Vector4f expected = Notice::GetVector4f(IDR(x, ID("result")));
+        Vector4f value = mat * vec;
+        if (value != expected) {
+            output("ERROR {} {} {}\n",IDToString(x),expected.to_string(),value.to_string());
+        }
+    }
+
+    auto result = Notice::GetVector4f(ID("properties.result"));
+
 
     nugget::system::Init();
 
@@ -137,7 +153,7 @@ int main(int argc, char* argv[]) {
         if (watcher.Check()) {
             ReloadPt(filename);
         }
-        });
+    });
 
     getchar();
 
