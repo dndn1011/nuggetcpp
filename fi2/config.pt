@@ -668,11 +668,11 @@ shaders {
                     vec4 b = mix(colv_f[2],colv_f[3],uv_f.y);
                     vec4 c = mix(a,b,uv_f.x);
 
-                    vec2 r = vec2(uv_f.y,-uv_f.x);
+                    vec2 r = vec2(-uv_f.y,-uv_f.x)*1.0;
 
     //                FragColor = c;
    //                 FragColor = vec4(1,0,0,1);
-                        FragColor = texture(quadTexture, r);
+                        FragColor = texture(quadTexture, r) + c/2;
                 }
 
 >>;
@@ -713,13 +713,20 @@ testobj {
     section {
         texture = spaceship;
 
+        renderMatrix : Matrix4f = {
+            2,0,0,0,
+            0,2,0,0,
+            0,0,2,0,
+            0,0,0,1,
+        };
+
         shader = @root.shaders.biquad;
         primitive = GL_TRIANGLES_ADJACENCY;
         start = 0;
-        length = 18;
+        length = 24;
 
         @scale = 1.0;
-        v : Vector3f = { 0.5,0.0,0.0 };
+        v : Vector3f = { 0.5,0.2,0.0 };
         s : Vector3f = { @scale,@scale,@scale };
 
 //        v1 = (ref(@root.quad.verts)*ref(@here.s)) - ref(@here.v) * 2.5;
@@ -727,19 +734,23 @@ testobj {
 //        v3 = (ref(@root.quad.verts)*ref(@here.s)) - ref(@here.v) * -2.5;
 
         /////////////////////////////////////////
-        v1 = ref(@root.quad.verts)*ref(@here.s)*2 + ref(@here.v) * 1.5;
-        v2 = ref(@root.quad.verts)*ref(@here.s)*1.5 + ref(@here.v) * 0.0;
-        v3 = ref(@root.quad.verts)*ref(@here.s)*0.75 + ref(@here.v) * -1.5;
+
+        j : Vector3f = { 0.0,0.1,0.0};
+
+        v1 = ref(@root.quad.verts)*ref(@here.s)*0.5 + ref(@here.v) * 0.8+ ref(@here.j);
+        v2 = ref(@root.quad.verts)*ref(@here.s)*0.8 + ref(@here.v) * 0.0 + ref(@here.j);
+        v3 = ref(@root.quad.verts)*ref(@here.s)*1.2 + ref(@here.v) * -1.25;
+        v4 = ref(@root.quad.verts)*ref(@here.s)*0.4 + ref(@here.v) * 1.4;
 
         u1 = ref(@root.quad.uvs);
 
 //        verts = concat(ref(@here.v1),ref(@here.v2),ref(@here.v3));
         
         /////////////////////////////////////////
-        verts = concat(ref(@here.v1),ref(@here.v2),ref(@here.v3));
+        verts = concat(ref(@here.v1),ref(@here.v2),ref(@here.v3),ref(@here.v4));
 
-        uvs = concat(ref(@root.quad.uvs),ref(@root.quad.uvs),ref(@root.quad.uvs));
-        colors = concat(ref(@root.quad.colors),ref(@root.quad.colors),ref(@root.quad.colors));
+        uvs = concat(ref(@root.quad.uvs),ref(@root.quad.uvs),ref(@root.quad.uvs),ref(@root.quad.uvs));
+        colors = concat(ref(@root.quad.colors),ref(@root.quad.colors),ref(@root.quad.colors),ref(@root.quad.colors));
 
 //        verts = ref(@root.quad.verts);
 //        uvs = ref(@root.quad.uvs);

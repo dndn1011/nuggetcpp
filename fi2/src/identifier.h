@@ -76,8 +76,10 @@ namespace nugget {
         IDType IDR(const std::string_view str);
         IDType IDRCheck(IDType hash1, const std::string_view str2);
 
+        IDType GetParentTry(IDType child);
+
         IDType IDR(const std::vector<std::string>& strings);
-        IDType IDR(const std::vector<IDType>& ids);
+        //IDType IDR(const std::vector<IDType>& ids);
         
         std::string IDCombineStrings(const std::string &a, const std::string& b);
         void IDCombineStringsInPlace(const std::string& a, const std::string& b, std::string &result);

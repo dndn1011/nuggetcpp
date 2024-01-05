@@ -140,11 +140,13 @@ namespace nugget {
 			return v.GetType() == ValueAny::Type::Matrix4f;
 		}
 		bool IsValueTypeParent(IDType id) {
-			assert(KeyExists(id));
-			auto& v = data.valueEntries.at(id);
-			return v.GetType() == ValueAny::Type::parent_;
+			if (!KeyExists(id)) {
+				return false;   // the parent node should exist and be of type 'parent'
+			} else {
+				auto& v = data.valueEntries.at(id);
+				return v.GetType() == ValueAny::Type::parent_;
+			}
 		}
-
 		std::string GetString(IDType id) {
 			assert(KeyExists(id));
 			auto &v = data.valueEntries.at(id);
@@ -272,7 +274,8 @@ namespace nugget {
 					data.valueEntries[id].Set(value);
 				}
 			} else {
-				check(Notice::IsValueTypeParent(Notice::GetParent(id)), "Cannot make a child of a leaf node: {}\n",IDToString(id));
+				auto parent = Notice::GetParentTry(id);
+				check(parent != IDType::null && Notice::IsValueTypeParent(parent), "Cannot make a child of a leaf node, or parent does not exist: {}\n",IDToString(id));
 				auto r = data.valueEntries.emplace(id,value);
 				check(r.second, ("Emplace failed"));
 			}

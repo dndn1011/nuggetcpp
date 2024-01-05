@@ -99,7 +99,7 @@ namespace nugget::gl {
         GLuint shader;
     };
 
-    Renderable renderable;
+    static Renderable renderable;
 
     GLuint textureID;
 
@@ -325,10 +325,10 @@ namespace nugget::gl {
         IDType vid = IDR("properties.testobj.section.verts");
         IDType uid = IDR("properties.testobj.section.uvs");
         IDType cid = IDR("properties.testobj.section.colors");
-        IDType startid = IDR("properties.testobj.section.start");
-        IDType lengthid = IDR("properties.testobj.section.length");
-        IDType primid = IDR("properties.testobj.section.primitive");
-        IDType shaderid = IDR("properties.testobj.section.shader");
+        IDType startNoticeID = IDR("properties.testobj.section.start");
+        IDType lengthNoticeID = IDR("properties.testobj.section.length");
+        IDType primNoticeID = IDR("properties.testobj.section.primitive");
+        IDType shaderNoideHash = IDR("properties.testobj.section.shader");
 
         Notice::RegisterHandler(Notice::Handler(vid, [](IDType vid) {
             ApplyRenderingData();
@@ -339,23 +339,29 @@ namespace nugget::gl {
         Notice::RegisterHandler(Notice::Handler(cid, [](IDType cid) {
             ApplyRenderingData();
             }));
-        Notice::RegisterHandler(Notice::Handler(startid, [](IDType startid) {
+        Notice::RegisterHandler(Notice::Handler(startNoticeID, [](IDType startid) {
             renderable.start = (GLint)Notice::GetInt64(startid);
             }));
-        Notice::RegisterHandler(Notice::Handler(lengthid, [](IDType lengthid) {
+        Notice::RegisterHandler(Notice::Handler(lengthNoticeID, [](IDType lengthid) {
             renderable.length = (GLint)Notice::GetInt64(lengthid);
             }));
-        Notice::RegisterHandler(Notice::Handler(primid, [&](IDType primid) {
+        Notice::RegisterHandler(Notice::Handler(primNoticeID, [&](IDType primid) {
             renderable.primitive = primitiveMap.at(Notice::GetID(primid));
             }));
 
         CompileShaderFromProperties(IDR("properties.shaders.biquad"));
 
+        IDType shaderProgramNoticeID = IDR({ IDToString(Notice::GetID(shaderNoideHash)), "_internal", "_pglid" });
+
         renderable.buffer = VAO;
-        renderable.length = (GLsizei)Notice::GetInt64(lengthid);
-        renderable.start = (GLint)Notice::GetInt64(startid);
-        renderable.primitive = primitiveMap.at(Notice::GetID(primid));
-        renderable.shader = (GLuint)Notice::GetInt64(IDR({ Notice::GetID(shaderid), IDR("_internal"), IDR("_pglid") }));
+        renderable.length = (GLsizei)Notice::GetInt64(lengthNoticeID);
+        renderable.start = (GLint)Notice::GetInt64(startNoticeID);
+        renderable.primitive = primitiveMap.at(Notice::GetID(primNoticeID));
+        renderable.shader = (GLuint)Notice::GetInt64(shaderProgramNoticeID);
+
+        Notice::RegisterHandler(Notice::Handler(shaderProgramNoticeID, [shaderProgramNoticeID](IDType id) {
+            renderable.shader = (GLuint)Notice::GetInt64(shaderProgramNoticeID);
+            }));
 
         // Enable backface culling
 //        glEnable(GL_CULL_FACE);

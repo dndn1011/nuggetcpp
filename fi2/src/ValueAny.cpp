@@ -6,7 +6,7 @@
 namespace nugget {
 	using namespace identifier;
 
-	ValueAny::ValueAny() : type(Type::parent_) {}
+	ValueAny::ValueAny() : type(Type::void_) {}
 
 	ValueAny::ValueAny(int32_t v) : type(Type::int32_t_), data{ .int32_t_ = v } {}
 	ValueAny::ValueAny(int64_t v) : type(Type::int64_t_), data{ .int64_t_ = v } {}
@@ -72,7 +72,7 @@ namespace nugget {
 				return *data.colorPtr == *other.data.colorPtr;
 			} break;
 			case ValueAny::Type::parent_: {
-				return true;
+				check(0, "should not compare a parent!");
 			} break;
 			case ValueAny::Type::dimension: {
 				return *data.dimensionPtr == *other.data.dimensionPtr;
@@ -97,6 +97,21 @@ namespace nugget {
 			} break;
 			case ValueAny::Type::ColorList: {
 				return *data.colorListPtr == *other.data.colorListPtr;
+			} break;
+			case ValueAny::Type::void_: {
+				check(0, "should not compare a void!");
+				return false;
+			} break;
+			case ValueAny::Type::deleted: {
+				check(0, "should not compare deleted!");
+				return false;
+			} break;
+			case ValueAny::Type::pointer: {
+				return data.ptr == other.data.ptr;
+			} break;
+			case ValueAny::Type::Exception: {
+				check(0, "unimplemented");
+				return false;
 			} break;
 			default: {
 				assert(0);
@@ -153,6 +168,30 @@ namespace nugget {
 			return data.colorListPtr->to_string();
 		} break;
 		case ValueAny::Type::parent_: {
+			return "<parent>";
+		} break;
+		case ValueAny::Type::deleted: {
+			return "<deleted>";
+		} break;
+		case ValueAny::Type::pointer: {
+			return std::format("{:16x}", (size_t)data.ptr);
+		} break;
+		case ValueAny::Type::Exception: {
+			return data.exceptionPtr->description;
+		} break;
+		case ValueAny::Type::Vector4f: {
+			return data.vector4fPtr->to_string();
+		} break;
+		case ValueAny::Type::Vector3f: {
+			return data.vector3fPtr->to_string();
+		} break;
+		case ValueAny::Type::Vector2f: {
+			return data.vector2fPtr->to_string();
+		} break;
+		case ValueAny::Type::Matrix4f: {
+			return data.matrix4fPtr->to_string();
+		} break;
+		case ValueAny::Type::void_: {
 			return "<void>";
 		} break;
 		default: {
@@ -405,80 +444,87 @@ namespace nugget {
 	}
 
 	void ValueAny::MarkDeleted() {
+		FreeCurrentValue();
 		type = Type::deleted;
 	}
 
 	ValueAny::~ValueAny() {
-		switch (type) {
-		case Type::string: {
-			delete data.stringPtr;
-		} break;
-		case Type::Color: {
-			delete data.colorPtr;
-		} break;
-
-			// not clearing some of the types!!  TODO
-		}
+		FreeCurrentValue();
 	}
 
 	ValueAny::Type ValueAny::GetType() const {
 		return type;
 	}
 
-
-	void ValueAny::CopyFrom(const ValueAny& other) {
-		assert(other.NotDeleted());
+	void ValueAny::FreeCurrentValue() {
 		switch (type) {
 			case Type::Color: {
 				if (data.colorPtr) {
 					delete data.colorPtr;
+					data.colorPtr = nullptr;
 				}
 			} break;
 			case Type::string: {
 				if (data.stringPtr) {
 					delete data.stringPtr;
+					data.stringPtr = nullptr;
 				}
 			} break;
 			case Type::dimension: {
 				if (data.dimensionPtr) {
 					delete data.dimensionPtr;
+					data.dimensionPtr = nullptr;
 				}
 			} break;
 			case Type::Vector3fList: {
 				if (data.vector3fListPtr) {
 					delete data.vector3fListPtr;
+					data.vector3fListPtr = nullptr;
 				}
 			} break;
 			case Type::Vector3f: {
 				if (data.vector3fPtr) {
 					delete data.vector3fPtr;
+					data.vector3fPtr = nullptr;
+				}
+			} break;
+			case Type::Vector2f: {
+				if (data.vector2fPtr) {
+					delete data.vector2fPtr;
+					data.vector2fPtr = nullptr;
 				}
 			} break;
 			case Type::ColorList: {
 				if (data.colorListPtr) {
 					delete data.colorListPtr;
+					data.colorListPtr = nullptr;
 				}
 			} break;
 			case Type::Vector2fList: {
 				if (data.vector2fListPtr) {
 					delete data.vector2fListPtr;
+					data.vector2fListPtr = nullptr;
 				}
 			} break;
 			case Type::Exception: {
 				if (data.exceptionPtr) {
 					delete data.exceptionPtr;
+					data.exceptionPtr = nullptr;
 				}
 			} break;
 			case Type::Matrix4f: {
 				if (data.matrix4fPtr) {
 					delete data.matrix4fPtr;
+					data.matrix4fPtr = nullptr;
 				}
 			} break;
 			case Type::Vector4f: {
 				if (data.vector4fPtr) {
 					delete data.vector4fPtr;
+					data.vector4fPtr = nullptr;
 				}
 			} break;
+			case Type::void_:
 			case Type::deleted:
 			case Type::parent_:
 			case Type::int64_t_:
@@ -487,11 +533,18 @@ namespace nugget {
 			case Type::IDType:
 			case Type::pointer:
 			case Type::float_: {
+				// no action needed
 			} break;
 			default: {
 				assert(0);
 			}
 		}
+	}
+
+	void ValueAny::CopyFrom(const ValueAny& other) {
+		assert(other.NotDeleted());
+		
+		FreeCurrentValue();
 
 		type = other.type;
 		switch (type) {
@@ -549,13 +602,18 @@ namespace nugget {
 			case Type::parent_: {
 				/* do nothing */
 			} break;
-			default:
-				assert(("unhandled type copy", 0));
+			case Type::void_: {
+				check(0, "We really should not be trying to copy voids...");
+			} break;
+			case Type::deleted: {
+				check(0, "We really should not be trying to copy deleted...");
+			} break;
 		}
 	}
 	/*static*/
 	const std::unordered_map<ValueAny::Type, std::string> ValueAny::typeStringLookup = {
-		{ValueAny::Type::parent_,"void"},
+		{ValueAny::Type::void_,"void_"},
+		{ValueAny::Type::parent_,"parent_"},
 		{ValueAny::Type::int32_t_,"int32_t_"},
 		{ValueAny::Type::int64_t_,"int64_t_"},
 		{ValueAny::Type::uint64_t_,"uint64_t_"},

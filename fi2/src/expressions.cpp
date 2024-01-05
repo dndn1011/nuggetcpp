@@ -432,6 +432,9 @@ namespace nugget::expressions {
                 case Token::Type::Color: {
                     check(0, "not implemented");
                 } break;
+                default: {
+                    check(0, "unhandled");
+                } break;
             }
             check(0, "cannot parse token");
             return {};

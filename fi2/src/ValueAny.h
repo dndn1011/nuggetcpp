@@ -41,6 +41,7 @@ namespace nugget {
 
         // Type enumeration with new Matrix4f type
         enum class Type {
+            void_,
             parent_,
             int32_t_,
             int64_t_,
@@ -134,10 +135,11 @@ namespace nugget {
             Matrix4f* matrix4fPtr;  // Pointer to Matrix4f
         } data = {};
 
-        Type type = Type::parent_;
+        Type type = Type::void_;
 
         static const std::unordered_map<Type, std::string> typeStringLookup;
 
         void CopyFrom(const ValueAny& other);
+        void FreeCurrentValue();
     };
 }

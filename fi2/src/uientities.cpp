@@ -61,6 +61,9 @@ namespace nugget::ui::entity {
 	// and sync
 	void UpdateEntityRecursive(IDType to, IDType from) {
 		//output("checking: %s <- %s : %zu %zu\n", IDToString(to).c_str(), IDToString(from).c_str(),to,from);
+		if (GetLeaf(to) == ID("_internal")) {
+			return;
+		}
 		if (Notice::KeyExists(from)) {
 			// both exist
 			ValueAny valueTo = Notice::GetValueAny(to);

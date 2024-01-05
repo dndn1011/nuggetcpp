@@ -9,6 +9,7 @@ namespace nugget::gl {
 
     // Function to compile a shader and check for compilation errors
     GLuint CompileShader(const std::string& shaderSource, GLenum shaderType) {
+       
         GLuint shader = glCreateShader(shaderType);
         const GLchar* source = shaderSource.c_str();
         glShaderSource(shader, 1, &source, nullptr);
@@ -101,10 +102,13 @@ namespace nugget::gl {
         IDType fragmentNode = IDR(node, ID("fragment"));
         IDType programNode = IDR(node, IDR("program"));
 
-        IDType vertexIdNode = IDR({ node, IDR("_internal"),IDR("_vglid") });
-        IDType geometryIdNode = IDR({ node, IDR("_internal"),IDR("_gglid") });
-        IDType fragmentIdNode = IDR({ node, IDR("_internal"),IDR("_fglid") });
-        IDType programIdNode = IDR({ node, IDR("_internal"),IDR("_pglid") });
+        std::string nodeStr = IDToString(node);
+        Notice::SetAsParent(IDR({ nodeStr, "_internal" }));
+        IDType vertexIdNode = IDR({ nodeStr, "_internal","_vglid" });
+        IDType geometryIdNode = IDR({ nodeStr, "_internal","_gglid" });
+        IDType fragmentIdNode = IDR({ nodeStr, "_internal","_fglid" });
+        IDType programIdNode = IDR({ nodeStr, "_internal","_pglid" });
+
         // e.g. properties.shaders.foo.program.glid
 
         if (Notice::KeyExists(programIdNode)) {

@@ -97,6 +97,14 @@ namespace nugget {
 			return data.parentMap.at(child);
 		}
 
+		IDType GetParentTry(IDType child) {
+			if (data.parentMap.contains(child)) {
+				return data.parentMap.at(child);
+			} else {
+				return (IDType)0;
+			}
+		}
+
 		IDType GetLeaf(IDType child) {
 			assert(("No self leaf?", data.selfMap.contains(child)));
 			return data.selfMap.at(child);
@@ -168,6 +176,7 @@ namespace nugget {
 			return id;
 		}
 
+#if 0
 		// n.b. does not register the combined hash
 		IDType IDR(const std::vector<IDType>& ids) {
 			IDType id = IDType::null;
@@ -186,6 +195,7 @@ namespace nugget {
 			}
 			return id;
 		}
+#endif
 
 		std::string IDCombineStrings(const std::string& a, const std::string& b) {
 			std::stringstream ss;

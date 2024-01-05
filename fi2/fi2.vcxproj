@@ -117,6 +117,7 @@
       <DisableSpecificWarnings>4189;4100;4702</DisableSpecificWarnings>
       <MinimalRebuild>false</MinimalRebuild>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <TreatSpecificWarningsAsErrors>4062</TreatSpecificWarningsAsErrors>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
