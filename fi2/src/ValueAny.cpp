@@ -72,7 +72,8 @@ namespace nugget {
 				return *data.colorPtr == *other.data.colorPtr;
 			} break;
 			case ValueAny::Type::parent_: {
-				check(0, "should not compare a parent!");
+				// yeh, comparing a parent to a parent does not count the children
+				return true;
 			} break;
 			case ValueAny::Type::dimension: {
 				return *data.dimensionPtr == *other.data.dimensionPtr;

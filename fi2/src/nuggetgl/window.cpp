@@ -7,9 +7,40 @@
 #include "notice.h"
 #include "identifier.h"
 #include "asset/asset.h"
+#include <format>
+#include "utils/StableVector.h"
 
 namespace nugget::gl {
     using namespace nugget::identifier;
+
+#if 0
+    struct GPUTexturePool {
+        std::vector<GLuint> freePool;
+        GPUTexturePool() {
+            GLint maxGPUTextures;
+            glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxGPUTextures);
+            for (GLuint i = 0; i < maxGPUTextures; i++) {
+                freePool.push_back(i);
+            }
+        }
+        GLuint NewUnit() {
+            GLuint v = freePool.back();
+            freePool.pop_back();
+            return v;
+        }
+        void FreeUnit(GLuint v) {
+            freePool.push_back(v);
+        }
+    };
+
+    static GPUTexturePool texturePool;
+#endif
+
+#define PRIMDEF(a) { ID(#a),a },
+    static std::unordered_map<IDType, GLenum> primitiveMap = {
+        PRIMDEF(GL_TRIANGLES_ADJACENCY)
+    };
+
 
     void Init(HDC hdc) {
         // Set pixel format (add this if not present in your code)
@@ -30,6 +61,10 @@ namespace nugget::gl {
         wglMakeCurrent(hdc, hglrc);
 
         InitFunctionPointers();
+
+
+        CompileShaderFromProperties(IDR("properties.shaders.biquad"));
+
     }
 }
 
@@ -91,52 +126,237 @@ namespace nugget::gl {
         return 0;
     }
 
-    struct Renderable {
+    struct RenderableSection {
+       struct BVOInfo {
+            GLuint slot;
+            size_t size;
+        };
+
+        APPLY_RULE_OF_MINUS_4(RenderableSection);
+
+        RenderableSection() {}
+
+        GLuint shader;
+        std::vector<BVOInfo> VBOs;
+        std::vector<GLuint> textures;
+        std::vector<GLuint> textureUniforms;
+
+ 
+        const std::string texturePrefix = "texture";
         GLenum primitive;
-        GLuint buffer;
         GLint start;
         GLsizei length;
-        GLuint shader;
+
+        void Init() {
+            for (GLuint i = 0; i < textures.size(); i++) {
+                auto loc = glGetUniformLocation(shader,
+                    std::format("{}{}", texturePrefix, i).c_str());
+                textureUniforms.push_back(loc);
+            }
+        }
+        void Render() {
+            glUseProgram(shader);
+            for (GLuint i = 0; i < textures.size(); i++) {
+                glActiveTexture(GL_TEXTURE0 + i);
+                glBindTexture(GL_TEXTURE_2D, textures[i]);
+                auto loc = textureUniforms[i];
+                glUniform1i(loc, i);
+            }
+
+            // Draw the triangle
+            glDrawArrays(primitive,
+                start,
+                length
+            );
+
+            GLenum error = glGetError();
+            if (error != GL_NO_ERROR) {
+                int a = 0;
+            }
+
+        }
+
+        void SetupFromPropertyTree(IDType nodeID) {
+            std::vector<float> vertData;
+            std::vector<float> uvData;
+            std::vector<float> colsData;
+
+            IDType verts = IDR(nodeID, ID("verts"));
+            Vector3fList vertices;
+            if (Notice::GetVector3fList(verts, vertices)) {
+                for (auto&& z : vertices.data) {
+                    vertData.push_back(z.x);
+                    vertData.push_back(z.y);
+                    vertData.push_back(z.z);
+                }
+            } else {
+                assert(0);
+            }
+            IDType uvsid = IDR(nodeID, ID("uvs"));
+            Vector2fList uvs;
+            if (Notice::GetVector2fList(uvsid, uvs)) {
+                for (auto&& z : uvs.data) {
+                    uvData.push_back(z.x);
+                    uvData.push_back(z.y);
+                }
+            } else {
+                assert(0);
+            }
+            IDType colsid = IDR(nodeID, ID("colors"));
+            ColorList cols;
+            if (Notice::GetColorList(colsid, cols)) {
+                for (auto&& z : cols.data) {
+                    colsData.push_back(z.r);
+                    colsData.push_back(z.g);
+                    colsData.push_back(z.b);
+                    colsData.push_back(z.a);
+                }
+            } else {
+                assert(0);
+            }
+            auto vsize = vertData.size() * sizeof(float);
+            auto usize = uvData.size() * sizeof(float);
+            auto csize = colsData.size() * sizeof(float);
+
+            // Vertex buffer
+            {
+                GLuint VBO;
+                glGenBuffers(1, &VBO);
+
+                glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+                size_t VBOsize = vsize + usize + csize;
+                glBufferData(GL_ARRAY_BUFFER, VBOsize, nullptr, GL_STATIC_DRAW);
+
+                glBufferSubData(GL_ARRAY_BUFFER, 0, vsize, vertData.data());
+                glBufferSubData(GL_ARRAY_BUFFER, vsize, usize, uvData.data());
+                glBufferSubData(GL_ARRAY_BUFFER, vsize + usize, csize, colsData.data());
+
+                // Set up vertex attributes
+                glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+                glEnableVertexAttribArray(0);
+
+                // Set the attribute pointers for the UV coordinates
+                glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)vsize);
+                glEnableVertexAttribArray(1);
+
+                // Set the attribute pointers for the vertex colours
+                glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(vsize + usize));
+                glEnableVertexAttribArray(2);
+                
+                VBOs.push_back({ VBO, VBOsize });
+
+                glBindBuffer(GL_ARRAY_BUFFER, 0);
+            }
+            // Texture
+            {
+                IDType textureNode = IDR(nodeID, "texture");
+                IDType textureName = Notice::GetID(textureNode);
+                const nugget::asset::TextureData& texture = nugget::asset::GetTexture(textureName);
+                GLuint textureID;
+                glGenTextures(1, &textureID);
+                glBindTexture(GL_TEXTURE_2D, textureID);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, texture.width, texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data);
+                glBindTexture(GL_TEXTURE_2D, 0);
+                textures.push_back(textureID);
+            }
+            // put it together
+            {
+                IDType startNoticeID = IDR(nodeID,"start");
+                IDType lengthNoticeID = IDR(nodeID, "length");
+                IDType shaderNoideHash = IDR(nodeID, "shader");
+                IDType vid = IDR(nodeID, "verts");
+                IDType uid = IDR(nodeID, "uvs");
+                IDType cid = IDR(nodeID, "colors");
+                IDType primNoticeID = IDR(nodeID, "primitive");
+
+                IDType shaderProgramNoticeID = IDR({ IDToString(Notice::GetID(shaderNoideHash)), "_internal", "_pglid" });
+                primitive = primitiveMap.at(Notice::GetID(primNoticeID));
+                shader = (GLuint)Notice::GetInt64(shaderProgramNoticeID);
+                length = (GLsizei)Notice::GetInt64(lengthNoticeID);
+                start = (GLint)Notice::GetInt64(startNoticeID);
+                Init();
+#if 0
+                std::vector<Notice::Handler> handlers;
+                Notice::RegisterHandlerOnChildren(Notice::Handler(IDR("properties.shaders.biquad"), [](IDType id) {
+                    CompileShaderFromProperties(IDR("properties.shaders.biquad"));
+                    }), handlers);
+
+                Notice::RegisterHandler(Notice::Handler(vid, [this](IDType vid) {
+                    ApplyRenderingData();
+                    }));
+                Notice::RegisterHandler(Notice::Handler(uid, [this](IDType uid) {
+                    ApplyRenderingData();
+                    }));
+                Notice::RegisterHandler(Notice::Handler(cid, [this](IDType cid) {
+                    ApplyRenderingData();
+                    }));
+                Notice::RegisterHandler(Notice::Handler(startNoticeID, [this](IDType startid) {
+                    renderable.start = (GLint)Notice::GetInt64(startid);
+                    }));
+                Notice::RegisterHandler(Notice::Handler(lengthNoticeID, [this](IDType lengthid) {
+                    renderable.length = (GLint)Notice::GetInt64(lengthid);
+                    }));
+                Notice::RegisterHandler(Notice::Handler(primNoticeID, [this](IDType primid) {
+                    renderable.primitive = primitiveMap.at(Notice::GetID(primid));
+                    }));
+#endif
+
+
+//                    Notice::RegisterHandler(Notice::Handler(shaderProgramNoticeID, [&,shaderProgramNoticeID](IDType id) {
+//                        shader = (GLuint)Notice::GetInt64(shaderProgramNoticeID);
+//                        }));
+//                }
+            }
+        }
+    };
+
+    struct Renderable {
+        GLuint VAO;
+        StableVector<RenderableSection,100> sections;
+        
+        void Init() {
+            glGenVertexArrays(1, &VAO);
+        }
+
+        bool AddSections(IDType id) {
+            check(VAO, "Ya didn't init, innit?");
+            // id is a section in propertytree to populate the instance
+            check(Notice::KeyExists(id), "Node does not exist: {}\n", IDToString(id));
+            std::vector<IDType> children;
+            Notice::GetChildrenOfType(id, ValueAny::Type::parent_, children);
+            glBindVertexArray(VAO);
+            for (auto&& x : children) {
+                sections.emplace_back();
+                auto& section = sections.back();
+                section.SetupFromPropertyTree(x);
+            }
+            glBindVertexArray(0);
+            return true;
+        }
     };
 
     static Renderable renderable;
-
-    GLuint textureID;
 
     void Update() {
         // Initialize OpenGL state
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // Use the shader program
-        glUseProgram(renderable.shader);
+        glBindVertexArray(renderable.VAO);
 
-
-        // Bind the VAO
-        glBindVertexArray(renderable.buffer);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, textureID);
-
-        auto loc = glGetUniformLocation(renderable.shader, "quadTexture");
-        glUniform1i(loc , 0);
-
-
-
-        // Draw the triangle
-        glDrawArrays(GL_TRIANGLES_ADJACENCY,
-            renderable.start,
-            renderable.length
-        );
-
-        GLenum error = glGetError();
-        if (error != GL_NO_ERROR) {
-            int a = 0;
+        for (auto&& x : renderable.sections) {
+            x.Render();
         }
 
         // Swap front and back buffers
         SwapBuffers(hdc);
     }
+
 
     void MainLoop(const std::function<void()>& updateCallback) {
         // Main loop
@@ -154,6 +374,78 @@ namespace nugget::gl {
             updateCallback();
         }
     }
+
+    void triangle_test() {
+        renderable.Init();
+        renderable.AddSections(ID("properties.testobj"));
+    }
+
+}
+
+#if 0
+
+        void SetupFromPropertyTree(IDType id) {
+            GLuint VBO;
+
+            ApplyRenderingData();
+
+            std::vector<Notice::Handler> handlers;
+            Notice::RegisterHandlerOnChildren(Notice::Handler(IDR("properties.shaders.biquad"), [](IDType id) {
+                CompileShaderFromProperties(IDR("properties.shaders.biquad"));
+                }), handlers);
+
+            IDType vid = IDR("properties.testobj.section.verts");
+            IDType uid = IDR("properties.testobj.section.uvs");
+            IDType cid = IDR("properties.testobj.section.colors");
+            IDType startNoticeID = IDR("properties.testobj.section.start");
+            IDType lengthNoticeID = IDR("properties.testobj.section.length");
+            IDType primNoticeID = IDR("properties.testobj.section.primitive");
+            IDType shaderNoideHash = IDR("properties.testobj.section.shader");
+
+            Notice::RegisterHandler(Notice::Handler(vid, [this](IDType vid) {
+                ApplyRenderingData();
+                }));
+            Notice::RegisterHandler(Notice::Handler(uid, [this](IDType uid) {
+                ApplyRenderingData();
+                }));
+            Notice::RegisterHandler(Notice::Handler(cid, [this](IDType cid) {
+                ApplyRenderingData();
+                }));
+            Notice::RegisterHandler(Notice::Handler(startNoticeID, [this](IDType startid) {
+                renderable.start = (GLint)Notice::GetInt64(startid);
+                }));
+            Notice::RegisterHandler(Notice::Handler(lengthNoticeID, [this](IDType lengthid) {
+                renderable.length = (GLint)Notice::GetInt64(lengthid);
+                }));
+            Notice::RegisterHandler(Notice::Handler(primNoticeID, [this](IDType primid) {
+                renderable.primitive = primitiveMap.at(Notice::GetID(primid));
+                }));
+
+            CompileShaderFromProperties(IDR("properties.shaders.biquad"));
+
+            IDType shaderProgramNoticeID = IDR({ IDToString(Notice::GetID(shaderNoideHash)), "_internal", "_pglid" });
+
+            renderable.buffer = VAO;
+            renderable.length = (GLsizei)Notice::GetInt64(lengthNoticeID);
+            renderable.start = (GLint)Notice::GetInt64(startNoticeID);
+            renderable.primitive = primitiveMap.at(Notice::GetID(primNoticeID));
+            renderable.shader = (GLuint)Notice::GetInt64(shaderProgramNoticeID);
+
+            Notice::RegisterHandler(Notice::Handler(shaderProgramNoticeID, [shaderProgramNoticeID](IDType id) {
+                renderable.shader = (GLuint)Notice::GetInt64(shaderProgramNoticeID);
+                }));
+
+            // Enable backface culling
+    //        glEnable(GL_CULL_FACE);
+
+            // Specify which faces to cull
+    //        glCullFace(GL_BACK);
+
+
+        }
+    };
+
+
 
     // Vertex Buffer Object (VBO)
     float s = 1.0f;
@@ -207,168 +499,7 @@ namespace nugget::gl {
         0.0f, 1.0f,  // br
     };
 
-    void ApplyRenderingData() {
-        std::vector<IDType> children;
-        Notice::GetChildrenOfType(IDR("properties.render.scene"), ValueAny::Type::IDType, children);
-        std::vector<float> vertData;
-        std::vector<float> uvData;
-        std::vector<float> colsData;
-        for (auto&& x : children) {         // each object
-            IDType id = Notice::GetID(x);   // points to the data
-            std::vector<IDType> childSections;
-            Notice::GetChildrenWithNodeExisting(id, ID("verts"), childSections);
-            for (auto&& y : childSections) {   // each section
-                IDType verts = IDR(y, ID("verts"));
-                Vector3fList vertices;
-                if (Notice::GetVector3fList(verts, vertices)) {
-                    for (auto&& z : vertices.data) {
-                        vertData.push_back(z.x);
-                        vertData.push_back(z.y);
-                        vertData.push_back(z.z);
-                    }
-                } else {
-                    assert(0);
-                }
-                IDType uvsid = IDR(y, ID("uvs"));
-                Vector2fList uvs;
-                if (Notice::GetVector2fList(uvsid, uvs)) {
-                    for (auto&& z : uvs.data) {
-                        uvData.push_back(z.x);
-                        uvData.push_back(z.y);
-                    }
-                } else {
-                    assert(0);
-                }
-                IDType colsid = IDR(y, ID("colors"));
-                ColorList cols;
-                if (Notice::GetColorList(colsid, cols)) {
-                    for (auto&& z : cols.data) {
-                        colsData.push_back(z.r);
-                        colsData.push_back(z.g);
-                        colsData.push_back(z.b);
-                        colsData.push_back(z.a);
-                    }
-                } else {
-                    assert(0);
-                }
-            }
-        }
-
-        auto vsize = vertData.size();
-        auto usize = uvData.size();
-        auto csize = colsData.size();
-
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * vsize, vertData.data());
-        glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * vsize, sizeof(float) * usize, uvData.data());
-        glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * vsize + sizeof(float) * usize, sizeof(float)*csize, colsData.data());
-
-        // Set up vertex attributes
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
-
-        // Set the attribute pointers for the UV coordinates
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(sizeof(float) * vsize));
-        glEnableVertexAttribArray(1);
-
-        // Set the attribute pointers for the vertex colours
-        glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)((sizeof(float) * vsize) + sizeof(float)*usize));
-        glEnableVertexAttribArray(2);
-
-    }
-
-    void triangle_test() {
-        GLuint VAO;
-
-        IDType asset = Notice::GetID(ID("properties.testobj.section.texture"));
-        const nugget::asset::TextureData &texture = nugget::asset::GetTexture(asset);
-            
 
 
-        // Vertex Array Object (VAO)
-//        glGenVertexArrays(1, &VAO);
-//        glBindVertexArray(VAO);
-    
-
-        // Create Vertex Array Object (VAO) and Vertex Buffer Object (VBO)
-        GLuint VBO;
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-
-        // Bind VAO
-        glBindVertexArray(VAO);
-
-        {
-            // Bind VBO, set the vertices and UV coordinates data
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 1200 + sizeof(uvCoords) + sizeof(colours), nullptr, GL_STATIC_DRAW);
-            ApplyRenderingData();
-        }
-
-        glGenTextures(1, &textureID);
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, texture.width, texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        std::unordered_map<IDType, GLenum> primitiveMap = {
-            { ID("GL_TRIANGLES_ADJACENCY"),GL_TRIANGLES_ADJACENCY }
-        };
-
-        std::vector<Notice::Handler> handlers;
-        Notice::RegisterHandlerOnChildren(Notice::Handler(IDR("properties.shaders.biquad"), [](IDType id) {
-            CompileShaderFromProperties(IDR("properties.shaders.biquad"));
-            }), handlers);
-
-        IDType vid = IDR("properties.testobj.section.verts");
-        IDType uid = IDR("properties.testobj.section.uvs");
-        IDType cid = IDR("properties.testobj.section.colors");
-        IDType startNoticeID = IDR("properties.testobj.section.start");
-        IDType lengthNoticeID = IDR("properties.testobj.section.length");
-        IDType primNoticeID = IDR("properties.testobj.section.primitive");
-        IDType shaderNoideHash = IDR("properties.testobj.section.shader");
-
-        Notice::RegisterHandler(Notice::Handler(vid, [](IDType vid) {
-            ApplyRenderingData();
-            }));
-        Notice::RegisterHandler(Notice::Handler(uid, [](IDType uid) {
-            ApplyRenderingData();
-            }));
-        Notice::RegisterHandler(Notice::Handler(cid, [](IDType cid) {
-            ApplyRenderingData();
-            }));
-        Notice::RegisterHandler(Notice::Handler(startNoticeID, [](IDType startid) {
-            renderable.start = (GLint)Notice::GetInt64(startid);
-            }));
-        Notice::RegisterHandler(Notice::Handler(lengthNoticeID, [](IDType lengthid) {
-            renderable.length = (GLint)Notice::GetInt64(lengthid);
-            }));
-        Notice::RegisterHandler(Notice::Handler(primNoticeID, [&](IDType primid) {
-            renderable.primitive = primitiveMap.at(Notice::GetID(primid));
-            }));
-
-        CompileShaderFromProperties(IDR("properties.shaders.biquad"));
-
-        IDType shaderProgramNoticeID = IDR({ IDToString(Notice::GetID(shaderNoideHash)), "_internal", "_pglid" });
-
-        renderable.buffer = VAO;
-        renderable.length = (GLsizei)Notice::GetInt64(lengthNoticeID);
-        renderable.start = (GLint)Notice::GetInt64(startNoticeID);
-        renderable.primitive = primitiveMap.at(Notice::GetID(primNoticeID));
-        renderable.shader = (GLuint)Notice::GetInt64(shaderProgramNoticeID);
-
-        Notice::RegisterHandler(Notice::Handler(shaderProgramNoticeID, [shaderProgramNoticeID](IDType id) {
-            renderable.shader = (GLuint)Notice::GetInt64(shaderProgramNoticeID);
-            }));
-
-        // Enable backface culling
-//        glEnable(GL_CULL_FACE);
-
-        // Specify which faces to cull
-//        glCullFace(GL_BACK);
-
-
-    }
 }
+#endif

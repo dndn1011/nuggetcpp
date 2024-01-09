@@ -672,7 +672,7 @@ shaders {
 
     //                FragColor = c;
    //                 FragColor = vec4(1,0,0,1);
-                        FragColor = texture(quadTexture, r) + c/2;
+                        FragColor = texture(quadTexture, r) + c/3;
                 }
 
 >>;
@@ -703,7 +703,7 @@ quad {
         1,0,0,1,
         0,1,0,1,
         0,0,1,1,
-        1,1,0,1,
+        0,0.5,0.5,1,
 
         0,0,0,0,0,0,0,0,
     };
@@ -712,6 +712,7 @@ quad {
 testobj {
     section {
         texture = spaceship;
+        slot = 0;
 
         renderMatrix : Matrix4f = {
             2,0,0,0,
@@ -737,7 +738,7 @@ testobj {
 
         j : Vector3f = { 0.0,0.1,0.0};
 
-        v1 = ref(@root.quad.verts)*ref(@here.s)*0.5 + ref(@here.v) * 0.8+ ref(@here.j);
+        v1 = ref(@root.quad.verts)*ref(@here.s)*0.5 + ref(@here.v) * 0.8 + ref(@here.j);
         v2 = ref(@root.quad.verts)*ref(@here.s)*0.8 + ref(@here.v) * 0.0 + ref(@here.j);
         v3 = ref(@root.quad.verts)*ref(@here.s)*1.2 + ref(@here.v) * -1.25;
         v4 = ref(@root.quad.verts)*ref(@here.s)*0.4 + ref(@here.v) * 1.4;
@@ -765,7 +766,7 @@ testobj {
 }
 render {
     scene {
-        :=@root.testobj;
+        : =@root.testobj;
     }
 }
 

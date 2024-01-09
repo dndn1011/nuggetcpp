@@ -25,5 +25,4 @@ GLDEF(glBufferSubData, (GLenum target, GLintptr offset, GLsizeiptr size, const v
 GLDEF(glUniform1i, (GLint location, GLint v), void)
 GLDEF(glGetUniformLocation, (GLuint program, const GLchar* name), GLint)
 GLDEF(glActiveTexture, (GLenum texture), void)
-
-
+GLDEF(glDeleteBuffers, (GLsizei n, const GLuint* buffers), void)

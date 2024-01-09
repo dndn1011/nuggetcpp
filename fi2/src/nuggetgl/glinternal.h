@@ -13,8 +13,9 @@ typedef char GLchar;
 #define GL_FRAGMENT_SHADER 0x8B30
 #define GL_COMPILE_STATUS 0x8B81
 #define GL_LINK_STATUS 0x8B82
-#define GL_TEXTURE0 0x84C0
+#define GL_MAX_TEXTURE_IMAGE_UNITS 0x8872
 
+#define GL_TEXTURE0 0x84C0
 
 #define GL_GEOMETRY_SHADER 0x8DD9
 
@@ -27,7 +28,8 @@ namespace nugget::gl {
 	// Function to get the address of an OpenGL function
 	template<typename T>
 	T GetGLFunctionAddress(const char* functionName) {
-		T result = reinterpret_cast<T>(wglGetProcAddress(functionName));
+		auto addr = wglGetProcAddress(functionName);
+		T result = reinterpret_cast<T>(addr);
 		if (!result) {
 			check(0, "Failed to get address of {}\n", functionName);
 		}

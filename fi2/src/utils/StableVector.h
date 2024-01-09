@@ -7,6 +7,52 @@ class StableVector {
 public:
     StableVector() : vSize(0) {}
 
+
+    // Iterator class
+    class Iterator {
+    public:
+        explicit Iterator(T* ptr) : ptr_(ptr) {}
+
+        T& operator*() const { return *ptr_; }
+        T* operator->() { return ptr_; }
+
+        // Prefix increment
+        Iterator& operator++() { ptr_++; return *this; }
+
+        // Comparison operators
+        friend bool operator==(const Iterator& a, const Iterator& b) { return a.ptr_ == b.ptr_; }
+        friend bool operator!=(const Iterator& a, const Iterator& b) { return a.ptr_ != b.ptr_; }
+
+    private:
+        T* ptr_;
+    };
+
+    // Const Iterator class
+    class ConstIterator {
+    public:
+        explicit ConstIterator(const T* ptr) : ptr_(ptr) {}
+
+        const T& operator*() const { return *ptr_; }
+        const T* operator->() const { return ptr_; }
+
+        // Prefix increment
+        ConstIterator& operator++() { ptr_++; return *this; }
+
+        // Comparison operators
+        friend bool operator==(const ConstIterator& a, const ConstIterator& b) { return a.ptr_ == b.ptr_; }
+        friend bool operator!=(const ConstIterator& a, const ConstIterator& b) { return a.ptr_ != b.ptr_; }
+
+    private:
+        const T* ptr_;
+    };
+
+    // Iterator methods
+    Iterator begin() { return Iterator(&data_[0]); }
+    Iterator end() { return Iterator(&data_[vSize]); }
+
+    ConstIterator begin() const { return ConstIterator(&data_[0]); }
+    ConstIterator end() const { return ConstIterator(&data_[vSize]); }
+
     template <typename... Args>
     size_t emplace_back(Args&&... args) {
         if (vSize < TSize) {
@@ -16,6 +62,11 @@ public:
             check(0, "Run out of slots: maxEntities = {}\n", TSize);
         }
         return (size_t)-1;
+    }
+
+    T& back() {
+        check(vSize > 0, "Empty vectpr");
+        return data_[vSize - 1];
     }
 
     // Access elements
