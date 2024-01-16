@@ -11,6 +11,7 @@
 #include "types.h"
 #include <span>
 #include "notice.h"
+#include <format>
 
 namespace nugget::expressions {
     using namespace nugget::properties;

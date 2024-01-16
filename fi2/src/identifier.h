@@ -19,7 +19,7 @@ namespace nugget {
 //        typedef uint64_t IDType;
 
         // hash a string and register it in the identrifier db
-        IDType Register(const std::string& str);
+        IDType Register(std::string fullPath);
 
         consteval std::uint64_t __combineHashes(std::uint64_t hash1, std::uint64_t hash2) {
             if (hash1 == 0) {
@@ -28,7 +28,7 @@ namespace nugget {
                 return (hash1 ^ hash2) * 1099511628211ULL;
             }
         }
-
+         
         consteval std::pair<uint64_t,uint64_t> __fnv1a_64_hash(
             const char* str, std::size_t index = 0,
             std::uint64_t hash = 14695981039346656037ULL,
@@ -85,7 +85,8 @@ namespace nugget {
         void IDCombineStringsInPlace(const std::string& a, const std::string& b, std::string &result);
         
         std::string IDRemoveLeaf(const std::string& path);
-        void IDRemoveLeafInPlace(std::string& path);
+        bool IDRemoveLeafInPlace(std::string& path);
+        void IDSeparateLeafAndPathInPlace(std::string& path /*fill*/, std::string& leaf /*fill*/);
 
         //std::string IDKeepLeaf(const std::string& path);
         std::string IDKeepLeaf(const std::string& path);

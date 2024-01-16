@@ -1,34 +1,124 @@
+#include <string>
+#include <cmath>
 #include <iostream>
-#include <map>
-#include <utility>
+#include <random>
+#include <chrono>
+#include <assert.h>
 
-class NonCopyableNonMovable {
-public:
-    NonCopyableNonMovable() = default;
+void floatToString(char *result,float value, int precision = 6) {
+    char integerPartResult[256];
+    char* resultp = result;
+    char* integerPartResultp = integerPartResult;
 
-    NonCopyableNonMovable(const NonCopyableNonMovable&) = delete;
-    NonCopyableNonMovable& operator=(const NonCopyableNonMovable&) = delete;
-
-    NonCopyableNonMovable(NonCopyableNonMovable&&) = delete;
-    NonCopyableNonMovable& operator=(NonCopyableNonMovable&&) = delete;
-
-    void print() const {
-        std::cout << "NonCopyableNonMovable object" << std::endl;
+    // Handle negative numbers
+    if (value < 0) {
+        *(resultp++) = '-';
+        value = -value;
     }
-};
+
+    // Extract integer part
+    int integerPart = (int)(value);
+    float fractionalPart = value - (float)(integerPart);
+    assert(value == (value - (float)integerPart + (float)integerPart));
+
+    // Convert integer part to string
+    do {
+        int div10 = integerPart / 10;
+        char digit = '0' + (char)((integerPart - 10*div10));
+        *(integerPartResultp++) = digit;
+        integerPart = div10;
+    } while (integerPart != 0);
+
+    for (char* p = integerPartResultp - 1; p >= integerPartResult; p--) {
+        *(resultp++) = *p;
+    }
+
+    *(resultp++) = '.';
+
+    char digit;
+    // Convert fractional part to string^
+    while (precision-- > 0) {
+        fractionalPart *= 10;
+        digit = '0' + (int)(fractionalPart) % 10;
+        *(resultp++) = digit;
+        fractionalPart -= (int)(fractionalPart);
+    }
+    *(resultp++) = '\0';
+}
 
 int main() {
-    std::map<int, NonCopyableNonMovable> myMap;
+    // Set up random number generation
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(-1000000, 1000000);
 
-    // Use emplace with std::piecewise_construct
-    myMap.emplace(std::piecewise_construct, std::forward_as_tuple(1), std::forward_as_tuple());
+    // Generate and convert 1 million random floats
+    const int numTests = 1000000;
+    std::vector<float> randomFloats(numTests);
+    std::vector<std::string> stringResults(numTests);
+    std::vector<std::string> stringResults2(numTests);
 
-    // Access the element and call a member function
-    myMap[1].print();
+    for (int i = 0; i < numTests; ++i) {
+        randomFloats[i] = (float)dis(gen);
+    }
 
-    // Uncommenting the lines below would result in compilation errors
-    // NonCopyableNonMovable obj = myMap[1];  // Error: copy constructor is deleted
-    // NonCopyableNonMovable obj2(std::move(myMap[1]));  // Error: move constructor is deleted
+    {
+        // Start timer
+        auto start = std::chrono::high_resolution_clock::now();
 
+
+        for (int i = 0; i < numTests; ++i) {
+            char r[256];
+            floatToString(r,randomFloats[i], 6);
+            stringResults[i] = r;
+        }
+
+        // End timer
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed = end - start;
+
+        // Output time taken
+        std::cout << "Algo: " << elapsed.count() << " seconds." << std::endl;
+    }
+
+    {
+        // Start timer
+        auto start = std::chrono::high_resolution_clock::now();
+
+
+        for (int i = 0; i < numTests; ++i) {
+            stringResults2[i] = std::to_string(randomFloats[i]);
+        }
+
+        // End timer
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed = end - start;
+
+        // Output time taken
+        std::cout << "std:  " << elapsed.count() << " seconds." << std::endl;
+    }
+
+    for (int i = 0; i < 10; i++) {
+        std::printf("test input: %f\n", randomFloats[i]);
+    }
+
+    for (int i = 0; i < numTests; ++i) {
+//        printf(" ?  %d %f %s %s\n", i, (double)randomFloats[i], stringResults[i].c_str(), stringResults2[i].c_str());
+        float a;
+        float b;
+        
+        std::from_chars(stringResults[i].data(), stringResults[i].data() + stringResults[i].size(), a);
+        std::from_chars(stringResults2[i].data(), stringResults2[i].data() + stringResults2[i].size(), b);
+
+        if (abs(a - b) > 0.000002f) {
+            printf("oh no! %d %f %s %s\n", i, (double)randomFloats[i], stringResults[i].c_str(), stringResults2[i].c_str());
+            break;
+        }
+    }
+
+//    std::string myStr = std::to_string(myFloat);
+    std::cout << "DONE!" << std::endl;
+    getchar();
     return 0;
 }
+

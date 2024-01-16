@@ -8,6 +8,7 @@
 #include "identifier.h"
 #include "notice.h"
 #include "propertytreetokeniser.h"
+#include <format>
 
 namespace nugget::properties {
     using namespace identifier;

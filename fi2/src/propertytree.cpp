@@ -318,8 +318,9 @@ namespace nugget::properties {
             Notice::Set(IDR(path), any);
         }
 
-        GrammarParseData(const std::string& rootName, std::vector<Token>& list, ParseState& parseState) :
-            currentPathName(rootName), rootName(rootName), list(list), parseState(parseState) {
+        GrammarParseData(const std::string& rootName, const std::string &as, std::vector<Token>& list, ParseState& parseState) :
+            currentPathName(rootName), rootName(rootName), list(list),
+            parseState(parseState), asRoot(as) {
         }
 
         bool AtEnd() {
@@ -448,7 +449,23 @@ namespace nugget::properties {
         {
             ID("here"),
             [&](IDType id) {
-                return ValueAny(IDR(currentPathName));
+                if (asRoot == rootName) {
+                    return ValueAny(IDR(currentPathName));
+                } else {
+                    std::vector<IDType> nodesIn;
+                    IDType path = IDR(currentPathName);
+                    IDType parent;
+                    // nodes except parent
+                    while ((parent = GetParentTry(path)) != IDType::null) {
+                        nodesIn.push_back(GetLeaf(path));
+                        path = parent;
+                    }
+                    IDType outid = IDR(asRoot);
+                    for (int64_t i = (int64_t)nodesIn.size() - 1; i >= 0 ; --i) {
+                        outid = IDR(outid, nodesIn[i]);
+                    }
+                    return ValueAny(outid);
+                }
             }
         }
     };
@@ -603,6 +620,7 @@ namespace nugget::properties {
         std::vector<Token>& list;
         std::string currentPathName = rootName;
         std::string rootName;
+        std::string asRoot;
 
         size_t point = 0;
         size_t endLength = list.size();
@@ -625,9 +643,9 @@ namespace nugget::properties {
 }
 
 namespace nugget::properties {
-    bool GrammarParse(std::string rootName, std::vector<Token>& list,ParseState &parseState) {
+    bool GrammarParse(std::string rootName, std::string  as, std::vector<Token>& list,ParseState &parseState) {
         Notice::SetAsParent(IDR(rootName));
-        GrammarParseData pdata(rootName, list,parseState);
+        GrammarParseData pdata(rootName, as, list,parseState);
         while (!pdata.AtEnd()) {
             /////////////////////////////////////////////
         expectInitialisation__:
@@ -856,7 +874,7 @@ namespace nugget::properties {
         return true;
     }
 
-    ParseState LoadPropertyTree(const std::string &where,const std::string filename) {
+    ParseState LoadPropertyTree(const std::string& where, const std::string& as, const std::string filename) {
         ParseState parseState;
         auto t = TimeSampler("parse", true);
 
@@ -873,7 +891,7 @@ namespace nugget::properties {
             return parseState;
         }
 
-        auto r = GrammarParse(where, tokenList, parseState);
+        auto r = GrammarParse(where, as, tokenList, parseState);
         if (!r) {
             return parseState;
         }
@@ -884,6 +902,10 @@ namespace nugget::properties {
         parseState.successful = true;
 
         return parseState;
+    }
+
+    ParseState LoadPropertyTree(const std::string& where, const std::string filename) {
+        return LoadPropertyTree(where, where, filename);
     }
 
 }

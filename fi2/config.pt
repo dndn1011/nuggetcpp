@@ -672,7 +672,7 @@ shaders {
 
     //                FragColor = c;
    //                 FragColor = vec4(1,0,0,1);
-                        FragColor = texture(quadTexture, r) + c/3;
+                        FragColor = texture(quadTexture, r) + c/2;
                 }
 
 >>;
@@ -683,7 +683,7 @@ shaders {
 
 quad {
     verts : Vector3fList = {
-        0.25, 0.25, 0,
+        1.25, 0.25, 0,
         0.25, -0.25, 0,
         -0.25, 0.25, 0,
         -0.25, -0.25, 0,

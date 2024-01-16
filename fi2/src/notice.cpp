@@ -95,47 +95,47 @@ namespace nugget {
 		}
 
 		bool IsValueTypeInteger64(IDType id) {
-			assert(KeyExists(id));
+			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::int64_t_;
 		}
 		bool IsValueTypeUnsignedInteger64(IDType id) {
-			assert(KeyExists(id));
+			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::uint64_t_;
 		}
 		bool IsValueTypeInteger32(IDType id) {
-			assert(KeyExists(id));
+			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::int32_t_;
 		}
 		bool IsValueTypeFloat(IDType id) {
-			assert(KeyExists(id));
+			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::float_;
 		}
 		bool IsValueTypeString(IDType id) {
-			assert(KeyExists(id));
+			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::string;
 		}
 		bool IsValueTypeIdentifier(IDType id) {
-			assert(KeyExists(id));
+			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::IDType;
 		}
 		bool IsValueTypeColor(IDType id) {
-			assert(KeyExists(id));
+			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::Color;
 		}
 		bool IsValueTypeDimension(IDType id) {
-			assert(KeyExists(id));
+			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::dimension;
 		}
 		bool IsValueTypeMatrix4f(IDType id) {
-			assert(KeyExists(id));
+			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::Matrix4f;
 		}
@@ -148,49 +148,49 @@ namespace nugget {
 			}
 		}
 		std::string GetString(IDType id) {
-			assert(KeyExists(id));
+			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto &v = data.valueEntries.at(id);
 			return v.AsString();
 		}
 		int32_t GetInt32(IDType id) {
-			assert(KeyExists(id));
+			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto &v = data.valueEntries.at(id);
 			return v.AsInt32();
 		}
 		int64_t GetInt64(IDType id) {
-			assert(KeyExists(id));
+			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.AsInt64();
 		}
 		uint64_t GetUint64(IDType id) {
-			assert(KeyExists(id));
+			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.AsUint64();
 		}
 		float GetFloat(IDType id) {
-			assert(KeyExists(id));
+			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto &v = data.valueEntries.at(id);
 			return v.AsFloat();
 		}
 		IDType GetID(IDType id) {
-			assert(KeyExists(id));
+			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto &v = data.valueEntries.at(id);
 			return v.AsIDType();
 		}
 		void* GetPointer(IDType id) {
-			assert(KeyExists(id));
+			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return  v.AsPointer();
 		}
 		Dimension GetDimension(IDType id)
 		{
-			assert(KeyExists(id));
+			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.AsDimension();
 		}
 		const Vector3fList& GetVector3fList(IDType id)
 		{
-			assert(KeyExists(id));
+			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.AsVector3fList();
 		}
@@ -250,7 +250,7 @@ namespace nugget {
 			}
 		}
 		const Matrix4f& GetMatrix4f(IDType id) {
-			assert(KeyExists(id));
+			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.AsMatrix4f();  // Assuming ValueAny has an AsMatrix4f method
 		}
@@ -268,6 +268,9 @@ namespace nugget {
 					bool diff = (currentValue != ValueAny(value));
 					data.valueEntries[id].Set(value);
 					if (diff) {
+						static int count = 0;
+						count++;
+						output("-------------------> {} {}\n", count, IDToString(id));
 						Notify(id);
 					}
 				} else {

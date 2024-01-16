@@ -129,18 +129,19 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Users\dino\source\repos\fi2\SFML-2.6.1\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -148,7 +149,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\dino\source\repos\fi2\SFML-2.6.1\lib;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sfml-graphics.lib;sfml-window.lib;sfml-system.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -162,7 +163,7 @@
     <ClCompile Include="src\expressions.cpp" />
     <ClCompile Include="src\filereader.cpp" />
     <ClCompile Include="src\identifier.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MaxSpeed</Optimization>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Default</BasicRuntimeChecks>
       <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</IntrinsicFunctions>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</WholeProgramOptimization>
@@ -174,7 +175,7 @@
     <ClCompile Include="src\nuggetgl\shader.cpp" />
     <ClCompile Include="src\nuggetgl\shader.h" />
     <ClCompile Include="src\propertytree.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MaxSpeed</Optimization>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Default</BasicRuntimeChecks>
       <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</IntrinsicFunctions>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</WholeProgramOptimization>

@@ -123,11 +123,16 @@ namespace nugget::gl {
 
         triangle_test();
 
+        std::vector<Notice::Handler> handlers;
+        Notice::RegisterHandlerOnChildren(Notice::Handler(IDR("properties.shaders.biquad"), [](IDType id) {
+            CompileShaderFromProperties(IDR("properties.shaders.biquad"));
+            }), handlers);
+
         return 0;
     }
 
     struct RenderableSection {
-       struct BVOInfo {
+       struct VBOInfo {
             GLuint slot;
             size_t size;
         };
@@ -137,7 +142,7 @@ namespace nugget::gl {
         RenderableSection() {}
 
         GLuint shader;
-        std::vector<BVOInfo> VBOs;
+        std::vector<VBOInfo> VBOs;
         std::vector<GLuint> textures;
         std::vector<GLuint> textureUniforms;
 
@@ -176,7 +181,7 @@ namespace nugget::gl {
 
         }
 
-        void SetupFromPropertyTree(IDType nodeID) {
+        void UpdateFromPropertyTree(IDType nodeID,int sectionIndex) {
             std::vector<float> vertData;
             std::vector<float> uvData;
             std::vector<float> colsData;
@@ -220,14 +225,27 @@ namespace nugget::gl {
 
             // Vertex buffer
             {
+                // vbo allocation
                 GLuint VBO;
-                glGenBuffers(1, &VBO);
-
-                glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
                 size_t VBOsize = vsize + usize + csize;
-                glBufferData(GL_ARRAY_BUFFER, VBOsize, nullptr, GL_STATIC_DRAW);
+                if (sectionIndex >= VBOs.size()) {
+                    check(sectionIndex == VBOs.size(), "Need to increment smoothly through section indices");
+                    VBOs.push_back({});
+                }
+                VBOInfo &vboInfo = VBOs[sectionIndex];
+                if (vboInfo.slot == 0 || vboInfo.size != VBOsize) {
+                    if (vboInfo.slot != 0) {
+                        check(VBOsize != 0, "Zero size?");
+                        glDeleteBuffers(1, &vboInfo.slot);
+                    }
+                    glGenBuffers(1, &VBO);
+                    vboInfo.size = VBOsize;
+                    vboInfo.slot = VBO;
+                    glBindBuffer(GL_ARRAY_BUFFER, vboInfo.slot);
+                    glBufferData(GL_ARRAY_BUFFER, VBOsize, nullptr, GL_STATIC_DRAW);
+                }
 
+                // vbo data
                 glBufferSubData(GL_ARRAY_BUFFER, 0, vsize, vertData.data());
                 glBufferSubData(GL_ARRAY_BUFFER, vsize, usize, uvData.data());
                 glBufferSubData(GL_ARRAY_BUFFER, vsize + usize, csize, colsData.data());
@@ -242,59 +260,56 @@ namespace nugget::gl {
 
                 // Set the attribute pointers for the vertex colours
                 glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(vsize + usize));
-                glEnableVertexAttribArray(2);
-                
-                VBOs.push_back({ VBO, VBOsize });
-
+                glEnableVertexAttribArray(2);               
                 glBindBuffer(GL_ARRAY_BUFFER, 0);
             }
             // Texture
             {
+                // texture allocation
+                if (sectionIndex >= textures.size()) {
+                    check(sectionIndex == textures.size(), "Need to increment smoothly through section indices");
+                    textures.push_back({});
+                }
+                GLuint &texID = textures[sectionIndex];
+                if (texID != 0) {
+                    glDeleteTextures(1, &texID);
+                }
+                glGenTextures(1, &texID);
+
+                // texture load
                 IDType textureNode = IDR(nodeID, "texture");
                 IDType textureName = Notice::GetID(textureNode);
                 const nugget::asset::TextureData& texture = nugget::asset::GetTexture(textureName);
-                GLuint textureID;
-                glGenTextures(1, &textureID);
-                glBindTexture(GL_TEXTURE_2D, textureID);
+                glBindTexture(GL_TEXTURE_2D, texID);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, texture.width, texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data);
                 glBindTexture(GL_TEXTURE_2D, 0);
-                textures.push_back(textureID);
             }
             // put it together
             {
                 IDType startNoticeID = IDR(nodeID,"start");
                 IDType lengthNoticeID = IDR(nodeID, "length");
-                IDType shaderNoideHash = IDR(nodeID, "shader");
+                IDType shaderNodeHash = IDR(nodeID, "shader");
                 IDType vid = IDR(nodeID, "verts");
                 IDType uid = IDR(nodeID, "uvs");
                 IDType cid = IDR(nodeID, "colors");
                 IDType primNoticeID = IDR(nodeID, "primitive");
 
-                IDType shaderProgramNoticeID = IDR({ IDToString(Notice::GetID(shaderNoideHash)), "_internal", "_pglid" });
+                IDType usedShaderID = Notice::GetID(shaderNodeHash);
+                std::string usedShaderPath = IDToString(usedShaderID);
+                IDType shaderProgramNoticeID = IDR({ usedShaderPath, "_internal", "_pglid" });
                 primitive = primitiveMap.at(Notice::GetID(primNoticeID));
                 shader = (GLuint)Notice::GetInt64(shaderProgramNoticeID);
                 length = (GLsizei)Notice::GetInt64(lengthNoticeID);
                 start = (GLint)Notice::GetInt64(startNoticeID);
                 Init();
-#if 0
-                std::vector<Notice::Handler> handlers;
-                Notice::RegisterHandlerOnChildren(Notice::Handler(IDR("properties.shaders.biquad"), [](IDType id) {
-                    CompileShaderFromProperties(IDR("properties.shaders.biquad"));
-                    }), handlers);
 
-                Notice::RegisterHandler(Notice::Handler(vid, [this](IDType vid) {
-                    ApplyRenderingData();
-                    }));
-                Notice::RegisterHandler(Notice::Handler(uid, [this](IDType uid) {
-                    ApplyRenderingData();
-                    }));
-                Notice::RegisterHandler(Notice::Handler(cid, [this](IDType cid) {
-                    ApplyRenderingData();
-                    }));
+
+#if 0
+
                 Notice::RegisterHandler(Notice::Handler(startNoticeID, [this](IDType startid) {
                     renderable.start = (GLint)Notice::GetInt64(startid);
                     }));
@@ -305,22 +320,44 @@ namespace nugget::gl {
                     renderable.primitive = primitiveMap.at(Notice::GetID(primid));
                     }));
 #endif
-
-
-//                    Notice::RegisterHandler(Notice::Handler(shaderProgramNoticeID, [&,shaderProgramNoticeID](IDType id) {
-//                        shader = (GLuint)Notice::GetInt64(shaderProgramNoticeID);
-//                        }));
-//                }
             }
+        }
+        void SetupFromPropertyTree(IDType nodeID, int sectionIndex) {
+            output("-------@@@@@@@------------> {}\n", IDToString(nodeID));
+            IDType shaderNoideHash = IDR(nodeID, "shader");
+            IDType shaderProgramNoticeID = IDR({ IDToString(Notice::GetID(shaderNoideHash)), "_internal", "_pglid" });
+            UpdateFromPropertyTree(nodeID, sectionIndex);
+            
+            Notice::RegisterHandler(Notice::Handler(IDR(nodeID, "verts"),
+                [this,nodeID, sectionIndex](IDType vid) {
+                UpdateFromPropertyTree(nodeID, sectionIndex);
+                }));
+            Notice::RegisterHandler(Notice::Handler(IDR(nodeID, "uvs"),
+                [this, nodeID, sectionIndex](IDType uid) {
+                UpdateFromPropertyTree(nodeID, sectionIndex);
+                }));
+            Notice::RegisterHandler(Notice::Handler(IDR(nodeID, "colors"),
+                [this, nodeID, sectionIndex](IDType cid) {
+                UpdateFromPropertyTree(nodeID, sectionIndex);
+                }));
+
+            Notice::RegisterHandler(Notice::Handler(shaderProgramNoticeID, [&, shaderProgramNoticeID](IDType id) {
+                shader = (GLuint)Notice::GetInt64(shaderProgramNoticeID);
+                }));
+
+
+                    
         }
     };
 
     struct Renderable {
-        GLuint VAO;
+        GLuint VAO = 0;
         StableVector<RenderableSection,100> sections;
         
         void Init() {
-            glGenVertexArrays(1, &VAO);
+            if (VAO == 0) {
+                glGenVertexArrays(1, &VAO);
+            }
         }
 
         bool AddSections(IDType id) {
@@ -330,10 +367,12 @@ namespace nugget::gl {
             std::vector<IDType> children;
             Notice::GetChildrenOfType(id, ValueAny::Type::parent_, children);
             glBindVertexArray(VAO);
+            GLuint index = 0;
             for (auto&& x : children) {
                 sections.emplace_back();
                 auto& section = sections.back();
-                section.SetupFromPropertyTree(x);
+                section.SetupFromPropertyTree(x,index);
+                index++;
             }
             glBindVertexArray(0);
             return true;

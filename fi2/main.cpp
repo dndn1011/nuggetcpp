@@ -49,7 +49,7 @@ void ReloadPt(std::string filename) {
     //            Notice::LockNotifications();
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     Notice::Remove(IDR("properties2"));
-    auto result = properties::LoadPropertyTree("properties2", filename);
+    auto result = properties::LoadPropertyTree("properties2", "properties", filename);
     if (result.successful) {
         nugget::ui::entity::UpdateEntity(IDR("properties"), IDR("properties2"));
         nugget::ui::entity::CreateEntity(IDR("properties.main"));

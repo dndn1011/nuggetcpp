@@ -25,7 +25,7 @@ namespace nugget {
 			}
 		}
 
-		static std::pair<uint64_t, uint64_t> HashRT(
+		static std::pair<uint64_t, uint64_t> HashRT_Rercursive(
 			const char* str, std::size_t index = 0,
 			std::uint64_t hash = 14695981039346656037ULL,
 			uint64_t combo = 0) {
@@ -34,10 +34,14 @@ namespace nugget {
 				return { hash, combo };
 			} else if (str[index] == '.') {
 				combo = CombineHashesRT(combo, hash);
-				return HashRT(str, index + 1, 14695981039346656037ULL, combo);
+				return HashRT_Rercursive(str, index + 1, 14695981039346656037ULL, combo);
 			} else {
-				return HashRT(str, index + 1, (hash ^ static_cast<std::uint64_t>(str[index])) * 1099511628211ULL, combo);
+				return HashRT_Rercursive(str, index + 1, (hash ^ static_cast<std::uint64_t>(str[index])) * 1099511628211ULL, combo);
 			}
+		}
+
+		static IDType HashRT(const std::string &str) {
+			return (IDType)HashRT_Rercursive(str.c_str()).second;
 		}
 
 		std::string IDToString(IDType id) {
@@ -59,29 +63,40 @@ namespace nugget {
 			}
 		}
 
-		IDType Register(const std::string& str) {
-			assert(("hash request on empty string", str != ""));
-			std::string path = str;
-			IDRemoveLeafInPlace(path);
+		IDType Register(std::string pathString) {
+			assert(("hash request on empty string", pathString != ""));
+			
+			bool firstTime = true;
+			IDType returnHash = IDType::null;
 
-			auto leaf = IDKeepLeaf(str);
-
-			IDType parent = (IDType)HashRT(path.c_str()).second;
-			IDType child = (IDType)HashRT(str.c_str()).second;
-			IDType strId = child;
-			SetReverseLookup(child,str);
-			data.parentMap[child] = parent;
-			IDType self = (IDType)HashRT(leaf.data()).second;
-			data.selfMap[child] = self;
-			SetReverseLookup(self, leaf.data());
-			while (parent != child) {
-				SetReverseLookup(parent,path);
-				data.childMap[parent].insert(child);
-				IDRemoveLeaf(path);
-				child = parent;
-				parent = (IDType)HashRT(path.c_str()).second;
+			std::string leafString;
+			std::string remainingPathString;
+			
+			for (;;) {
+				remainingPathString = pathString;
+				IDSeparateLeafAndPathInPlace(pathString, leafString);
+				IDType fullHash = HashRT(remainingPathString);
+				if (firstTime) {
+					returnHash = fullHash;
+					firstTime = false;
+				}
+				if (pathString.size() == 0) { 
+					IDType leafHash = HashRT(leafString);
+					SetReverseLookup(leafHash, leafString);
+					data.selfMap[fullHash] = leafHash;
+					break;
+				} else {
+					IDType pathHash = HashRT(pathString);
+					IDType leafHash = HashRT(leafString);
+					SetReverseLookup(fullHash, remainingPathString);
+					SetReverseLookup(leafHash, leafString);
+					data.parentMap[fullHash] = pathHash;
+					data.childMap[pathHash].insert(fullHash);
+					data.selfMap[fullHash] = leafHash;
+				}
 			}
-			return strId;
+
+			return returnHash;
 		}
 
 		const std::unordered_set<IDType>* IDGetChildren(IDType id) {
@@ -101,7 +116,7 @@ namespace nugget {
 			if (data.parentMap.contains(child)) {
 				return data.parentMap.at(child);
 			} else {
-				return (IDType)0;
+				return IDType::null;
 			}
 		}
 
@@ -151,7 +166,7 @@ namespace nugget {
 			if (data.toStringMap.contains(hash1)) {
 				std::string str1 = data.toStringMap[hash1];
 				std::string combo = IDCombineStrings( str1,str2.data() );
-				IDType id = (IDType)HashRT(combo.c_str()).second;
+				IDType id = HashRT(combo);
 				if (data.toStringMap.contains(id)) {
 					return id;
 				} else {
@@ -208,7 +223,7 @@ namespace nugget {
 			result.append(a).append(".").append(b);
 		}
 
-		std::string IDRemoveLeaf(const std::string& path) {
+		[[nodiscard]] std::string IDRemoveLeaf(const std::string& path) {
 			// Find the position of the last '.' character
 			auto lastDotPosition = path.find_last_of('.');
 
@@ -222,7 +237,7 @@ namespace nugget {
 			}
 		}
 
-		void IDRemoveLeafInPlace(std::string& path) {
+		bool IDRemoveLeafInPlace(std::string& path) {
 			// Find the position of the last '.' character
 			auto lastDotPosition = path.find_last_of('.');
 
@@ -230,6 +245,25 @@ namespace nugget {
 			if (lastDotPosition != std::string::npos) {
 				// Strip off everything after the last '.' character
 				path.resize(lastDotPosition);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		void IDSeparateLeafAndPathInPlace(std::string& path /*fill*/,std::string &leaf /*fill*/) {
+			// Find the position of the last '.' character
+			auto lastDotPosition = path.find_last_of('.');
+
+			// Check if a '.' character was found
+			if (lastDotPosition != std::string::npos) {
+				// copy over the leaf
+				leaf = path.substr(lastDotPosition+1);
+				// Strip off everything after the last '.' character
+				path.resize(lastDotPosition);
+			} else {
+				leaf = path;
+				path.resize(0);
 			}
 		}
 

@@ -3,6 +3,7 @@
 #include "shader.h"
 #include "Notice.h"
 #include "identifier.h"
+#include <format>
 
 using namespace nugget::identifier;
 namespace nugget::gl {
