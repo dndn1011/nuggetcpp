@@ -253,8 +253,8 @@ namespace nugget::expressions {
                 [&](const std::span<ValueAny>& args) {
                     check(args.size() == 1,"Incorrect number of arguments");
                     IDType id = args[0].AsIDType();
-                    if (Notice::KeyExists(id)) {
-                        return Notice::GetValueAny(id);
+                    if (gNotice.KeyExists(id)) {
+                        return gNotice.GetValueAny(id);
                     } else {
                         return ValueAny(Exception{ .description = std::format("Could not find property '{}'",IDToString(id)) });
                     }
@@ -604,10 +604,10 @@ namespace nugget::expressions {
         ValueAny IndirectValue(const std::span<ValueAny> values) {
             const ValueAny& v = values[0];
             check(v.GetType() == ValueAny::Type::IDType, "Must be an IDType");
-            const ValueAny& w = Notice::GetValueAny(v.AsIDType());
+            const ValueAny& w = gNotice.GetValueAny(v.AsIDType());
             const IDType wid = w.AsIDType();
-            if (Notice::KeyExists(wid)) {
-                return Notice::GetValueAny(wid);
+            if (gNotice.KeyExists(wid)) {
+                return gNotice.GetValueAny(wid);
             }
             return {};
         }

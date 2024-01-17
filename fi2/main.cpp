@@ -19,6 +19,7 @@
 
 using namespace nugget;
 using namespace nugget::identifier;
+using namespace properties;
 
 struct FileWatcher {
     FileWatcher(const std::string& filenameIn) : filename(filenameIn) {
@@ -46,9 +47,9 @@ struct FileWatcher {
 };
 
 void ReloadPt(std::string filename) {
-    //            Notice::LockNotifications();
+    //            gNotice.LockNotifications();
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    Notice::Remove(IDR("properties2"));
+    gNotice.Remove(IDR("properties2"));
     auto result = properties::LoadPropertyTree("properties2", "properties", filename);
     if (result.successful) {
         nugget::ui::entity::UpdateEntity(IDR("properties"), IDR("properties2"));
@@ -60,7 +61,7 @@ void ReloadPt(std::string filename) {
         output("Parse state:\n{}({}): {}\n", absfilename.string(), result.lineNumber, result.description);
         output("Could not load propertries for {}: {}\n", filename.c_str(), result.description.c_str());
     }
-    //            Notice::UnlockNotifications();
+    //            gNotice.UnlockNotifications();
 }
 
 
@@ -84,32 +85,32 @@ int main(int argc, char* argv[]) {
     }   
 
     std::vector<IDType> list;
-    Notice::GetChildrenWithNodeExisting(ID("properties.tests"), ID("mat"), list);
+    gNotice.GetChildrenWithNodeExisting(ID("properties.tests"), ID("mat"), list);
     for (auto&& x : list) {
-        Matrix4f mat = Notice::GetMatrix4f(IDR(x, ID("mat")));
-        Vector4f vec = Notice::GetVector4f(IDR(x, ID("vec")));
-        Vector4f expected = Notice::GetVector4f(IDR(x, ID("result")));
+        Matrix4f mat = gNotice.GetMatrix4f(IDR(x, ID("mat")));
+        Vector4f vec = gNotice.GetVector4f(IDR(x, ID("vec")));
+        Vector4f expected = gNotice.GetVector4f(IDR(x, ID("result")));
         Vector4f value = mat * vec;
         if (value != expected) {
             output("ERROR {} {} {}\n",IDToString(x),expected.to_string(),value.to_string());
         }
     }
 
-    auto result = Notice::GetVector4f(ID("properties.result"));
+    auto result = gNotice.GetVector4f(ID("properties.result"));
 
 
     nugget::system::Init();
 
-//    auto v = Notice::GetValueAny(IDR("properties.test.value"));
+//    auto v = gNotice.GetValueAny(IDR("properties.test.value"));
 //    output("RESULT: {} : {}\n", v.GetTypeAsString(), v.GetValueAsString());
 
 //    PrintHashTree(IDR("properties"));
 
 #if 0
-    auto a = nugget::Notice::GetString(IDR("properties.test.a"));
-    auto b = nugget::Notice::GetInt64(IDR("properties.test.b"));
-    auto c = nugget::Notice::GetFloat(IDR("properties.test.c"));
-    auto d = nugget::Notice::GetValueAsString(IDR("properties.test.d"));
+    auto a = nugget::gNotice.GetString(IDR("properties.test.a"));
+    auto b = nugget::gNotice.GetInt64(IDR("properties.test.b"));
+    auto c = nugget::gNotice.GetFloat(IDR("properties.test.c"));
+    auto d = nugget::gNotice.GetValueAsString(IDR("properties.test.d"));
 
     output("a = %s\n", a.c_str());
     output("b = %lld\n", b);
@@ -126,14 +127,14 @@ int main(int argc, char* argv[]) {
 
 #if 0 // test of button events
     auto updateLambda = [](IDType changeId) {
-        int32_t count = Notice::GetInt32(changeId);
-        Notice::Set(IDR(GetParent(changeId), ID("text")), std::to_string(count));
+        int32_t count = gNotice.GetInt32(changeId);
+        gNotice.Set(IDR(GetParent(changeId), ID("text")), std::to_string(count));
         };
 
     std::vector<IDType> children;
-    Notice::GetChildrenWithNodeOfValue(ID("properties.main.sub"), ID("class"), ID("ui::Button"), children/*fill*/);
+    gNotice.GetChildrenWithNodeOfValue(ID("properties.main.sub"), ID("class"), ID("ui::Button"), children/*fill*/);
     for (auto& x : children) {
-        Notice::RegisterHandler(Notice::Handler{
+        gNotice.RegisterHandler(gNotice.Handler{
             IDR(x,ID("pressEventCount")),
             updateLambda
             });

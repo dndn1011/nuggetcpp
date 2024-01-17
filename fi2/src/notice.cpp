@@ -27,10 +27,15 @@ namespace nugget {
 			std::unordered_set<IDType> changes;
 		};
 
-		static Data data;
+		Board::Board() : data(*(new nugget::Notice::Data())) {
+		}
+
+		Board::~Board() {
+			delete& data;
+		}
 
 		// pass in both id and the entry to save another lookup
-		void Notify(IDType id) {
+		void Board::Notify(IDType id) {
 			if (!notifyLock) {
 				if (data.handlers.contains(id)) {
 					auto& list = data.handlers.at(id);
@@ -43,7 +48,7 @@ namespace nugget {
 			}
 		}
 
-		void Remove(IDType id)
+		void Board::Remove(IDType id)
 		{
 			if (KeyExists(id)) {
 				const auto& entry = data.valueEntries.at(id);
@@ -66,9 +71,9 @@ namespace nugget {
 			}
 		}
 
-		void LockNotifications() {
+		void Board::LockNotifications() {
 		}
-		void UnlockNotifications() {
+		void Board::UnlockNotifications() {
 			// when unlocking, fire off the pending notifications
 			for (auto& x : data.changes) {
 				assert(KeyExists(x));
@@ -81,7 +86,7 @@ namespace nugget {
 			notifyLock = false;
 		}
 
-		std::string AsString(IDType id) {
+		std::string Board::AsString(IDType id) {
 			if (KeyExists(id)) {
 				auto &v = data.valueEntries.at(id);
 				return v.AsString();
@@ -90,56 +95,56 @@ namespace nugget {
 			}
 		}
 
-		std::string GetValueTypeAsString(const ValueAny& var) {
+		std::string Board::GetValueTypeAsString(const ValueAny& var) {
 			return  var.TypeAsString();
 		}
 
-		bool IsValueTypeInteger64(IDType id) {
+		bool Board::IsValueTypeInteger64(IDType id) {
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::int64_t_;
 		}
-		bool IsValueTypeUnsignedInteger64(IDType id) {
+		bool Board::IsValueTypeUnsignedInteger64(IDType id) {
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::uint64_t_;
 		}
-		bool IsValueTypeInteger32(IDType id) {
+		bool Board::IsValueTypeInteger32(IDType id) {
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::int32_t_;
 		}
-		bool IsValueTypeFloat(IDType id) {
+		bool Board::IsValueTypeFloat(IDType id) {
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::float_;
 		}
-		bool IsValueTypeString(IDType id) {
+		bool Board::IsValueTypeString(IDType id) {
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::string;
 		}
-		bool IsValueTypeIdentifier(IDType id) {
+		bool Board::IsValueTypeIdentifier(IDType id) {
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::IDType;
 		}
-		bool IsValueTypeColor(IDType id) {
+		bool Board::IsValueTypeColor(IDType id) {
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::Color;
 		}
-		bool IsValueTypeDimension(IDType id) {
+		bool Board::IsValueTypeDimension(IDType id) {
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::dimension;
 		}
-		bool IsValueTypeMatrix4f(IDType id) {
+		bool Board::IsValueTypeMatrix4f(IDType id) {
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.GetType() == ValueAny::Type::Matrix4f;
 		}
-		bool IsValueTypeParent(IDType id) {
+		bool Board::IsValueTypeParent(IDType id) {
 			if (!KeyExists(id)) {
 				return false;   // the parent node should exist and be of type 'parent'
 			} else {
@@ -147,54 +152,54 @@ namespace nugget {
 				return v.GetType() == ValueAny::Type::parent_;
 			}
 		}
-		std::string GetString(IDType id) {
+		std::string Board::GetString(IDType id) {
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto &v = data.valueEntries.at(id);
 			return v.AsString();
 		}
-		int32_t GetInt32(IDType id) {
+		int32_t Board::GetInt32(IDType id) {
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto &v = data.valueEntries.at(id);
 			return v.AsInt32();
 		}
-		int64_t GetInt64(IDType id) {
+		int64_t Board::GetInt64(IDType id) {
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.AsInt64();
 		}
-		uint64_t GetUint64(IDType id) {
+		uint64_t Board::GetUint64(IDType id) {
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.AsUint64();
 		}
-		float GetFloat(IDType id) {
+		float Board::GetFloat(IDType id) {
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto &v = data.valueEntries.at(id);
 			return v.AsFloat();
 		}
-		IDType GetID(IDType id) {
+		IDType Board::GetID(IDType id) {
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto &v = data.valueEntries.at(id);
 			return v.AsIDType();
 		}
-		void* GetPointer(IDType id) {
+		void* Board::GetPointer(IDType id) {
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return  v.AsPointer();
 		}
-		Dimension GetDimension(IDType id)
+		Dimension Board::GetDimension(IDType id)
 		{
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.AsDimension();
 		}
-		const Vector3fList& GetVector3fList(IDType id)
+		const Vector3fList& Board::GetVector3fList(IDType id)
 		{
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.AsVector3fList();
 		}
-		bool GetVector3fList(IDType id, Vector3fList& result) {
+		bool Board::GetVector3fList(IDType id, Vector3fList& result) {
 			if (KeyExists(id)) {
 				auto& v = GetValueAny(id);
 				if (v.GetType() == ValueAny::Type::Vector3fList) {
@@ -204,7 +209,7 @@ namespace nugget {
 			}
 			return false;
 		}
-		bool nugget::Notice::GetVector2fList(IDType id, Vector2fList& result) {
+		bool Board::GetVector2fList(IDType id, Vector2fList& result) {
 			if (KeyExists(id)) {
 				auto& v = GetValueAny(id);
 				if (v.GetType() == ValueAny::Type::Vector2fList) {
@@ -214,7 +219,7 @@ namespace nugget {
 			}
 			return false;
 		}
-		bool nugget::Notice::GetColorList(IDType id, ColorList& result) {
+		bool Board::GetColorList(IDType id, ColorList& result) {
 			if (KeyExists(id)) {
 				auto& v = GetValueAny(id);
 				if (v.GetType() == ValueAny::Type::ColorList) {
@@ -224,14 +229,14 @@ namespace nugget {
 			}
 			return false;
 		}
-		const ValueAny& GetValueAny(IDType id) {
+		const ValueAny& Board::GetValueAny(IDType id) {
 			if (KeyExists(id)) {
 				return data.valueEntries[id];
 			}
 			assert(0);
 			return data.valueEntries[id];
 		}
-		const nugget::Color &GetColor(IDType id) {
+		const nugget::Color& Board::GetColor(IDType id) {
 			if (KeyExists(id)) {
 				auto& v = data.valueEntries[id];
 				assert(v.GetType() == ValueAny::Type::Color);
@@ -240,7 +245,7 @@ namespace nugget {
 				return Color::defaultValue;
 			}
 		}
-		const nugget::Vector4f& GetVector4f(IDType id) {
+		const nugget::Vector4f& Board::GetVector4f(IDType id) {
 			if (KeyExists(id)) {
 				auto& v = data.valueEntries[id];
 				assert(v.GetType() == ValueAny::Type::Vector4f);
@@ -249,19 +254,19 @@ namespace nugget {
 				return Vector4f::defaultValue;
 			}
 		}
-		const Matrix4f& GetMatrix4f(IDType id) {
+		const Matrix4f& Board::GetMatrix4f(IDType id) {
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.AsMatrix4f();  // Assuming ValueAny has an AsMatrix4f method
 		}
-		void SetAsParent(IDType id)
+		void Board::SetAsParent(IDType id)
 		{
 			auto& entry = data.valueEntries[id];
 			entry.SetAsParent();
 		}
 
 		template <typename T>
-		void Set(IDType id, const T& value) {
+		void Board::Set(IDType id, const T& value) {
 			if (data.valueEntries.contains(id)) {
 				const auto& currentValue = data.valueEntries.at(id);
 				if (currentValue.GetType() != ValueAny::Type::deleted) {
@@ -270,7 +275,7 @@ namespace nugget {
 					if (diff) {
 						static int count = 0;
 						count++;
-						output("-------------------> {} {}\n", count, IDToString(id));
+//						output("-------------------> {} {}\n", count, IDToString(id));
 						Notify(id);
 					}
 				} else {
@@ -278,36 +283,36 @@ namespace nugget {
 				}
 			} else {
 				auto parent = Notice::GetParentTry(id);
-				check(parent != IDType::null && Notice::IsValueTypeParent(parent), "Cannot make a child of a leaf node, or parent does not exist: {}\n",IDToString(id));
+				check(parent != IDType::null && IsValueTypeParent(parent), "Cannot make a child of a leaf node, or parent does not exist: {}\n",IDToString(id));
 				auto r = data.valueEntries.emplace(id,value);
 				check(r.second, ("Emplace failed"));
 			}
 		}
 
-		template void Set<int64_t>(IDType id, const int64_t& value);
-		template void Set<uint64_t>(IDType id, const uint64_t& value);
-		template void Set<std::string>(IDType id, const std::string& value);
-		template void Set<int32_t>(IDType id, const int32_t& value);
-		template void Set<Color>(IDType id, const Color& value);
-		template void Set<float>(IDType id, const float& value);
-		template void Set<ValueAny>(IDType id, const ValueAny& value);
-		template void Set<Dimension>(IDType id, const Dimension& value);
-		template void Set<IDType>(IDType id, const IDType& value);
-		template void Set<Vector3fList>(IDType id, const Vector3fList& value);
-		template void Set<Vector3f>(IDType id, const Vector3f& value);
-		template void Set<Vector2fList>(IDType id, const Vector2fList& value);
-		template void Set<ColorList>(IDType id, const ColorList& value);
-		template void Set<Vector2f>(IDType id, const Vector2f& value);
-		template void Set<Matrix4f>(IDType id, const Matrix4f& value);
-		template void Set<Vector4f>(IDType id, const Vector4f& value);
+		template void Board::Set<int64_t>(IDType id, const int64_t& value);
+		template void Board::Set<uint64_t>(IDType id, const uint64_t& value);
+		template void Board::Set<std::string>(IDType id, const std::string& value);
+		template void Board::Set<int32_t>(IDType id, const int32_t& value);
+		template void Board::Set<Color>(IDType id, const Color& value);
+		template void Board::Set<float>(IDType id, const float& value);
+		template void Board::Set<ValueAny>(IDType id, const ValueAny& value);
+		template void Board::Set<Dimension>(IDType id, const Dimension& value);
+		template void Board::Set<IDType>(IDType id, const IDType& value);
+		template void Board::Set<Vector3fList>(IDType id, const Vector3fList& value);
+		template void Board::Set<Vector3f>(IDType id, const Vector3f& value);
+		template void Board::Set<Vector2fList>(IDType id, const Vector2fList& value);
+		template void Board::Set<ColorList>(IDType id, const ColorList& value);
+		template void Board::Set<Vector2f>(IDType id, const Vector2f& value);
+		template void Board::Set<Matrix4f>(IDType id, const Matrix4f& value);
+		template void Board::Set<Vector4f>(IDType id, const Vector4f& value);
 
-		void RegisterHandler(const Handler &handler) {
+		void Board::RegisterHandler(const Handler &handler) {
 			if (!data.handlers.contains(handler.changeId)) {
 				data.handlers[handler.changeId] = {};
 			}
 			data.handlers.at(handler.changeId).push_back(handler);
 		}
-		void RegisterHandlerOnChildren(const Handler &handler,std::vector<Handler> &out) {
+		void Board::RegisterHandlerOnChildren(const Handler &handler,std::vector<Handler> &out) {
 			std::vector<IDType> children;
 			auto r = GetChildren(handler.notifyId,children /*fill*/);
 			assert(r);
@@ -319,7 +324,7 @@ namespace nugget {
 		}
 
 		// Check key exists and is not marked deleted
-		bool KeyExists(IDType id) {
+		bool Board::KeyExists(IDType id) {
 			if (!data.valueEntries.contains(id)) {
 				return false;
 			}
@@ -330,7 +335,7 @@ namespace nugget {
 			return true;
 		}
 
-		bool GetChildren(IDType id, std::vector<IDType>& fill) {
+		bool Board::GetChildren(IDType id, std::vector<IDType>& fill) {
 			if (KeyExists(id)) {
 				if (auto set = identifier::IDGetChildren(id)) {
 					for (const auto& x : *set) {
@@ -345,12 +350,12 @@ namespace nugget {
 			}
 		}
 
-		bool GetChildrenOfType(IDType id, ValueAny::Type type,std::vector<IDType>& fill) {
+		bool Board::GetChildrenOfType(IDType id, ValueAny::Type type,std::vector<IDType>& fill) {
 			if (KeyExists(id)) {
 				if (auto set = identifier::IDGetChildren(id)) {
 					for (const auto& x : *set) {
 						if (KeyExists(x)) {
-							if (Notice::GetValueAny(x).GetType() == type) {
+							if (GetValueAny(x).GetType() == type) {
 								fill.push_back(x);
 							}
 						}
@@ -362,7 +367,7 @@ namespace nugget {
 			}
 		}
 
-		bool GetChildrenWithNodeExisting(IDType id, IDType leaf, std::vector<IDType>& fill) {
+		bool Board::GetChildrenWithNodeExisting(IDType id, IDType leaf, std::vector<IDType>& fill) {
 			if (KeyExists(id)) {
 				if (auto set = identifier::IDGetChildren(id)) {
 					for (const auto& x : *set) {
@@ -378,13 +383,13 @@ namespace nugget {
 			}
 		}
 
-		bool GetChildrenWithNodeOfValue(IDType id, IDType leaf, ValueAny value,std::vector<IDType>& fill) {
+		bool Board::GetChildrenWithNodeOfValue(IDType id, IDType leaf, ValueAny value,std::vector<IDType>& fill) {
 			if (KeyExists(id)) {
 				if (auto set = identifier::IDGetChildren(id)) {
 					for (const auto& x : *set) {
 						check(KeyExists(x), "Key should exist: {}", IDToString(x));
 						auto xleaf = IDR(x, leaf);
-						if (KeyExists(xleaf) && Notice::GetValueAny(xleaf) == value) {
+						if (KeyExists(xleaf) && GetValueAny(xleaf) == value) {
 							fill.push_back(x);
 						}
 					}

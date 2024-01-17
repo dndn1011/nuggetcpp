@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "notice.h"
 
 namespace nugget::properties {
 	struct [[nodiscard]] ParseState {
@@ -9,4 +10,7 @@ namespace nugget::properties {
 	};
 	ParseState LoadPropertyTree(const std::string &where, const std::string filename);
 	ParseState LoadPropertyTree(const std::string& where, const std::string& as, const std::string filename);
+
+	extern Notice::Board gNotice;
+
 }

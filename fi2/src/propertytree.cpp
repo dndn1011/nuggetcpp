@@ -67,6 +67,7 @@ namespace std {
 namespace nugget::properties {
     using namespace identifier;
     using namespace expressions;
+
     struct GrammarParseData {
         ParseState& parseState;
 
@@ -112,7 +113,7 @@ namespace nugget::properties {
                 },
                 [](const std::string& from, const std::string& path) {
                     auto fromval = ParseInteger(from);
-                    Notice::Set(IDR(path), (float)fromval);
+                    gNotice.Set(IDR(path), (float)fromval);
                 },
             },
             {
@@ -122,7 +123,7 @@ namespace nugget::properties {
                 [](const std::string& from, const std::string& path) {
                 // raw float dimension
                 auto fromval = ParseFloat(from);
-                Notice::Set(IDR(path), nugget::ui::Dimension{ fromval,nugget::ui::Dimension::Units::none });
+                gNotice.Set(IDR(path), nugget::ui::Dimension{ fromval,nugget::ui::Dimension::Units::none });
             },
         },
         {
@@ -132,7 +133,7 @@ namespace nugget::properties {
             [](const std::string& from, const std::string& path) {
                 // raw float dimension
                 auto fromval = ParseInteger(from);
-                Notice::Set(IDR(path), nugget::ui::Dimension{ (float)fromval,nugget::ui::Dimension::Units::none });
+                gNotice.Set(IDR(path), nugget::ui::Dimension{ (float)fromval,nugget::ui::Dimension::Units::none });
             },
         },
             {
@@ -142,7 +143,7 @@ namespace nugget::properties {
                 [](const std::string& from, const std::string& path) {
                 // raw float dimension
                 auto fromval = ParseFloat(from.substr(0, from.size() - 1));
-                Notice::Set(IDR(path), nugget::ui::Dimension{ (float)fromval,nugget::ui::Dimension::Units::percent });
+                gNotice.Set(IDR(path), nugget::ui::Dimension{ (float)fromval,nugget::ui::Dimension::Units::percent });
             },
         },
         };
@@ -156,7 +157,7 @@ namespace nugget::properties {
                     float b = Expression::ConvertType(initialiserList[2], ValueAny::Type::float_).AsFloat();
                     float a = Expression::ConvertType(initialiserList[3], ValueAny::Type::float_).AsFloat();
                     IDType id = IDR(IDR(currentPathName), currentValueName);
-                    Notice::Set(id,Color(r, g, b, a));
+                    gNotice.Set(id,Color(r, g, b, a));
                 },
             },
             {
@@ -173,7 +174,7 @@ namespace nugget::properties {
                     IDType id = IDR(IDR(currentPathName), currentValueName);
 
                     // Set the notice with the matrix
-                    Notice::Set(id, Matrix4f(m));
+                    gNotice.Set(id, Matrix4f(m));
                 },
             },
             {
@@ -194,7 +195,7 @@ namespace nugget::properties {
                             });
                     }
                     IDType id = IDR(IDR(currentPathName), currentValueName);
-                    Notice::Set(id, cols);
+                    gNotice.Set(id, cols);
                 },
             },
             {
@@ -204,7 +205,7 @@ namespace nugget::properties {
                     float y = Expression::ConvertType(initialiserList[1], ValueAny::Type::float_).AsFloat();
                     float z = Expression::ConvertType(initialiserList[2], ValueAny::Type::float_).AsFloat();
                     IDType id = IDR(IDR(currentPathName), currentValueName);
-                    Notice::Set(id,Vector3f(x, y, z));
+                    gNotice.Set(id,Vector3f(x, y, z));
                 },
             },
             {
@@ -215,7 +216,7 @@ namespace nugget::properties {
                     float z = Expression::ConvertType(initialiserList[2], ValueAny::Type::float_).AsFloat();
                     float w = Expression::ConvertType(initialiserList[3], ValueAny::Type::float_).AsFloat();
                     IDType id = IDR(IDR(currentPathName), currentValueName);
-                    Notice::Set(id,Vector4f(x, y, z, w));
+                    gNotice.Set(id,Vector4f(x, y, z, w));
                 },
             },
             {
@@ -234,7 +235,7 @@ namespace nugget::properties {
                             });
                     }
                     IDType id = IDR(IDR(currentPathName), currentValueName);
-                    Notice::Set(id,verts);
+                    gNotice.Set(id,verts);
                 }
             },
             {
@@ -243,7 +244,7 @@ namespace nugget::properties {
                     float x = Expression::ConvertType(initialiserList[0], ValueAny::Type::float_).AsFloat();
                     float y = Expression::ConvertType(initialiserList[1], ValueAny::Type::float_).AsFloat();
                     IDType id = IDR(IDR(currentPathName), currentValueName);
-                    Notice::Set(id,Vector2f(x, y));
+                    gNotice.Set(id,Vector2f(x, y));
                 }
             },
             {
@@ -260,7 +261,7 @@ namespace nugget::properties {
                             });
                     }
                     IDType id = IDR(IDR(currentPathName), currentValueName);
-                    Notice::Set(id,verts);
+                    gNotice.Set(id,verts);
                 }
             }
         };
@@ -270,9 +271,9 @@ namespace nugget::properties {
             if (currentTypeName == "") {
                 // we need to check if the value already exists and we can get the type from that
                 IDType id = IDR(IDR(currentPathName), currentValueName);
-                if (Notice::KeyExists(id)) {
-                    auto value = Notice::GetValueAny(id);
-                    currentTypeName = Notice::GetValueTypeAsString(value);
+                if (gNotice.KeyExists(id)) {
+                    auto value = gNotice.GetValueAny(id);
+                    currentTypeName = gNotice.GetValueTypeAsString(value);
                     assert(currentTypeName != "");
                 } else {
                     parseState.description =
@@ -315,7 +316,7 @@ namespace nugget::properties {
         void StoreValue() {
             std::string path = IDCombineStrings(currentPathName, currentValueName);
             ValueAny any = ParseValue();
-            Notice::Set(IDR(path), any);
+            gNotice.Set(IDR(path), any);
         }
 
         GrammarParseData(const std::string& rootName, const std::string &as, std::vector<Token>& list, ParseState& parseState) :
@@ -355,10 +356,10 @@ namespace nugget::properties {
         void NestWithCurrentBlock() {
             currentPathName = IDCombineStrings(currentPathName, currentBlockName);
             IDType id = identifier::Register(currentPathName);
-            Notice::SetAsParent(id);
+            gNotice.SetAsParent(id);
             if (nestLevel > 0) {   // we do not bother counting the children of the root
                 childCounts.back()++;
-                Notice::Set(IDR(id, IDR("_seq")), childCounts.back());
+                gNotice.Set(IDR(id, IDR("_seq")), childCounts.back());
             }
             nestLevel++;
             childCounts.push_back(0);
@@ -434,13 +435,13 @@ namespace nugget::properties {
         }
 
         Token::Type GetTypeOfValue(IDType id) {
-            if (Notice::IsValueTypeInteger32(id)) return Token::Type::integer;
-            if (Notice::IsValueTypeInteger64(id)) return Token::Type::integer;
-            if (Notice::IsValueTypeFloat(id)) return Token::Type::float_;
-            if (Notice::IsValueTypeString(id)) return Token::Type::string;
-            if (Notice::IsValueTypeIdentifier(id)) return Token::Type::identifier;
-            if (Notice::IsValueTypeColor(id)) return Token::Type::Color;
-            if (Notice::IsValueTypeDimension(id)) return Token::Type::dimension;
+            if (gNotice.IsValueTypeInteger32(id)) return Token::Type::integer;
+            if (gNotice.IsValueTypeInteger64(id)) return Token::Type::integer;
+            if (gNotice.IsValueTypeFloat(id)) return Token::Type::float_;
+            if (gNotice.IsValueTypeString(id)) return Token::Type::string;
+            if (gNotice.IsValueTypeIdentifier(id)) return Token::Type::identifier;
+            if (gNotice.IsValueTypeColor(id)) return Token::Type::Color;
+            if (gNotice.IsValueTypeDimension(id)) return Token::Type::dimension;
             assert(0);
             return Token::Type::unset;
         }
@@ -449,23 +450,7 @@ namespace nugget::properties {
         {
             ID("here"),
             [&](IDType id) {
-                if (asRoot == rootName) {
-                    return ValueAny(IDR(currentPathName));
-                } else {
-                    std::vector<IDType> nodesIn;
-                    IDType path = IDR(currentPathName);
-                    IDType parent;
-                    // nodes except parent
-                    while ((parent = GetParentTry(path)) != IDType::null) {
-                        nodesIn.push_back(GetLeaf(path));
-                        path = parent;
-                    }
-                    IDType outid = IDR(asRoot);
-                    for (int64_t i = (int64_t)nodesIn.size() - 1; i >= 0 ; --i) {
-                        outid = IDR(outid, nodesIn[i]);
-                    }
-                    return ValueAny(outid);
-                }
+                return ValueAny(IDR(currentPathName));
             }
         }
     };
@@ -517,7 +502,7 @@ namespace nugget::properties {
         }
         std::string path = IDCombineStrings(currentPathName, currentValueName);
         IDType toid = IDR(path);
-        Notice::Set<ValueAny>(toid, any);
+        gNotice.Set<ValueAny>(toid, any);
         return true;
     }
 
@@ -551,9 +536,9 @@ namespace nugget::properties {
             IDType fromId = IDR(fromstr);
             IDType toId = IDR(tostr);
             std::vector<IDType> children;
-            Notice::SetAsParent(toId);
+            gNotice.SetAsParent(toId);
 
-            if (auto r = !Notice::GetChildren(fromId, children /*fill*/)) {
+            if (auto r = !gNotice.GetChildren(fromId, children /*fill*/)) {
                 parseState.description = std::format("The class to Derive from could not be found or is empty: {}", fromstr);
                 SetLineNumberToToken();
                 return false;
@@ -567,10 +552,10 @@ namespace nugget::properties {
                 auto leaf = IDKeepLeaf(IDToString(fromPathId));
                 IDCombineStringsInPlace(tostr, leaf.data(), toPath);
 
-                auto value = Notice::GetValueAny(fromPathId);
+                auto value = gNotice.GetValueAny(fromPathId);
                 if (!value.IsVoid()) {
-                    auto& fromValue = Notice::GetValueAny(IDR(fromPath));
-                    Notice::Set(IDR(toPath), fromValue);
+                    auto& fromValue = gNotice.GetValueAny(IDR(fromPath));
+                    gNotice.Set(IDR(toPath), fromValue);
 //                    output("Inherit value {}->{}\n", fromPath, toPath);
                 } else {
                     auto r = CopyNodes(IDCombineStrings(fromstr, leaf.data()), IDCombineStrings(tostr, leaf.data()));
@@ -644,7 +629,7 @@ namespace nugget::properties {
 
 namespace nugget::properties {
     bool GrammarParse(std::string rootName, std::string  as, std::vector<Token>& list,ParseState &parseState) {
-        Notice::SetAsParent(IDR(rootName));
+        gNotice.SetAsParent(IDR(rootName));
         GrammarParseData pdata(rootName, as, list,parseState);
         while (!pdata.AtEnd()) {
             /////////////////////////////////////////////
@@ -908,4 +893,6 @@ namespace nugget::properties {
         return LoadPropertyTree(where, where, filename);
     }
 
+    // the definition of the global notice board
+    nugget::Notice::Board gNotice;
 }

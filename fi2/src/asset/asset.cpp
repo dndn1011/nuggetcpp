@@ -8,9 +8,11 @@
 #include <unordered_map>
 #include "../../external/stb_image.h"
 #include "png.h"
+#include "propertytree.h"
 
 namespace nugget::asset {
     using namespace identifier;
+    using namespace properties;
     namespace fs = std::filesystem;
 
     static const size_t MaxTextures = 100;
@@ -51,20 +53,20 @@ namespace nugget::asset {
 
     void CollectAssetMetadata(IDType node) {
         std::vector<IDType> children;
-        Notice::GetChildrenWithNodeExisting(node, ID("path"), children);
+        gNotice.GetChildrenWithNodeExisting(node, ID("path"), children);
         for (auto&& x : children) {
             IDType idPath = IDR(x, "path");
             IDType idType = IDR(x, "type");
             IDType idDescription = IDR(x, "description");
-            const std::string &path = Notice::GetString(idPath);
-            const std::string &type = Notice::GetString(idType);
-            const std::string &description = Notice::GetString(idDescription);
+            const std::string &path = gNotice.GetString(idPath);
+            const std::string &type = gNotice.GetString(idType);
+            const std::string &description = gNotice.GetString(idDescription);
             db::AddAssetMeta(IDToString(GetLeaf(x)), path, type, description);
         }
     }
 
     void Init() {
-        std::string textureDir = Notice::GetString(ID("properties.assets.config.textures"));
+        std::string textureDir = gNotice.GetString(ID("properties.assets.config.textures"));
         CollectFiles(textureDir);
         CollectAssetMetadata(ID("properties.assets.meta"));
     }

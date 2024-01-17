@@ -4,10 +4,11 @@
 #include "Notice.h"
 #include "identifier.h"
 #include <format>
+#include "propertytree.h"
 
 using namespace nugget::identifier;
 namespace nugget::gl {
-
+    using namespace properties;
     // Function to compile a shader and check for compilation errors
     GLuint CompileShader(const std::string& shaderSource, GLenum shaderType) {
        
@@ -104,7 +105,7 @@ namespace nugget::gl {
         IDType programNode = IDR(node, IDR("program"));
 
         std::string nodeStr = IDToString(node);
-        Notice::SetAsParent(IDR({ nodeStr, "_internal" }));
+        gNotice.SetAsParent(IDR({ nodeStr, "_internal" }));
         IDType vertexIdNode = IDR({ nodeStr, "_internal","_vglid" });
         IDType geometryIdNode = IDR({ nodeStr, "_internal","_gglid" });
         IDType fragmentIdNode = IDR({ nodeStr, "_internal","_fglid" });
@@ -112,35 +113,35 @@ namespace nugget::gl {
 
         // e.g. properties.shaders.foo.program.glid
 
-        if (Notice::KeyExists(programIdNode)) {
-            auto id = Notice::GetUint64(programIdNode);
+        if (gNotice.KeyExists(programIdNode)) {
+            auto id = gNotice.GetUint64(programIdNode);
             if (id) {
                 glDeleteProgram((GLuint)id);
             }
         }
-        if (Notice::KeyExists(vertexIdNode)) {
-            auto id = Notice::GetUint64(vertexIdNode);
+        if (gNotice.KeyExists(vertexIdNode)) {
+            auto id = gNotice.GetUint64(vertexIdNode);
             if (id) {
                 glDeleteShader((GLuint)id);
             }
         }
-        if (Notice::KeyExists(geometryIdNode)) {
-            auto id = Notice::GetUint64(geometryIdNode);
+        if (gNotice.KeyExists(geometryIdNode)) {
+            auto id = gNotice.GetUint64(geometryIdNode);
             if (id) {
                 glDeleteShader((GLuint)id);
             }
 
         }
-        if (Notice::KeyExists(fragmentIdNode)) {
-            auto id = Notice::GetUint64(fragmentIdNode);
+        if (gNotice.KeyExists(fragmentIdNode)) {
+            auto id = gNotice.GetUint64(fragmentIdNode);
             if (id) {
                 glDeleteShader((GLuint)id);
             }
         }
 
-        std::string vertexShaderSource = Notice::GetString(vertexNode);
-        std::string geometryShaderSource = Notice::GetString(geometryNode);
-        std::string fragmentShaderSource = Notice::GetString(fragmentNode);
+        std::string vertexShaderSource = gNotice.GetString(vertexNode);
+        std::string geometryShaderSource = gNotice.GetString(geometryNode);
+        std::string fragmentShaderSource = gNotice.GetString(fragmentNode);
 
             
         // Geometry Shader
@@ -160,10 +161,10 @@ namespace nugget::gl {
         GLuint shaderProgram = LinkProgram(geometryShader, vertexShader, fragmentShader);
         testAlways(shaderProgram != 0, ("fragment shader compilation failed\n"));
 
-        Notice::Set(vertexIdNode, (int64_t)vertexShader);
-        Notice::Set(geometryIdNode, (int64_t)geometryShader);
-        Notice::Set(fragmentIdNode, (int64_t)fragmentShader);
-        Notice::Set(programIdNode, (int64_t)shaderProgram);
+        gNotice.Set(vertexIdNode, (int64_t)vertexShader);
+        gNotice.Set(geometryIdNode, (int64_t)geometryShader);
+        gNotice.Set(fragmentIdNode, (int64_t)fragmentShader);
+        gNotice.Set(programIdNode, (int64_t)shaderProgram);
 
     }
      

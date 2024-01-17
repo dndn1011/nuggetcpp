@@ -5,11 +5,12 @@
 #include "notice.h"
 #include "debug.h"
 #include "utils/utils.h"
+#include "propertytree.h"
 
 namespace nugget::ui::entity {
 	using namespace identifier;
 	using namespace Notice;
-
+	using namespace nugget::properties;
 	struct EntityInfo {
 		IDType node = {};
 		CreateLambda createFunc = {};
@@ -22,18 +23,18 @@ namespace nugget::ui::entity {
 	void CreateEntityRecursive(IDType id) {
 		auto classNode = IDRCheck(id, "class");
 		if (classNode!=IDType::null) {
-			assert(Notice::KeyExists(classNode));
-			auto classId = Notice::GetID(classNode);
+			assert(gNotice.KeyExists(classNode));
+			auto classId = gNotice.GetID(classNode);
 			check(registeredEntities.contains(classId), "the entity constructor is not defined: {}\n",
 				IDToString(classId));
 
 			registeredEntities.at(classId).createFunc(id);
 
 			std::vector<IDType> children;
-			if (auto r = Notice::GetChildren(IDR(id, "sub"),children)) {
+			if (auto r = gNotice.GetChildren(IDR(id, "sub"),children)) {
 				for (auto& x : children) {
 					IDType classNodeHash = IDRCheck(x, "class");
-					if (classNodeHash!=IDType::null && Notice::KeyExists(classNodeHash)) {
+					if (classNodeHash!=IDType::null && gNotice.KeyExists(classNodeHash)) {
 						CreateEntityRecursive(x);
 					}
 				}
@@ -64,23 +65,23 @@ namespace nugget::ui::entity {
 		if (GetLeaf(to) == ID("_internal")) {
 			return;
 		}
-		if (Notice::KeyExists(from)) {
+		if (gNotice.KeyExists(from)) {
 			// both exist
-			ValueAny valueTo = Notice::GetValueAny(to);
-			ValueAny valueFrom = Notice::GetValueAny(from);
+			ValueAny valueTo = gNotice.GetValueAny(to);
+			ValueAny valueFrom = gNotice.GetValueAny(from);
 			if (valueTo == valueFrom) {
 			//	output("SAME!\n");
 			} else {
-				//output("updating: %s <- %s\n", IDToString(to).c_str(), IDToString(from).c_str());
-				//output("      values: %s <- %s\n", valueTo.GetValueAsString().c_str(), valueFrom.GetValueAsString().c_str());
-				Notice::Set(to, valueFrom);
+				output("updating: {} <- {}\n", IDToString(to), IDToString(from));
+				output("      values: {} <- {}\n", valueTo.AsString(), valueFrom.AsString());
+				gNotice.Set(to, valueFrom);
 			}
 		} else {
 			output("Removed {}\n", IDToString(to).c_str());
-			Notice::Remove(to);
+			gNotice.Remove(to);
 		}
 		std::vector<IDType> children;
-		if (auto r = Notice::GetChildren(to,children /*fill*/)) {
+		if (auto r = gNotice.GetChildren(to,children /*fill*/)) {
 			for (auto& x : children) {
 		//		output("-------->{}\n", IDToString(x));
 				IDType newFrom = IDR(from, GetLeaf(x));
@@ -91,15 +92,15 @@ namespace nugget::ui::entity {
 
 	void UpdateEntityRecursive2(IDType to, IDType from) {
 //		output("checking: %s <- %s : %zu %zu\n", IDToString(to).c_str(), IDToString(from).c_str(),to,from);
-		if (Notice::KeyExists(to)) {
+		if (gNotice.KeyExists(to)) {
 			// both exist
 		} else {
 //			output("MISSING!!!! {}\n", IDToString(from).c_str());
-			ValueAny valueTo = Notice::GetValueAny(from);
-			Set(to, valueTo);
+			ValueAny valueTo = gNotice.GetValueAny(from);
+			gNotice.Set(to, valueTo);
 		}
 		std::vector<IDType> children;
-		if (auto r = Notice::GetChildren(from, children /*fill*/)) {
+		if (auto r = gNotice.GetChildren(from, children /*fill*/)) {
 			for (auto& x : children) {
 				IDType newTo = IDR(to, GetLeaf(x));
 				UpdateEntityRecursive2(newTo, x /*fill*/);
