@@ -236,8 +236,8 @@ namespace nugget {
 				// Strip off everything after the last '.' character
 				return path.substr(0, lastDotPosition);
 			} else {
-				// If no '.' character was found, return the original string
-				return path;
+				// If no '.' character was found, the result is the null string
+				return "";
 			}
 		}
 

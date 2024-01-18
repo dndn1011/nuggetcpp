@@ -66,9 +66,9 @@ namespace nugget::asset {
     }
 
     void Init() {
-        std::string textureDir = gNotice.GetString(ID("properties.assets.config.textures"));
+        std::string textureDir = gNotice.GetString(ID("assets.config.textures"));
         CollectFiles(textureDir);
-        CollectAssetMetadata(ID("properties.assets.meta"));
+        CollectAssetMetadata(ID("assets.meta"));
     }
 
 

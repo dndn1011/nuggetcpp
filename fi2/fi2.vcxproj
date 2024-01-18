@@ -155,8 +155,10 @@
   <ItemGroup>
     <ClCompile Include="external\stb_image.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\asset\asset.cpp" />
     <ClCompile Include="src\asset\png.cpp" />
     <ClCompile Include="src\Color_plat.cpp" />
+    <ClCompile Include="src\database\db.cpp" />
     <ClCompile Include="src\debug.cpp" />
     <ClCompile Include="src\expressions.cpp" />
     <ClCompile Include="src\filereader.cpp" />

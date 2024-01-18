@@ -684,8 +684,6 @@ shaders {
     }
 }
 
-@root=@here;
-
 quad {
     verts : Vector3fList = {
         0.25, 0.25, 0,
@@ -726,7 +724,7 @@ testobj {
             0,0,0,1,
         };
 
-        shader = @root.shaders.biquad;
+        shader = shaders.biquad;
         primitive = GL_TRIANGLES_ADJACENCY;
         start = 0;
         length = 24;
@@ -735,55 +733,42 @@ testobj {
         v : Vector3f = { 0.5,0.2,0.0 };
         s : Vector3f = { @scale,@scale,@scale };
 
-//        v1 = (ref(@root.quad.verts)*ref(@here.s)) - ref(@here.v) * 2.5;
-//        v2 = (ref(@root.quad.verts)*ref(@here.s)) - ref(@here.v) * 0.0;
-//        v3 = (ref(@root.quad.verts)*ref(@here.s)) - ref(@here.v) * -2.5;
+//        v1 = (ref(quad.verts)*ref(@here.s)) - ref(@here.v) * 2.5;
+//        v2 = (ref(quad.verts)*ref(@here.s)) - ref(@here.v) * 0.0;
+//        v3 = (ref(quad.verts)*ref(@here.s)) - ref(@here.v) * -2.5;
 
         /////////////////////////////////////////
 
         j : Vector3f = { 0.0,0.1,0.0};
 
-        v1 = ref(@root.quad.verts)*ref(@here.s)*0.5 + ref(@here.v) * 0.8 + ref(@here.j);
-        v2 = ref(@root.quad.verts)*ref(@here.s)*0.8 + ref(@here.v) * 0.0 + ref(@here.j);
-        v3 = ref(@root.quad.verts)*ref(@here.s)*1.2 + ref(@here.v) * -1.25;
-        v4 = ref(@root.quad.verts)*ref(@here.s)*0.4 + ref(@here.v) * 1.4;
+        v1 = ref(quad.verts)*ref(@here.s)*0.5 + ref(@here.v) * 0.8 + ref(@here.j);
+        v2 = ref(quad.verts)*ref(@here.s)*0.8 + ref(@here.v) * 0.0 + ref(@here.j);
+        v3 = ref(quad.verts)*ref(@here.s)*1.2 + ref(@here.v) * -1.25;
+        v4 = ref(quad.verts)*ref(@here.s)*0.4 + ref(@here.v) * 1.4;
 
-        u1 = ref(@root.quad.uvs);
+        u1 = ref(quad.uvs);
 
 //        verts = concat(ref(@here.v1),ref(@here.v2),ref(@here.v3));
         
         /////////////////////////////////////////
         verts = concat(ref(@here.v1),ref(@here.v2),ref(@here.v3),ref(@here.v4));
 
-        uvs = concat(ref(@root.quad.uvs),ref(@root.quad.uvs),ref(@root.quad.uvs),ref(@root.quad.uvs));
-        colors = concat(ref(@root.quad.colors),ref(@root.quad.colors),ref(@root.quad.colors),ref(@root.quad.colors));
+        uvs = concat(ref(quad.uvs),ref(quad.uvs),ref(quad.uvs),ref(quad.uvs));
+        colors = concat(ref(quad.colors),ref(quad.colors),ref(quad.colors),ref(quad.colors));
 
-//        verts = ref(@root.quad.verts);
-//        uvs = ref(@root.quad.uvs);
-//        colors = ref(@root.quad.colors);
+//        verts = ref(quad.verts);
+//        uvs = ref(quad.uvs);
+//        colors = ref(quad.colors);
 
-        //verts = concat(ref(@root.quad.verts)*ref(@here.s) - ref(@here.v)
-        //, ref(@root.quad.verts)*ref(@here.s) + ref(@here.v) *1.25
-        //, ref(@root.quad.verts)*ref(@here.s) + ref(@here.v) *0.5
+        //verts = concat(ref(quad.verts)*ref(@here.s) - ref(@here.v)
+        //, ref(quad.verts)*ref(@here.s) + ref(@here.v) *1.25
+        //, ref(quad.verts)*ref(@here.s) + ref(@here.v) *0.5
         //);
-//       verts = ref(@root.quad.verts) * ref(@here.s) + ref(@here.v);
+//       verts = ref(quad.verts) * ref(@here.s) + ref(@here.v);
     }
 }
 render {
     scene {
-        : =@root.testobj;
+        : = testobj;
     }
-}
-
-test {
-    @b=properties.render.object.section.verts;
-	value = 0;
-}
-
-main {
-}
-
-foo {
-//    @haha = hello;
-    //test = @haha;
 }

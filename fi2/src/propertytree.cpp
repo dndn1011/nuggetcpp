@@ -451,7 +451,11 @@ namespace nugget::properties {
         {
             ID("here"),
             [&](IDType id) {
-                return ValueAny(IDR(currentPathName));
+                if (currentPathName.size()) {
+                    return ValueAny(IDR(currentPathName));
+                } else {
+                    return ValueAny(IDType::null);
+                }
             }
         }
     };

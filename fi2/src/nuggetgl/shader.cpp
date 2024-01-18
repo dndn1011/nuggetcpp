@@ -111,7 +111,7 @@ namespace nugget::gl {
         IDType fragmentIdNode = IDR({ nodeStr, "_internal","_fglid" });
         IDType programIdNode = IDR({ nodeStr, "_internal","_pglid" });
 
-        // e.g. properties.shaders.foo.program.glid
+        // e.g. shaders.foo.program.glid
 
         if (gNotice.KeyExists(programIdNode)) {
             auto id = gNotice.GetUint64(programIdNode);

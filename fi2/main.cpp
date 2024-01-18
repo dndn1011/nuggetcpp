@@ -91,8 +91,6 @@ int main(int argc, char* argv[]) {
 
     }   
 
-    exit(1);
-
     std::vector<IDType> list;
     gNotice.GetChildrenWithNodeExisting(ID("tests"), ID("mat"), list);
     for (auto&& x : list) {
@@ -113,7 +111,7 @@ int main(int argc, char* argv[]) {
     nugget::ui::entity::CreateEntity(gNotice, IDR("main"));
     nugget::ui::entity::ManageGeometry(gNotice, IDR("main"));
 
-//    nugget::ui::entity::CreateEntity(ID("properties.circle"));
+//    nugget::ui::entity::CreateEntity(ID("circle"));
 
     FileWatcher watcher(filename);
 
@@ -124,7 +122,7 @@ int main(int argc, char* argv[]) {
         };
 
     std::vector<IDType> children;
-    gNotice.GetChildrenWithNodeOfValue(ID("properties.main.sub"), ID("class"), ID("ui::Button"), children/*fill*/);
+    gNotice.GetChildrenWithNodeOfValue(ID("main.sub"), ID("class"), ID("ui::Button"), children/*fill*/);
     for (auto& x : children) {
         gNotice.RegisterHandler(gNotice.Handler{
             IDR(x,ID("pressEventCount")),

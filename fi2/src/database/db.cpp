@@ -15,7 +15,7 @@ namespace nugget::db {
 
     sqlite3* databaseConnection;
     bool Init() {
-        constexpr IDType db_node = ID("properties.database");
+        constexpr IDType db_node = ID("database");
         constexpr IDType prop_file = ID(db_node, "file");
         constexpr IDType prop_extension = ID(db_node, "extension");
         constexpr IDType prop_extension_entry = ID(db_node, "extension_entry");

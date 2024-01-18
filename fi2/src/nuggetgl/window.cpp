@@ -65,7 +65,7 @@ namespace nugget::gl {
         InitFunctionPointers();
 
 
-        CompileShaderFromProperties(IDR("properties.shaders.biquad"));
+        CompileShaderFromProperties(IDR("shaders.biquad"));
 
     }
 }
@@ -126,8 +126,8 @@ namespace nugget::gl {
         triangle_test();
 
         std::vector<Notice::Handler> handlers;
-        gNotice.RegisterHandlerOnChildren(Notice::Handler(IDR("properties.shaders.biquad"), [](IDType id) {
-            CompileShaderFromProperties(IDR("properties.shaders.biquad"));
+        gNotice.RegisterHandlerOnChildren(Notice::Handler(IDR("shaders.biquad"), [](IDType id) {
+            CompileShaderFromProperties(IDR("shaders.biquad"));
             }), handlers);
 
         return 0;
@@ -267,7 +267,6 @@ namespace nugget::gl {
             }
             // Texture
             {
-#if 0
                 // texture allocation
                 if (sectionIndex >= textures.size()) {
                     check(sectionIndex == textures.size(), "Need to increment smoothly through section indices");
@@ -290,7 +289,6 @@ namespace nugget::gl {
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, texture.width, texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data);
                 glBindTexture(GL_TEXTURE_2D, 0);
-#endif
             }
             // put it together
             {
@@ -420,7 +418,7 @@ namespace nugget::gl {
 
     void triangle_test() {
         renderable.Init();
-        renderable.AddSections(ID("properties.testobj"));
+        renderable.AddSections(ID("testobj"));
     }
 
 }
@@ -433,17 +431,17 @@ namespace nugget::gl {
             ApplyRenderingData();
 
             std::vector<gNotice.Handler> handlers;
-            gNotice.RegisterHandlerOnChildren(gNotice.Handler(IDR("properties.shaders.biquad"), [](IDType id) {
-                CompileShaderFromProperties(IDR("properties.shaders.biquad"));
+            gNotice.RegisterHandlerOnChildren(gNotice.Handler(IDR("shaders.biquad"), [](IDType id) {
+                CompileShaderFromProperties(IDR("shaders.biquad"));
                 }), handlers);
 
-            IDType vid = IDR("properties.testobj.section.verts");
-            IDType uid = IDR("properties.testobj.section.uvs");
-            IDType cid = IDR("properties.testobj.section.colors");
-            IDType startNoticeID = IDR("properties.testobj.section.start");
-            IDType lengthNoticeID = IDR("properties.testobj.section.length");
-            IDType primNoticeID = IDR("properties.testobj.section.primitive");
-            IDType shaderNoideHash = IDR("properties.testobj.section.shader");
+            IDType vid = IDR("testobj.section.verts");
+            IDType uid = IDR("testobj.section.uvs");
+            IDType cid = IDR("testobj.section.colors");
+            IDType startNoticeID = IDR("testobj.section.start");
+            IDType lengthNoticeID = IDR("testobj.section.length");
+            IDType primNoticeID = IDR("testobj.section.primitive");
+            IDType shaderNoideHash = IDR("testobj.section.shader");
 
             gNotice.RegisterHandler(gNotice.Handler(vid, [this](IDType vid) {
                 ApplyRenderingData();
@@ -464,7 +462,7 @@ namespace nugget::gl {
                 renderable.primitive = primitiveMap.at(gNotice.GetID(primid));
                 }));
 
-            CompileShaderFromProperties(IDR("properties.shaders.biquad"));
+            CompileShaderFromProperties(IDR("shaders.biquad"));
 
             IDType shaderProgramNoticeID = IDR({ IDToString(gNotice.GetID(shaderNoideHash)), "_internal", "_pglid" });
 
