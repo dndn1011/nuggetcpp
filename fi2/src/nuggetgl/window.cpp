@@ -102,8 +102,8 @@ namespace nugget::gl {
         // Create the window
         HWND hwnd = CreateWindowEx(0, L"MyOpenGLProject", L"My OpenGL Project", WS_OVERLAPPEDWINDOW,
             CW_USEDEFAULT, CW_USEDEFAULT,
-            (int)gNotice.GetInt64(IDR("properties.app.window.w")),
-            (int)gNotice.GetInt64(IDR("properties.app.window.h")),
+            (int)gNotice.GetInt64(IDR("app.window.w")),
+            (int)gNotice.GetInt64(IDR("app.window.h")),
             0, 0, GetModuleHandle(NULL), 0);
 
         if (!hwnd) {
@@ -115,8 +115,8 @@ namespace nugget::gl {
         ShowWindow(hwnd, SW_SHOW);
 
         SetWindowPos(hwnd, NULL,
-            (int)gNotice.GetInt64(ID("properties.app.window.x")),
-            (int)gNotice.GetInt64(IDR("properties.app.window.y")),
+            (int)gNotice.GetInt64(ID("app.window.x")),
+            (int)gNotice.GetInt64(IDR("app.window.y")),
             0, 0, SWP_NOZORDER | SWP_NOSIZE);
 
         hdc = GetDC(hwnd);
@@ -267,6 +267,7 @@ namespace nugget::gl {
             }
             // Texture
             {
+#if 0
                 // texture allocation
                 if (sectionIndex >= textures.size()) {
                     check(sectionIndex == textures.size(), "Need to increment smoothly through section indices");
@@ -289,6 +290,7 @@ namespace nugget::gl {
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, texture.width, texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data);
                 glBindTexture(GL_TEXTURE_2D, 0);
+#endif
             }
             // put it together
             {

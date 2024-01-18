@@ -20,22 +20,22 @@ namespace nugget::ui::entity {
 	};
 	static inline std::unordered_map<IDType,EntityInfo> registeredEntities;
 
-	void CreateEntityRecursive(IDType id) {
+	void CreateEntityRecursive(const Notice::Board &board,IDType id) {
 		auto classNode = IDRCheck(id, "class");
 		if (classNode!=IDType::null) {
-			assert(gNotice.KeyExists(classNode));
-			auto classId = gNotice.GetID(classNode);
+			assert(board.KeyExists(classNode));
+			auto classId = board.GetID(classNode);
 			check(registeredEntities.contains(classId), "the entity constructor is not defined: {}\n",
 				IDToString(classId));
 
 			registeredEntities.at(classId).createFunc(id);
 
 			std::vector<IDType> children;
-			if (auto r = gNotice.GetChildren(IDR(id, "sub"),children)) {
+			if (auto r = board.GetChildren(IDR(id, "sub"),children)) {
 				for (auto& x : children) {
 					IDType classNodeHash = IDRCheck(x, "class");
-					if (classNodeHash!=IDType::null && gNotice.KeyExists(classNodeHash)) {
-						CreateEntityRecursive(x);
+					if (classNodeHash!=IDType::null && board.KeyExists(classNodeHash)) {
+						CreateEntityRecursive(board,x);
 					}
 				}
 			}
@@ -60,61 +60,58 @@ namespace nugget::ui::entity {
 
 	// compare the state of the property tree with the current instances of entities
 	// and sync
-	void UpdateEntityRecursive(IDType to, IDType from) {
+	void UpdateEntityRecursive(Notice::Board &to,const Notice::Board &from,IDType node) {
 		//output("checking: %s <- %s : %zu %zu\n", IDToString(to).c_str(), IDToString(from).c_str(),to,from);
-		if (GetLeaf(to) == ID("_internal")) {
+		if (GetLeaf(node) == ID("_internal")) {
 			return;
 		}
-		if (gNotice.KeyExists(from)) {
+		if (from.KeyExists(node)) {
 			// both exist
-			ValueAny valueTo = gNotice.GetValueAny(to);
-			ValueAny valueFrom = gNotice.GetValueAny(from);
+			ValueAny valueTo = to.GetValueAny(node);
+			ValueAny valueFrom = from.GetValueAny(node);
 			if (valueTo == valueFrom) {
 			//	output("SAME!\n");
 			} else {
-				output("updating: {} <- {}\n", IDToString(to), IDToString(from));
+				output("updating: {}\n", IDToString(node));
 				output("      values: {} <- {}\n", valueTo.AsString(), valueFrom.AsString());
-				gNotice.Set(to, valueFrom);
+				to.Set(node, valueFrom);
 			}
 		} else {
-			output("Removed {}\n", IDToString(to).c_str());
-			gNotice.Remove(to);
+			output("Removed {}\n", IDToString(node));
+			to.Remove(node);
 		}
 		std::vector<IDType> children;
-		if (auto r = gNotice.GetChildren(to,children /*fill*/)) {
+		if (auto r = to.GetChildren(node,children /*fill*/)) {
 			for (auto& x : children) {
-		//		output("-------->{}\n", IDToString(x));
-				IDType newFrom = IDR(from, GetLeaf(x));
-				UpdateEntityRecursive(x,newFrom);
+				UpdateEntityRecursive(to /*fill*/,from,x);
 			}
 		}
 	}
 
-	void UpdateEntityRecursive2(IDType to, IDType from) {
+	void UpdateEntityRecursive2(Notice::Board& to, const Notice::Board& from, IDType node) {
 //		output("checking: %s <- %s : %zu %zu\n", IDToString(to).c_str(), IDToString(from).c_str(),to,from);
-		if (gNotice.KeyExists(to)) {
+		if (to.KeyExists(node)) {
 			// both exist
 		} else {
 //			output("MISSING!!!! {}\n", IDToString(from).c_str());
-			ValueAny valueTo = gNotice.GetValueAny(from);
-			gNotice.Set(to, valueTo);
+			ValueAny valueTo = from.GetValueAny(node);
+			to.Set(node, valueTo);
 		}
 		std::vector<IDType> children;
-		if (auto r = gNotice.GetChildren(from, children /*fill*/)) {
+		if (auto r = from.GetChildren(node, children /*fill*/)) {
 			for (auto& x : children) {
-				IDType newTo = IDR(to, GetLeaf(x));
-				UpdateEntityRecursive2(newTo, x /*fill*/);
+				UpdateEntityRecursive2(to /*fill*/,from, x);
 			}
 		}
 	}
 
-	void CreateEntity(IDType id) {
-		CreateEntityRecursive(id);
+	void CreateEntity(Notice::Board &board,IDType id) {
+		CreateEntityRecursive(board,id);
 	}
 
-	void UpdateEntity(IDType to, IDType from) {
-		UpdateEntityRecursive(to,from);
-		UpdateEntityRecursive2(to, from);
+	void UpdateEntity(Notice::Board &to, const Notice::Board &from) {
+		UpdateEntityRecursive(to,from,IDR("root"));
+		UpdateEntityRecursive2(to, from, IDR("root"));
 	}
 
 	struct RegisterSingleton;
@@ -132,12 +129,11 @@ namespace nugget::ui::entity {
 	RegisterSingleton* staticEntityRegistrations = RegisterSingleton::GetInstance();
 
 
-	void ManageGeometry(IDType nodeId) {
+	void ManageGeometry(Notice::Board& board,IDType nodeId) {
 		for (auto &&x : registeredEntities) {
 			check(x.second.selfGeomFunc, ("The function pointer is null\n"));
 			x.second.selfGeomFunc();
 		}
-
 
 		for (auto&& x : registeredEntities) {
 			if (x.second.manageGeomFunc) {

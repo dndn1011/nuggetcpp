@@ -21,6 +21,11 @@ using namespace nugget;
 using namespace nugget::identifier;
 using namespace properties;
 
+namespace nugget::properties {
+    Notice::Board gNotice;
+    static Notice::Board gNoticeBack;
+}
+
 struct FileWatcher {
     FileWatcher(const std::string& filenameIn) : filename(filenameIn) {
         mtime = std::filesystem::last_write_time(filename);
@@ -49,12 +54,14 @@ struct FileWatcher {
 void ReloadPt(std::string filename) {
     //            gNotice.LockNotifications();
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    gNotice.Remove(IDR("properties2"));
-    auto result = properties::LoadPropertyTree("properties2", "properties", filename);
+    
+    gNoticeBack.Clear();
+
+    auto result = properties::LoadPropertyTree(gNoticeBack, filename);
     if (result.successful) {
-        nugget::ui::entity::UpdateEntity(IDR("properties"), IDR("properties2"));
-        nugget::ui::entity::CreateEntity(IDR("properties.main"));
-        nugget::ui::entity::ManageGeometry(IDR("properties.main"));
+        nugget::ui::entity::UpdateEntity(gNotice, gNoticeBack);
+        nugget::ui::entity::CreateEntity(gNotice,IDR("main"));
+        nugget::ui::entity::ManageGeometry(gNotice, IDR("main"));
     } else {
         auto absfilename = std::filesystem::absolute(filename);
 
@@ -73,7 +80,7 @@ int main(int argc, char* argv[]) {
         file = std::string(argv[1]);
     }
     for (int i = 0; i<1; i++) {
-        auto result = properties::LoadPropertyTree("properties",file);
+        auto result = properties::LoadPropertyTree(gNotice /*fill*/,file);
         if (!result.successful) {
             output("Could not load propertries for {}:\n", file);
             auto absfilename = std::filesystem::absolute(file);
@@ -84,8 +91,10 @@ int main(int argc, char* argv[]) {
 
     }   
 
+    exit(1);
+
     std::vector<IDType> list;
-    gNotice.GetChildrenWithNodeExisting(ID("properties.tests"), ID("mat"), list);
+    gNotice.GetChildrenWithNodeExisting(ID("tests"), ID("mat"), list);
     for (auto&& x : list) {
         Matrix4f mat = gNotice.GetMatrix4f(IDR(x, ID("mat")));
         Vector4f vec = gNotice.GetVector4f(IDR(x, ID("vec")));
@@ -96,30 +105,13 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    auto result = gNotice.GetVector4f(ID("properties.result"));
+    auto result = gNotice.GetVector4f(ID("result"));
 
 
     nugget::system::Init();
 
-//    auto v = gNotice.GetValueAny(IDR("properties.test.value"));
-//    output("RESULT: {} : {}\n", v.GetTypeAsString(), v.GetValueAsString());
-
-//    PrintHashTree(IDR("properties"));
-
-#if 0
-    auto a = nugget::gNotice.GetString(IDR("properties.test.a"));
-    auto b = nugget::gNotice.GetInt64(IDR("properties.test.b"));
-    auto c = nugget::gNotice.GetFloat(IDR("properties.test.c"));
-    auto d = nugget::gNotice.GetValueAsString(IDR("properties.test.d"));
-
-    output("a = %s\n", a.c_str());
-    output("b = %lld\n", b);
-    output("c = %f\n", c);
-    output("d = %s\n", d.c_str());
-#endif
-
-    nugget::ui::entity::CreateEntity(IDR("properties.main"));
-    nugget::ui::entity::ManageGeometry(IDR("properties.main"));
+    nugget::ui::entity::CreateEntity(gNotice, IDR("main"));
+    nugget::ui::entity::ManageGeometry(gNotice, IDR("main"));
 
 //    nugget::ui::entity::CreateEntity(ID("properties.circle"));
 

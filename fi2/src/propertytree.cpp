@@ -319,9 +319,9 @@ namespace nugget::properties {
             gNotice.Set(IDR(path), any);
         }
 
-        GrammarParseData(const std::string& rootName, const std::string &as, std::vector<Token>& list, ParseState& parseState) :
+        GrammarParseData(const std::string& rootName, std::vector<Token>& list, ParseState& parseState) :
             currentPathName(rootName), rootName(rootName), list(list),
-            parseState(parseState), asRoot(as) {
+            parseState(parseState) {
         }
 
         bool AtEnd() {
@@ -419,7 +419,8 @@ namespace nugget::properties {
             }
         }
         void SetCurrentDerivationOrType() {
-            currentDerivedName = IDCombineStrings(rootName, list[point - 1].text);
+//            currentDerivedName = IDCombineStrings(rootName, list[point - 1].text);
+            currentDerivedName = list[point - 1].text;
             currentPossibleType = list[point - 1].text;
         }
         void SetCurrentValue() {
@@ -628,9 +629,9 @@ namespace nugget::properties {
 }
 
 namespace nugget::properties {
-    bool GrammarParse(std::string rootName, std::string  as, std::vector<Token>& list,ParseState &parseState) {
-        gNotice.SetAsParent(IDR(rootName));
-        GrammarParseData pdata(rootName, as, list,parseState);
+    bool GrammarParse(Notice::Board &board,std::string rootName, std::vector<Token>& list,ParseState &parseState) {
+//        gNotice.SetAsParent(IDR(rootName));
+        GrammarParseData pdata(rootName, list,parseState);
         while (!pdata.AtEnd()) {
             /////////////////////////////////////////////
         expectInitialisation__:
@@ -859,7 +860,7 @@ namespace nugget::properties {
         return true;
     }
 
-    ParseState LoadPropertyTree(const std::string& where, const std::string& as, const std::string filename) {
+    ParseState LoadPropertyTree(Notice::Board &board /*fill*/, const std::string filename) {
         ParseState parseState;
         auto t = TimeSampler("parse", true);
 
@@ -876,7 +877,7 @@ namespace nugget::properties {
             return parseState;
         }
 
-        auto r = GrammarParse(where, as, tokenList, parseState);
+        auto r = GrammarParse(board /*fill*/, "", tokenList, parseState);
         if (!r) {
             return parseState;
         }
@@ -889,10 +890,7 @@ namespace nugget::properties {
         return parseState;
     }
 
-    ParseState LoadPropertyTree(const std::string& where, const std::string filename) {
-        return LoadPropertyTree(where, where, filename);
-    }
-
     // the definition of the global notice board
-    nugget::Notice::Board gNotice;
+    // for now the noticeboard created in main.ccp will be used
+//    nugget::Notice::Board gNotice;
 }

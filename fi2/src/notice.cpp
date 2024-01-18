@@ -25,6 +25,11 @@ namespace nugget {
 			std::unordered_map<IDType, ValueAny> valueEntries;
 			std::unordered_map<IDType, std::vector<Handler>> handlers;
 			std::unordered_set<IDType> changes;
+			void Clear() {
+				valueEntries.clear();
+				handlers.clear();
+				changes.clear();
+			}
 		};
 
 		Board::Board() : data(*(new nugget::Notice::Data())) {
@@ -177,7 +182,7 @@ namespace nugget {
 			auto &v = data.valueEntries.at(id);
 			return v.AsFloat();
 		}
-		IDType Board::GetID(IDType id) {
+		IDType Board::GetID(IDType id) const {
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto &v = data.valueEntries.at(id);
 			return v.AsIDType();
@@ -229,7 +234,7 @@ namespace nugget {
 			}
 			return false;
 		}
-		const ValueAny& Board::GetValueAny(IDType id) {
+		const ValueAny& Board::GetValueAny(IDType id) const {
 			if (KeyExists(id)) {
 				return data.valueEntries[id];
 			}
@@ -324,7 +329,7 @@ namespace nugget {
 		}
 
 		// Check key exists and is not marked deleted
-		bool Board::KeyExists(IDType id) {
+		bool Board::KeyExists(IDType id) const {
 			if (!data.valueEntries.contains(id)) {
 				return false;
 			}
@@ -335,7 +340,7 @@ namespace nugget {
 			return true;
 		}
 
-		bool Board::GetChildren(IDType id, std::vector<IDType>& fill) {
+		bool Board::GetChildren(IDType id, std::vector<IDType>& fill) const {
 			if (KeyExists(id)) {
 				if (auto set = identifier::IDGetChildren(id)) {
 					for (const auto& x : *set) {
@@ -400,6 +405,9 @@ namespace nugget {
 			}
 		}
 
+		void Board::Clear() {
+			data.Clear();
+		}
 
 	}
 }

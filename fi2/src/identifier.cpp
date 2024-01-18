@@ -213,9 +213,13 @@ namespace nugget {
 #endif
 
 		std::string IDCombineStrings(const std::string& a, const std::string& b) {
-			std::stringstream ss;
-			ss << a << "." << b;
-			return ss.str();
+			if (a.size() > 0) {
+				std::stringstream ss;
+				ss << a << "." << b;
+				return ss.str();
+			} else {
+				return b;
+			}
 		}
 
 		void IDCombineStringsInPlace(const std::string& a, const std::string& b,std::string &result) {

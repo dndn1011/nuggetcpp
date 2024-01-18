@@ -2,6 +2,7 @@
 #include "identifier.h"
 #include <functional>
 #include "utils/utils.h"
+#include "notice.h"
 
 namespace nugget::ui::entity {
     struct EntityPointer {
@@ -35,10 +36,10 @@ namespace nugget::ui::entity {
     using SimpleLambda = std::function<void()>;
 
     void CallFunction(IDType functionId, IDType entityId);
-    void CreateEntity(IDType id);
-    void UpdateEntity(IDType to, IDType from);
+    void CreateEntity(nugget::Notice::Board &board,IDType id);
+    void UpdateEntity(nugget::Notice::Board &to, const nugget::Notice::Board &from);
     void Init();
-    void ManageGeometry(IDType nodeId);
+    void ManageGeometry(nugget::Notice::Board& board, IDType nodeId);
     size_t RegisterEntityInit(std::function<void()> func);
     
     void RegisterPostSelfGeomFunction(IDType node, std::function<void(IDType)> func);
