@@ -184,6 +184,9 @@ namespace nugget::gl {
         }
 
         void UpdateFromPropertyTree(IDType nodeID,int sectionIndex) {
+            static int count = 0;
+            count++;
+
             std::vector<float> vertData;
             std::vector<float> uvData;
             std::vector<float> colsData;
@@ -245,6 +248,8 @@ namespace nugget::gl {
                     vboInfo.slot = VBO;
                     glBindBuffer(GL_ARRAY_BUFFER, vboInfo.slot);
                     glBufferData(GL_ARRAY_BUFFER, VBOsize, nullptr, GL_STATIC_DRAW);
+                } else {
+                    glBindBuffer(GL_ARRAY_BUFFER, vboInfo.slot);
                 }
 
                 // vbo data
@@ -265,6 +270,7 @@ namespace nugget::gl {
                 glEnableVertexAttribArray(2);               
                 glBindBuffer(GL_ARRAY_BUFFER, 0);
             }
+
             // Texture
             {
                 // texture allocation
@@ -329,7 +335,8 @@ namespace nugget::gl {
             IDType shaderNoideHash = IDR(nodeID, "shader");
             IDType shaderProgramNoticeID = IDR({ IDToString(gNotice.GetID(shaderNoideHash)), "_internal", "_pglid" });
             UpdateFromPropertyTree(nodeID, sectionIndex);
-            
+            UpdateFromPropertyTree(nodeID, sectionIndex);
+
             gNotice.RegisterHandler(Notice::Handler(IDR(nodeID, "verts"),
                 [this,nodeID, sectionIndex](IDType vid) {
                 UpdateFromPropertyTree(nodeID, sectionIndex);
@@ -346,8 +353,6 @@ namespace nugget::gl {
             gNotice.RegisterHandler(Notice::Handler(shaderProgramNoticeID, [&, shaderProgramNoticeID](IDType id) {
                 shader = (GLuint)gNotice.GetInt64(shaderProgramNoticeID);
                 }));
-
-
                     
         }
     };

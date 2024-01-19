@@ -62,23 +62,25 @@ namespace nugget::ui::entity {
 	// and sync
 	void UpdateEntityRecursive(Notice::Board &to,const Notice::Board &from,IDType node) {
 		//output("checking: %s <- %s : %zu %zu\n", IDToString(to).c_str(), IDToString(from).c_str(),to,from);
-		if (GetLeaf(node) == ID("_internal")) {
-			return;
-		}
-		if (from.KeyExists(node)) {
-			// both exist
-			ValueAny valueTo = to.GetValueAny(node);
-			ValueAny valueFrom = from.GetValueAny(node);
-			if (valueTo == valueFrom) {
-			//	output("SAME!\n");
-			} else {
-				output("updating: {}\n", IDToString(node));
-				output("      values: {} <- {}\n", valueTo.AsString(), valueFrom.AsString());
-				to.Set(node, valueFrom);
+		if (node != IDType::null) {
+			if (GetLeaf(node) == ID("_internal")) {
+				return;
 			}
-		} else {
-			output("Removed {}\n", IDToString(node));
-			to.Remove(node);
+			if (from.KeyExists(node)) {
+				// both exist
+				ValueAny valueTo = to.GetValueAny(node);
+				ValueAny valueFrom = from.GetValueAny(node);
+				if (valueTo == valueFrom) {
+					//	output("SAME!\n");
+				} else {
+					output("updating: {}\n", IDToString(node));
+					output("      values: {} <- {}\n", valueTo.AsString(), valueFrom.AsString());
+					to.Set(node, valueFrom);
+				}
+			} else {
+				output("Removed {}\n", IDToString(node));
+				to.Remove(node);
+			}
 		}
 		std::vector<IDType> children;
 		if (auto r = to.GetChildren(node,children /*fill*/)) {
@@ -90,12 +92,14 @@ namespace nugget::ui::entity {
 
 	void UpdateEntityRecursive2(Notice::Board& to, const Notice::Board& from, IDType node) {
 //		output("checking: %s <- %s : %zu %zu\n", IDToString(to).c_str(), IDToString(from).c_str(),to,from);
-		if (to.KeyExists(node)) {
-			// both exist
-		} else {
-//			output("MISSING!!!! {}\n", IDToString(from).c_str());
-			ValueAny valueTo = from.GetValueAny(node);
-			to.Set(node, valueTo);
+		if (node != IDType::null) {
+			if (to.KeyExists(node)) {
+				// both exist
+			} else {
+				//			output("MISSING!!!! {}\n", IDToString(from).c_str());
+				ValueAny valueTo = from.GetValueAny(node);
+				to.Set(node, valueTo);
+			}
 		}
 		std::vector<IDType> children;
 		if (auto r = from.GetChildren(node, children /*fill*/)) {
@@ -110,8 +114,8 @@ namespace nugget::ui::entity {
 	}
 
 	void UpdateEntity(Notice::Board &to, const Notice::Board &from) {
-		UpdateEntityRecursive(to,from,IDR("root"));
-		UpdateEntityRecursive2(to, from, IDR("root"));
+	//	UpdateEntityRecursive(to,from, IDType::null);
+	//	UpdateEntityRecursive2(to, from, IDType::null);
 	}
 
 	struct RegisterSingleton;
