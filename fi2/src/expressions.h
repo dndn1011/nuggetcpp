@@ -9,7 +9,7 @@ namespace nugget::expressions {
 	class Expression {
 	public:
 		Expression_imp& imp;
-		Expression();
+		Expression(Notice::Board& boardIn);
 		void AddToken(const Token& token);
 		ValueAny Evaluate(std::function<nugget::ValueAny(nugget::identifier::IDType)> expandParseVars);
 		static ValueAny ConvertType(nugget::ValueAny a, nugget::ValueAny::Type type);

@@ -45,9 +45,12 @@ namespace nugget {
 		}
 
 		std::string IDToString(IDType id) {
-			assert(("Null id used", +id));
-			auto &s = data.toStringMap.at(id);
-			return(s);
+			if (id == IDType::null) {
+				return "{null}";
+			} else {
+				auto& s = data.toStringMap.at(id);
+				return(s);
+			}
 		}
 
 		void SetReverseLookup(IDType id,const std::string& str) {
@@ -72,18 +75,20 @@ namespace nugget {
 			std::string leafString;
 			std::string remainingPathString;
 			
-			for (;;) {
+			for (;;firstTime=false) {
 				remainingPathString = pathString;
 				IDSeparateLeafAndPathInPlace(pathString, leafString);
 				IDType fullHash = HashRT(remainingPathString);
 				if (firstTime) {
 					returnHash = fullHash;
-					firstTime = false;
 				}
-				if (pathString.size() == 0) { 
+				if (pathString.size() == 0) {
 					IDType leafHash = HashRT(leafString);
 					SetReverseLookup(leafHash, leafString);
 					data.selfMap[fullHash] = leafHash;
+					if (!firstTime) {
+						data.childMap[IDType::null].insert(fullHash);
+					}
 					break;
 				} else {
 					IDType pathHash = HashRT(pathString);

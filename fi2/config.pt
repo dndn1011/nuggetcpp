@@ -622,12 +622,16 @@ shaders {
             layout (location = 0) in vec3 aPos;
             layout (location = 1) in vec2 aTexCoord;
             layout (location = 2) in vec4 aColour;
+
+            uniform mat4 projectionMatrix;
+
             void main()
             {
-
                 uv_g = aTexCoord;
                 col_g = aColour;
-                gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    
+                gl_Position = projectionMatrix * vec4(aPos, 1.0);
+  //             gl_Position = vec4(aPos, 1.0);
             }
 >>;
         geometry <<
@@ -685,11 +689,14 @@ shaders {
 }
 
 quad {
+    @Z = -0.5;
+    @Y = -0.0;
+    @S = 1.0;
     verts : Vector3fList = {
-        0.25, 0.25, 0,
-        0.55, -0.25, 0,
-        -0.55, 0.25, 0,
-        -0.25, -0.25, 0,
+        (@S), (@S)+(@Y), @Z,
+        (@S), -(@S)+(@Y), @Z,
+        -(@S), (@S)+(@Y), @Z,
+        -(@S), -(@S)+(@Y), @Z,
 
         0, 0, 0, 0, 0, 0,
     };
@@ -703,7 +710,7 @@ quad {
     };
     colors : ColorList = {
         1,0,0,1,
-        1,0,0,1,
+        0,1,0,1,
         0,0,1,1,
         0,0.5,0.5,1,
 
@@ -716,21 +723,21 @@ testobj {
         texture = spaceship;
         slot = 0;
 
-        renderMatrix : Matrix4f = {
-            2,0,0,0,
-            0,2,0,0,
-            0,0,2,0,
-            0,0,0,1,
+        projectionMatrix : Matrix4f = {
+            1.0, 0, 0.0, 0,
+            0, 1.33333, 0.0, 0,
+            0, 0, -1.00200, -2.00200,
+            0, 0, -1, 0,
         };
 
         shader = shaders.biquad;
         primitive = GL_TRIANGLES_ADJACENCY;
         start = 0;
-        length = 24;
+        length = 6;
 
         @scale = 1.0;
         v : Vector3f = { 0.5,0.2,0.0 };
-        s : Vector3f = { @scale,@scale,@scale };
+        s : Vector3f = { @scale,@scale, 1 };
 
 //        v1 = (ref(quad.verts)*ref(@here.s)) - ref(@here.v) * 2.5;
 //        v2 = (ref(quad.verts)*ref(@here.s)) - ref(@here.v) * 0.0;
@@ -750,7 +757,11 @@ testobj {
 //        verts = concat(ref(@here.v1),ref(@here.v2),ref(@here.v3));
         
         /////////////////////////////////////////
-        verts = concat(ref(@here.v1),ref(@here.v2),ref(@here.v3),ref(@here.v4));
+//        verts = concat(ref(@here.v1),ref(@here.v2),ref(@here.v3),ref(@here.v4));
+
+        @sxy = 0.5;
+        s1 : Vector3f = { @sxy,@sxy, 1.0 };
+        verts = ref(quad.verts) * ref(@here.s1);
 
         uvs = concat(ref(quad.uvs),ref(quad.uvs),ref(quad.uvs),ref(quad.uvs));
         colors = concat(ref(quad.colors),ref(quad.colors),ref(quad.colors),ref(quad.colors));

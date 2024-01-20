@@ -340,12 +340,17 @@ namespace nugget {
 			return true;
 		}
 
+		// The Children Of Null
+		// can save humanity
+
 		bool Board::GetChildren(IDType id, std::vector<IDType>& fill) const {
-			if (KeyExists(id)) {
+			if (KeyExists(id) || id == IDType::null) {
 				if (auto set = identifier::IDGetChildren(id)) {
 					for (const auto& x : *set) {
 						if (KeyExists(x)) {
 							fill.push_back(x);
+						} else {
+							int a =0;
 						}
 					}
 				}

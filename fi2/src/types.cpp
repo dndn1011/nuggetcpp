@@ -419,4 +419,7 @@ namespace nugget {
 	/*static*/
 	Vector4f Vector4f::defaultValue = { 0,0,0,0 };
 
+	const float(&nugget::Matrix4f::GetArray() const)[16] {
+		return data;
+	}
 }

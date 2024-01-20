@@ -61,7 +61,9 @@ namespace nugget::ui::entity {
 	// compare the state of the property tree with the current instances of entities
 	// and sync
 	void UpdateEntityRecursive(Notice::Board &to,const Notice::Board &from,IDType node) {
-		//output("checking: %s <- %s : %zu %zu\n", IDToString(to).c_str(), IDToString(from).c_str(),to,from);
+
+		//output("checking: {}\n", IDToString(node));
+
 		if (node != IDType::null) {
 			if (GetLeaf(node) == ID("_internal")) {
 				return;
@@ -73,8 +75,8 @@ namespace nugget::ui::entity {
 				if (valueTo == valueFrom) {
 					//	output("SAME!\n");
 				} else {
-					output("updating: {}\n", IDToString(node));
-					output("      values: {} <- {}\n", valueTo.AsString(), valueFrom.AsString());
+//					output("updating: {}\n", IDToString(node));
+//					output("      values: {} <- {}\n", valueTo.AsString(), valueFrom.AsString());
 					to.Set(node, valueFrom);
 				}
 			} else {
@@ -114,8 +116,8 @@ namespace nugget::ui::entity {
 	}
 
 	void UpdateEntity(Notice::Board &to, const Notice::Board &from) {
-	//	UpdateEntityRecursive(to,from, IDType::null);
-	//	UpdateEntityRecursive2(to, from, IDType::null);
+		UpdateEntityRecursive(to,from, IDType::null);
+		UpdateEntityRecursive2(to, from, IDType::null);
 	}
 
 	struct RegisterSingleton;

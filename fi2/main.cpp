@@ -59,7 +59,7 @@ void ReloadPt(std::string filename) {
 
     auto result = properties::LoadPropertyTree(gNoticeBack, filename);
     if (result.successful) {
-        //nugget::ui::entity::UpdateEntity(gNotice, gNoticeBack);
+        nugget::ui::entity::UpdateEntity(gNotice, gNoticeBack);
         nugget::ui::entity::CreateEntity(gNotice,IDR("main"));
         nugget::ui::entity::ManageGeometry(gNotice, IDR("main"));
     } else {

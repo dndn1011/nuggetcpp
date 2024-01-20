@@ -153,6 +153,7 @@ namespace nugget::gl {
         GLenum primitive;
         GLint start;
         GLsizei length;
+        Matrix4f projectionMatrix;
 
         void Init() {
             for (GLuint i = 0; i < textures.size(); i++) {
@@ -160,7 +161,14 @@ namespace nugget::gl {
                     std::format("{}{}", texturePrefix, i).c_str());
                 textureUniforms.push_back(loc);
             }
+
+            glUseProgram(shader);
+            GLint projMatLocation = glGetUniformLocation(shader, "projectionMatrix");
+            if (projMatLocation >= 0) {
+                glUniformMatrix4fv(projMatLocation, 1, GL_FALSE, projectionMatrix.GetArray());
+            }
         }
+
         void Render() {
             glUseProgram(shader);
             for (GLuint i = 0; i < textures.size(); i++) {
@@ -305,6 +313,7 @@ namespace nugget::gl {
                 IDType uid = IDR(nodeID, "uvs");
                 IDType cid = IDR(nodeID, "colors");
                 IDType primNoticeID = IDR(nodeID, "primitive");
+                IDType projectionMatrixID = IDR(nodeID, "projectionMatrix");
 
                 IDType usedShaderID = gNotice.GetID(shaderNodeHash);
                 std::string usedShaderPath = IDToString(usedShaderID);
@@ -313,8 +322,8 @@ namespace nugget::gl {
                 shader = (GLuint)gNotice.GetInt64(shaderProgramNoticeID);
                 length = (GLsizei)gNotice.GetInt64(lengthNoticeID);
                 start = (GLint)gNotice.GetInt64(startNoticeID);
+                projectionMatrix = gNotice.GetMatrix4f(projectionMatrixID);
                 Init();
-
 
 #if 0
 

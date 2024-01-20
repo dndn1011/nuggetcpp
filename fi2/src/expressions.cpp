@@ -54,6 +54,9 @@ namespace nugget::expressions {
         std::stack<Token> operatorStack;
         std::vector<Token> output;
         std::vector<Token> input;
+        Notice::Board& board;
+
+        Rpn(Notice::Board& boardIn) : board(boardIn) {}
 
         void AddToken(const Token& token) {
             input.emplace_back(token);
@@ -253,8 +256,8 @@ namespace nugget::expressions {
                 [&](const std::span<ValueAny>& args) {
                     check(args.size() == 1,"Incorrect number of arguments");
                     IDType id = args[0].AsIDType();
-                    if (gNotice.KeyExists(id)) {
-                        return gNotice.GetValueAny(id);
+                    if (board.KeyExists(id)) {
+                        return board.GetValueAny(id);
                     } else {
                         return ValueAny(Exception{ .description = std::format("Could not find property '{}'",IDToString(id)) });
                     }
@@ -604,10 +607,10 @@ namespace nugget::expressions {
         ValueAny IndirectValue(const std::span<ValueAny> values) {
             const ValueAny& v = values[0];
             check(v.GetType() == ValueAny::Type::IDType, "Must be an IDType");
-            const ValueAny& w = gNotice.GetValueAny(v.AsIDType());
+            const ValueAny& w = board.GetValueAny(v.AsIDType());
             const IDType wid = w.AsIDType();
-            if (gNotice.KeyExists(wid)) {
-                return gNotice.GetValueAny(wid);
+            if (board.KeyExists(wid)) {
+                return board.GetValueAny(wid);
             }
             return {};
         }
@@ -823,10 +826,11 @@ namespace nugget::expressions {
     };
 
     struct Expression_imp {
+        Expression_imp(Notice::Board& boardIn) : rpn(boardIn) {}
         Rpn rpn;
     };
 
-    Expression::Expression() : imp(*new Expression_imp()) {
+    Expression::Expression(Notice::Board& boardIn) : imp(*new Expression_imp(boardIn)) {
     }
     void Expression::AddToken(const Token& token) {
         imp.rpn.AddToken(token);

@@ -115,7 +115,7 @@ namespace nugget {
 		float& operator[](int index);
 		const float& operator[](int index) const;
 
-		// Additional methods...
+		const float(&GetArray() const) [16];
 	};
 
 	struct Vector4f {

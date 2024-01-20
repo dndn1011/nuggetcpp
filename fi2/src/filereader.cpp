@@ -44,10 +44,12 @@ namespace nugget {
 
     void FileReader::Open() {
         int count;
-        for (count = 0, file = std::ifstream(filename, std::ios::binary);
-            !file.is_open() || count > 10;
-            std::this_thread::sleep_for(std::chrono::milliseconds(100)), count++) {
-        }
+        for (
+            count = 0, file = std::ifstream(filename, std::ios::binary);
+            !file.is_open() && count < 10;
+            std::this_thread::sleep_for(std::chrono::milliseconds(100)), count++
+            );
+
         check(file.is_open(), "Could not open file: {}\n", filename);
     }
 
