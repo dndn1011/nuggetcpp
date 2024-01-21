@@ -10,6 +10,8 @@
 #include <format>
 #include "utils/StableVector.h"
 #include "propertytree.h"
+#include "system.h"
+
 
 namespace nugget::gl {
     using namespace nugget::identifier;
@@ -476,7 +478,6 @@ namespace nugget::gl {
         SwapBuffers(hdc);
     }
 
-
     void MainLoop(const std::function<void()>& updateCallback) {
         // Main loop
         MSG msg = {};
@@ -498,6 +499,12 @@ namespace nugget::gl {
         renderable.Init();
         renderable.AddSections(ID("testobj"));
     }
+
+
+    static size_t init_dummy = nugget::system::RegisterModule([]() {
+        OpenWindow();
+        return 0;
+        }, 250);
 
 }
 

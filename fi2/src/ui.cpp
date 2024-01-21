@@ -13,7 +13,6 @@
 
 namespace nugget::ui {
     void Init() {
-        nugget::gl::OpenWindow();
     }
 
     void Exec(const std::function<void()>& updateCallback) {

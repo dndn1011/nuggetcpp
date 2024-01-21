@@ -23,7 +23,7 @@ using namespace properties;
 
 namespace nugget::properties {
     Notice::Board gProps;
-    static Notice::Board gNoticeBack;
+    static Notice::Board gPropsBack;
 }
 
 struct FileWatcher {
@@ -55,11 +55,11 @@ void ReloadPt(std::string filename) {
     //            gNotice.LockNotifications();
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     
-    gNoticeBack.Clear();
+    gPropsBack.Clear();
 
-    auto result = properties::LoadPropertyTree(gNoticeBack, filename);
+    auto result = properties::LoadPropertyTree(gPropsBack, filename);
     if (result.successful) {
-        nugget::ui::entity::UpdateEntity(gProps, gNoticeBack);
+        nugget::ui::entity::UpdateEntity(gProps, gPropsBack);
         nugget::ui::entity::CreateEntity(gProps,IDR("main"));
         nugget::ui::entity::ManageGeometry(gProps, IDR("main"));
     } else {
