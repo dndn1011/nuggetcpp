@@ -34,7 +34,25 @@ namespace nugget {
 		Vector3f operator*(const Vector3f& other) const;
 		Vector3f operator*(float other) const;
 
+		float Dot(const Vector3f& o) const {
+			return o.x * x + o.y * y + o.z * z;
+		}
+
+		Vector3f Cross(const Vector3f& o) {
+			return Vector3f{
+				y * o.z - z * o.y,
+				z * o.x - x * o.z,
+				x * o.y - y * o.x
+			};
+		}
+
+		float Length() const;
+
+		Vector3f Normalized() const;
+
 		std::string to_string() const;
+
+		static Vector3f defaultValue;
 
 	private:
 		static std::string to_string_imp(const Vector3f& obj);
@@ -116,13 +134,15 @@ namespace nugget {
 		const float& operator[](int index) const;
 
 		const float(&GetArray() const) [16];
+
+		static void SetFromEulers(float radX, float radY, float radZ, Matrix4f& outMatrix);
+		static void CreateProjectionMatrix(float screenWidth, float screenHeight, float fov, float nearPlane, float farPlane, Matrix4f& matrix);
+		static void LookAt(const Vector3f& eye, const Vector3f& center, const Vector3f& normalisedUp, Matrix4f& outMatrix);
 	};
 
 	struct Vector4f {
 		// Member variables
-		float x, y, z, w;
-
-		Vector4f(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+		float x=0, y=0, z=0, w=0;
 
 		// Method declarations
 		bool operator==(const Vector4f& other) const;
@@ -130,7 +150,7 @@ namespace nugget {
 		Vector4f operator-(const Vector4f& other) const;
 		Vector4f operator*(const Vector4f& other) const;
 		std::string to_string() const;
-
+		
 		static Vector4f defaultValue;
 
 	private:

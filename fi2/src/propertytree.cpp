@@ -485,6 +485,7 @@ namespace nugget::properties {
         }
         // must not consume the next token, "push back"
         point--;
+ 
         return ex.Evaluate([&](IDType id) {
             return ExpandParseVariable(id);
             }
@@ -631,7 +632,7 @@ namespace nugget::properties {
         size_t uniqueNameCounter = 0;
 
 
-        StableVector<ValueAny,100> initialiserList;
+        StableVector<ValueAny,1000> initialiserList;
         std::vector<std::string> literalLines;
     };
 }
@@ -685,6 +686,8 @@ namespace nugget::properties {
                                                     } else {
                                                         ValueAny any = pdata.ParseInitialiserExpressionToValue();
                                                         if (any.IsException()) {
+                                                            pdata.SetLineNumberToToken();
+                                                            parseState.description = any.AsException().description;
                                                             return false;
                                                         }
                                                         pdata.AddValueToInitialiserList(any);
@@ -828,10 +831,17 @@ namespace nugget::properties {
                                 case Token::Type::equals: {
                                     pdata.NextToken();
                                     ValueAny val = pdata.ParseExpressionToValue();
-                                    pdata.parseVariables[IDR(pdata.GetCurrentValueName())] = val;
-                                    if (pdata.GetCurrentValueName() == "stop" && val.AsInt64() == 1) {
-                                        parseState.successful = true;
+                                    if (val.IsException()) {
+                                        output("vvvvvvvvvvvvvvvvvvv\n");
+                                        pdata.SetLineNumberToToken();
+                                        parseState.description = val.AsException().description;
                                         return false;
+                                    } else {
+                                        pdata.parseVariables[IDR(pdata.GetCurrentValueName())] = val;
+                                        if (pdata.GetCurrentValueName() == "stop" && val.AsInt64() == 1) {
+                                            parseState.successful = true;
+                                            return false;
+                                        }
                                     }
                                 } break;
                                 default: {

@@ -1,6 +1,10 @@
 #include "types.h"
 #include <format>
 #include <sstream>
+#include <math.h>
+#include "debug.h"
+
+static const float PI = 3.141592654f;
 
 std::string nugget::Vector3fList::to_string_imp(const Vector3fList& obj) {
 	std::stringstream ss;
@@ -414,10 +418,96 @@ namespace nugget {
 		);
 	}
 
+	/*static */
+	void Matrix4f::CreateProjectionMatrix(float screenWidth, float screenHeight, float fov, float nearPlane, float farPlane,Matrix4f &matrix) {
+		Matrix4f projectionMatrix;
+		float aspectRatio = screenWidth / screenHeight;
+		float fovRadians = 1.0f / tan(fov * 0.5f);
+		float frustumLength = farPlane - nearPlane;
+
+		matrix.data[0] = fovRadians / aspectRatio;
+		matrix.data[5] = fovRadians;
+		matrix.data[10] = -(farPlane + nearPlane) / frustumLength;
+		matrix.data[11] = -1;
+		matrix.data[14] = -(2 * nearPlane * farPlane) / frustumLength;
+		matrix.data[15] = 0;
+	}
+
+	/*static*/
+	void Matrix4f::SetFromEulers(float radX, float radY, float radZ, Matrix4f &outMatrix) {
+		float cx = cos(radX);
+		float sx = sin(radX);
+		float cy = cos(radY);
+		float sy = sin(radY);
+		float cz = cos(radZ);
+		float sz = sin(radZ);
+		float* mat = outMatrix.data;
+
+		mat[0] = cz * cy;
+		mat[1] = cz * sy * sx - sz * cx;
+		mat[2] = cz * sy * cx + sz * sx;
+		mat[3] = 0;
+
+		mat[4] = sz * cy;
+		mat[5] = sz * sy * sx + cz * cx;
+		mat[6] = sz * sy * cx - cz * sx;
+		mat[7] = 0;
+
+		mat[8] = -sy;
+		mat[9] = cy * sx;
+		mat[10] = cy * cx;
+		mat[11] = 0;
+
+		mat[12] = 0;
+		mat[13] = 0;
+		mat[14] = 0;
+		mat[15] = 1;
+	}
+
+	Vector3f Vector3f::Normalized() const {
+		float m = x * x + y * y + z * z;
+		if (m == 0) {
+			return { 1,0,0 };
+		}
+		m = sqrt(m);
+		return { x / m, y / m, z / m };
+	}
+
+	float Vector3f::Length() const {
+		return sqrt(x * x + y * y + z * z);
+	}
+
+
+	/*static*/
+	void Matrix4f::LookAt(const Vector3f& eye, const Vector3f& center, const Vector3f& normalisedUp, Matrix4f& outMatrix) {
+		Vector3f f = (center - eye).Normalized();
+		Vector3f u = normalisedUp;
+		Vector3f s = f.Cross(u).Normalized();
+		u = s.Cross(f);
+
+		Matrix4f result;
+		outMatrix.data[0] = s.x;
+		outMatrix.data[4] = s.y;
+		outMatrix.data[8] = s.z;
+
+		outMatrix.data[1] = u.x;
+		outMatrix.data[5] = u.y;
+		outMatrix.data[9] = u.z;
+
+		outMatrix.data[2] = -f.x;
+		outMatrix.data[6] = -f.y;
+		outMatrix.data[10] = -f.z;
+
+		outMatrix.data[12] = -s.Dot(eye);
+		outMatrix.data[13] = -u.Dot(eye);
+		outMatrix.data[14] = f.Dot(eye);
+
+	}
 	/*static*/
 	Color Color::defaultValue = { 0.5,0.5,0.5,0.5 };
 	/*static*/
 	Vector4f Vector4f::defaultValue = { 0,0,0,0 };
+	Vector3f Vector3f::defaultValue = { 0,0,0 };
 
 	const float(&nugget::Matrix4f::GetArray() const)[16] {
 		return data;

@@ -71,9 +71,9 @@ namespace nugget::expressions {
             case Token::Type::divide:
                 return 2;
             case Token::Type::uMinus:
-                return 200;
-            case Token::Type::at:
                 return 100;
+            case Token::Type::at:
+                return 200;
             default:
                 return 0;
             }
@@ -490,8 +490,8 @@ namespace nugget::expressions {
 #define EXPR_MINUS 2
 #define EXPR_MULTIPLY 3
 #define EXPR_DIVIDE 4
-#define EXPR_DOT 4
-#define EXPR_DOUBLE_COLON 5
+#define EXPR_DOT 5
+#define EXPR_DOUBLE_COLON 6
 
 #define EXPR_OPERATOR +
 #define EXPR_NAME Plus
@@ -729,7 +729,7 @@ namespace nugget::expressions {
                     case Token::Type::dot: {
                         const auto& r = Dot(accumulation.GetArrayLast(2));
                         if (r.IsException()) {
-                            assert(0);
+                            return r;
                         }
                         accumulation.Pop(2);
                         accumulation.emplace_back(r);
@@ -798,7 +798,7 @@ namespace nugget::expressions {
                     case Token::Type::divide: {
                         const auto& r = Divide(accumulation.GetArrayLast(2));
                         if (r.IsException()) {
-                            assert(0);
+                            return r;
                         }
                         accumulation.Pop(2);
                         accumulation.emplace_back(r);

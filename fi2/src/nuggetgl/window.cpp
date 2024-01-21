@@ -88,6 +88,8 @@ namespace nugget::gl {
 
     void triangle_test();
 
+    Vector4f screenGeom;
+
     int OpenWindow() {
         // Create a WinAPI window
 
@@ -99,11 +101,20 @@ namespace nugget::gl {
 
         RegisterClass(&wc);
 
+        screenGeom =
+        {
+            (float)gNotice.GetInt64(IDR("app.window.x")),
+            (float)gNotice.GetInt64(IDR("app.window.y")),
+            (float)gNotice.GetInt64(IDR("app.window.w")),
+            (float)gNotice.GetInt64(IDR("app.window.h")),
+        };
+
+
         // Create the window
         HWND hwnd = CreateWindowEx(0, L"MyOpenGLProject", L"My OpenGL Project", WS_OVERLAPPEDWINDOW,
             CW_USEDEFAULT, CW_USEDEFAULT,
-            (int)gNotice.GetInt64(IDR("app.window.w")),
-            (int)gNotice.GetInt64(IDR("app.window.h")),
+            (int)screenGeom.z,
+            (int)screenGeom.w,
             0, 0, GetModuleHandle(NULL), 0);
 
         if (!hwnd) {
@@ -154,6 +165,14 @@ namespace nugget::gl {
         GLint start;
         GLsizei length;
         Matrix4f projectionMatrix;
+        Matrix4f modelMatrix;
+        Matrix4f viewMatrix;
+        float fov;
+        float nearClip;
+        float farClip;
+        Vector3f cameraPos;
+        Vector3f lookAtPos;
+        Vector3f lookAtUp;
 
         void Init() {
             for (GLuint i = 0; i < textures.size(); i++) {
@@ -167,9 +186,33 @@ namespace nugget::gl {
             if (projMatLocation >= 0) {
                 glUniformMatrix4fv(projMatLocation, 1, GL_FALSE, projectionMatrix.GetArray());
             }
+            GLint modMatLocation = glGetUniformLocation(shader, "modelMatrix");
+            if (modMatLocation >= 0) {
+                glUniformMatrix4fv(modMatLocation, 1, GL_FALSE, modelMatrix.GetArray());
+            }
+            GLint viewMatLocation = glGetUniformLocation(shader, "viewMatrix");
+            if (viewMatLocation >= 0) {
+                glUniformMatrix4fv(viewMatLocation, 1, GL_FALSE, viewMatrix.GetArray());
+            }
         }
 
         void Render() {
+
+            Vector3f RV = gNotice.GetVector3f(ID("testobj.section.rotation"));
+            Matrix4f R;
+            Matrix4f::SetFromEulers(RV.x, RV.y, RV.z, R);
+            modelMatrix = R * modelMatrix;
+            GLint modMatLocation = glGetUniformLocation(shader, "modelMatrix");
+            if (modMatLocation >= 0) {
+                glUniformMatrix4fv(modMatLocation, 1, GL_FALSE, modelMatrix.GetArray());
+            }
+
+            Matrix4f::LookAt(cameraPos, lookAtPos, lookAtUp, viewMatrix);
+            GLint viewMatLocation = glGetUniformLocation(shader, "viewMatrix");
+            if (viewMatLocation >= 0) {
+                glUniformMatrix4fv(viewMatLocation, 1, GL_FALSE, viewMatrix.GetArray());
+            }
+
             glUseProgram(shader);
             for (GLuint i = 0; i < textures.size(); i++) {
                 glActiveTexture(GL_TEXTURE0 + i);
@@ -304,25 +347,37 @@ namespace nugget::gl {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, texture.width, texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data);
                 glBindTexture(GL_TEXTURE_2D, 0);
             }
+
+#define PROP(a,t1,t2) IDType a##ID = IDR(nodeID,#a);a = (t2)gNotice.Get##t1(a##ID)
             // put it together
             {
-                IDType startNoticeID = IDR(nodeID,"start");
-                IDType lengthNoticeID = IDR(nodeID, "length");
-                IDType shaderNodeHash = IDR(nodeID, "shader");
-                IDType vid = IDR(nodeID, "verts");
-                IDType uid = IDR(nodeID, "uvs");
-                IDType cid = IDR(nodeID, "colors");
-                IDType primNoticeID = IDR(nodeID, "primitive");
-                IDType projectionMatrixID = IDR(nodeID, "projectionMatrix");
+                PROP(start, Int64, GLuint);
+                PROP(length, Int64, GLsizei);
+                PROP(modelMatrix, Matrix4f, Matrix4f);
+                PROP(viewMatrix, Matrix4f, Matrix4f);
+                PROP(fov, Float, float);
+                PROP(nearClip, Float, float);
+                PROP(farClip, Float, float);
+                PROP(cameraPos, Vector3f, Vector3f);
+                PROP(lookAtPos, Vector3f, Vector3f);
+                PROP(lookAtUp, Vector3f, Vector3f);
 
+                PROP(projectionMatrix, Matrix4f, Matrix4f);
+
+                Matrix4f::CreateProjectionMatrix(
+                    screenGeom.z, 
+                    screenGeom.w, 
+                    fov, nearClip, farClip, projectionMatrix);
+
+                IDType primitiveID = IDR(nodeID, "primitive");
+                primitive = primitiveMap.at(gNotice.GetID(primitiveID));
+
+                IDType shaderNodeHash = IDR(nodeID, "shader");
                 IDType usedShaderID = gNotice.GetID(shaderNodeHash);
                 std::string usedShaderPath = IDToString(usedShaderID);
                 IDType shaderProgramNoticeID = IDR({ usedShaderPath, "_internal", "_pglid" });
-                primitive = primitiveMap.at(gNotice.GetID(primNoticeID));
                 shader = (GLuint)gNotice.GetInt64(shaderProgramNoticeID);
-                length = (GLsizei)gNotice.GetInt64(lengthNoticeID);
-                start = (GLint)gNotice.GetInt64(startNoticeID);
-                projectionMatrix = gNotice.GetMatrix4f(projectionMatrixID);
+
                 Init();
 
 #if 0
@@ -339,6 +394,9 @@ namespace nugget::gl {
 #endif
             }
         }
+
+        std::vector<Notice::Handler> regsteredHandlers;
+
         void SetupFromPropertyTree(IDType nodeID, int sectionIndex) {
             output("-------@@@@@@@------------> {}\n", IDToString(nodeID));
             IDType shaderNoideHash = IDR(nodeID, "shader");
@@ -346,22 +404,24 @@ namespace nugget::gl {
             UpdateFromPropertyTree(nodeID, sectionIndex);
             UpdateFromPropertyTree(nodeID, sectionIndex);
 
-            gNotice.RegisterHandler(Notice::Handler(IDR(nodeID, "verts"),
-                [this,nodeID, sectionIndex](IDType vid) {
+            gNotice.RegisterHandlerOnChildren(Notice::Handler(nodeID,
+                [this, nodeID, sectionIndex](IDType id) {
                 UpdateFromPropertyTree(nodeID, sectionIndex);
-                }));
+                }), regsteredHandlers);
+
+
             gNotice.RegisterHandler(Notice::Handler(IDR(nodeID, "uvs"),
                 [this, nodeID, sectionIndex](IDType uid) {
                 UpdateFromPropertyTree(nodeID, sectionIndex);
-                }));
+                }), regsteredHandlers);
             gNotice.RegisterHandler(Notice::Handler(IDR(nodeID, "colors"),
                 [this, nodeID, sectionIndex](IDType cid) {
                 UpdateFromPropertyTree(nodeID, sectionIndex);
-                }));
+                }), regsteredHandlers);
 
             gNotice.RegisterHandler(Notice::Handler(shaderProgramNoticeID, [&, shaderProgramNoticeID](IDType id) {
                 shader = (GLuint)gNotice.GetInt64(shaderProgramNoticeID);
-                }));
+                }), regsteredHandlers);
                     
         }
     };
@@ -400,7 +460,11 @@ namespace nugget::gl {
     void Update() {
         // Initialize OpenGL state
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+        glDepthMask(GL_TRUE);
 
         glBindVertexArray(renderable.VAO);
 
@@ -437,124 +501,3 @@ namespace nugget::gl {
 
 }
 
-#if 0
-
-        void SetupFromPropertyTree(IDType id) {
-            GLuint VBO;
-
-            ApplyRenderingData();
-
-            std::vector<gNotice.Handler> handlers;
-            gNotice.RegisterHandlerOnChildren(gNotice.Handler(IDR("shaders.biquad"), [](IDType id) {
-                CompileShaderFromProperties(IDR("shaders.biquad"));
-                }), handlers);
-
-            IDType vid = IDR("testobj.section.verts");
-            IDType uid = IDR("testobj.section.uvs");
-            IDType cid = IDR("testobj.section.colors");
-            IDType startNoticeID = IDR("testobj.section.start");
-            IDType lengthNoticeID = IDR("testobj.section.length");
-            IDType primNoticeID = IDR("testobj.section.primitive");
-            IDType shaderNoideHash = IDR("testobj.section.shader");
-
-            gNotice.RegisterHandler(gNotice.Handler(vid, [this](IDType vid) {
-                ApplyRenderingData();
-                }));
-            gNotice.RegisterHandler(gNotice.Handler(uid, [this](IDType uid) {
-                ApplyRenderingData();
-                }));
-            gNotice.RegisterHandler(gNotice.Handler(cid, [this](IDType cid) {
-                ApplyRenderingData();
-                }));
-            gNotice.RegisterHandler(gNotice.Handler(startNoticeID, [this](IDType startid) {
-                renderable.start = (GLint)gNotice.GetInt64(startid);
-                }));
-            gNotice.RegisterHandler(gNotice.Handler(lengthNoticeID, [this](IDType lengthid) {
-                renderable.length = (GLint)gNotice.GetInt64(lengthid);
-                }));
-            gNotice.RegisterHandler(gNotice.Handler(primNoticeID, [this](IDType primid) {
-                renderable.primitive = primitiveMap.at(gNotice.GetID(primid));
-                }));
-
-            CompileShaderFromProperties(IDR("shaders.biquad"));
-
-            IDType shaderProgramNoticeID = IDR({ IDToString(gNotice.GetID(shaderNoideHash)), "_internal", "_pglid" });
-
-            renderable.buffer = VAO;
-            renderable.length = (GLsizei)gNotice.GetInt64(lengthNoticeID);
-            renderable.start = (GLint)gNotice.GetInt64(startNoticeID);
-            renderable.primitive = primitiveMap.at(gNotice.GetID(primNoticeID));
-            renderable.shader = (GLuint)gNotice.GetInt64(shaderProgramNoticeID);
-
-            gNotice.RegisterHandler(gNotice.Handler(shaderProgramNoticeID, [shaderProgramNoticeID](IDType id) {
-                renderable.shader = (GLuint)gNotice.GetInt64(shaderProgramNoticeID);
-                }));
-
-            // Enable backface culling
-    //        glEnable(GL_CULL_FACE);
-
-            // Specify which faces to cull
-    //        glCullFace(GL_BACK);
-
-
-        }
-    };
-
-
-
-    // Vertex Buffer Object (VBO)
-    float s = 1.0f;
-#if 0
-    float vertices[] = {
-         s,  s, 0.0f,     // TR
-         s,  -s, 0.0f,    // BR
-        -s,  s, 0.0f,     // TL
-        -s, -s, 0.0f,     // BL
-
-         0,  0, 0.0f,
-         0,  0, 0.0f,
-    };
-#endif
-    float colours[] = {
-        //             1,0,0,1,  // tr
-        //             0.5f,0,0,1,  // br
-        //             0.3f,0,0,1,  // tl
-        //             0.7f,0,0,1,  // bl
-                     1,0,0,1,
-                     0,1,0,1,
-                     0,0,1,1,
-                     1,1,0,1,
-
-                     0.5,0,0,1,  // tl
-                     0,0.5,0,1,  // br
-    };
-    float uvCoords[] = {
-        0.0f, 1.0f,  // tr
-        1.0f, 1.0f,  // br
-        0.0f, 0.0f,  // tl
-        1.0f, 0.0f,   // bl
-
-        1.0f, 0.0f,  // tl
-        0.0f, 1.0f,  // br
-
-        0.0f, 1.0f,  // tr
-        1.0f, 1.0f,  // br
-        0.0f, 0.0f,  // tl
-        1.0f, 0.0f,   // bl
-
-        1.0f, 0.0f,  // tl
-        0.0f, 1.0f,  // br
-
-        0.0f, 1.0f,  // tr
-        1.0f, 1.0f,  // br
-        0.0f, 0.0f,  // tl
-        1.0f, 0.0f,   // bl
-
-        1.0f, 0.0f,  // tl
-        0.0f, 1.0f,  // br
-    };
-
-
-
-}
-#endif

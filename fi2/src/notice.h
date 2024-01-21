@@ -58,6 +58,7 @@ namespace nugget {
 			bool GetColorList(IDType id, ColorList& result);
 			const Matrix4f& GetMatrix4f(IDType id);
 			const Vector4f& GetVector4f(IDType id);
+			const Vector3f& GetVector3f(IDType id);
 
 			std::string AsString(IDType id);
 			std::string GetValueTypeAsString(const ValueAny& var);
@@ -82,6 +83,8 @@ namespace nugget {
 			bool IsValueTypeMatrix4f(IDType id);
 
 			void RegisterHandler(const Handler& handler);
+			void RegisterHandler(const Handler& handler, std::vector<Handler>& out);
+
 			void UnregisterHandler(const Handler& handler);
 
 			void RegisterHandlerOnChildren(const Handler& handler, std::vector<Handler>& out);

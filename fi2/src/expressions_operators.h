@@ -44,9 +44,11 @@ ValueAny EXPR_NAME(const std::span<ValueAny> values) {
             case ValueAny::Type::int64_t_: {
                 return ValueAny(v.AsInt64() EXPR_OPERATOR w.AsInt64());
             }
+#if EXPR_OP != EXPR_DIVIDE
             case ValueAny::Type::Vector3f: {
                 return ValueAny(v.AsVector3f() EXPR_OPERATOR w.AsVector3f());
-              }
+            }
+#endif
 #if EXPR_OP == EXPR_PLUS
             case ValueAny::Type::string: {
                 return ValueAny(v.AsString() EXPR_OPERATOR w.AsString());
@@ -62,7 +64,10 @@ ValueAny EXPR_NAME(const std::span<ValueAny> values) {
             }
 #endif
             default: {
-                check(0, "not implemented for types: EXPR_OP={}, type: {}\n", EXPR_OP, v.TypeAsString());
+                return ValueAny(Exception{
+                    .description = std::format("not implemented for types: EXPR_OP={}, type: {}\n",
+                    EXPR_OP, w.TypeAsString())
+                    });
             }
         }
     }

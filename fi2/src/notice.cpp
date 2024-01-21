@@ -259,6 +259,15 @@ namespace nugget {
 				return Vector4f::defaultValue;
 			}
 		}
+		const nugget::Vector3f& Board::GetVector3f(IDType id) {
+			if (KeyExists(id)) {
+				auto& v = data.valueEntries[id];
+				assert(v.GetType() == ValueAny::Type::Vector3f);
+				return v.AsVector3f();
+			} else {
+				return Vector3f::defaultValue;
+			}
+		}
 		const Matrix4f& Board::GetMatrix4f(IDType id) {
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
 			auto& v = data.valueEntries.at(id);
@@ -311,11 +320,18 @@ namespace nugget {
 		template void Board::Set<Matrix4f>(IDType id, const Matrix4f& value);
 		template void Board::Set<Vector4f>(IDType id, const Vector4f& value);
 
-		void Board::RegisterHandler(const Handler &handler) {
+		void Board::RegisterHandler(const Handler& handler) {
 			if (!data.handlers.contains(handler.changeId)) {
 				data.handlers[handler.changeId] = {};
 			}
 			data.handlers.at(handler.changeId).push_back(handler);
+		}
+		void Board::RegisterHandler(const Handler& handler, std::vector<Handler>& out) {
+			if (!data.handlers.contains(handler.changeId)) {
+				data.handlers[handler.changeId] = {};
+			}
+			data.handlers.at(handler.changeId).push_back(handler);
+			out.push_back(handler);
 		}
 		void Board::RegisterHandlerOnChildren(const Handler &handler,std::vector<Handler> &out) {
 			std::vector<IDType> children;
