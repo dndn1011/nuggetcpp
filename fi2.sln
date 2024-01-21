@@ -10,11 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Identifier.h = Identifier.h
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sqlite3_extensions", "sqlite3_extensions\sqlite3_extensions.vcxproj", "{AC9691FB-0A4D-42A9-BBD8-5B698C938DEC}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sqlite", "sqlite\sqlite.vcxproj", "{B7F897C2-2D95-4846-B678-6C588DB56F27}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sqlitecmd", "sqlitecmd\sqlitecmd.vcxproj", "{254B8D4E-BC47-406E-A687-38A41894F33C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sqlite3_nidhash", "sqlite3_extensions\sqlite3_extensions.vcxproj", "{AC9691FB-0A4D-42A9-BBD8-5B698C938DEC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,22 +36,6 @@ Global
 		{AC9691FB-0A4D-42A9-BBD8-5B698C938DEC}.Release|x64.Build.0 = Release|x64
 		{AC9691FB-0A4D-42A9-BBD8-5B698C938DEC}.Release|x86.ActiveCfg = Release|Win32
 		{AC9691FB-0A4D-42A9-BBD8-5B698C938DEC}.Release|x86.Build.0 = Release|Win32
-		{B7F897C2-2D95-4846-B678-6C588DB56F27}.Debug|x64.ActiveCfg = Debug|x64
-		{B7F897C2-2D95-4846-B678-6C588DB56F27}.Debug|x64.Build.0 = Debug|x64
-		{B7F897C2-2D95-4846-B678-6C588DB56F27}.Debug|x86.ActiveCfg = Debug|Win32
-		{B7F897C2-2D95-4846-B678-6C588DB56F27}.Debug|x86.Build.0 = Debug|Win32
-		{B7F897C2-2D95-4846-B678-6C588DB56F27}.Release|x64.ActiveCfg = Release|x64
-		{B7F897C2-2D95-4846-B678-6C588DB56F27}.Release|x64.Build.0 = Release|x64
-		{B7F897C2-2D95-4846-B678-6C588DB56F27}.Release|x86.ActiveCfg = Release|Win32
-		{B7F897C2-2D95-4846-B678-6C588DB56F27}.Release|x86.Build.0 = Release|Win32
-		{254B8D4E-BC47-406E-A687-38A41894F33C}.Debug|x64.ActiveCfg = Debug|x64
-		{254B8D4E-BC47-406E-A687-38A41894F33C}.Debug|x64.Build.0 = Debug|x64
-		{254B8D4E-BC47-406E-A687-38A41894F33C}.Debug|x86.ActiveCfg = Debug|Win32
-		{254B8D4E-BC47-406E-A687-38A41894F33C}.Debug|x86.Build.0 = Debug|Win32
-		{254B8D4E-BC47-406E-A687-38A41894F33C}.Release|x64.ActiveCfg = Release|x64
-		{254B8D4E-BC47-406E-A687-38A41894F33C}.Release|x64.Build.0 = Release|x64
-		{254B8D4E-BC47-406E-A687-38A41894F33C}.Release|x86.ActiveCfg = Release|Win32
-		{254B8D4E-BC47-406E-A687-38A41894F33C}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
