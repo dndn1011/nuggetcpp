@@ -100,5 +100,7 @@ namespace nugget {
 
 			void Clear();
 		};
+
+		extern Notice::Board gBoard;
 	}
 }

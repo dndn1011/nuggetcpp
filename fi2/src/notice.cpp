@@ -19,6 +19,8 @@ namespace nugget {
 	namespace Notice {
 		using namespace identifier;
 
+		Notice::Board gBoard;
+
 		bool notifyLock = false;
 		 
 		struct Data {
