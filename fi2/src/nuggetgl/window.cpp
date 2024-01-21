@@ -103,10 +103,10 @@ namespace nugget::gl {
 
         screenGeom =
         {
-            (float)gNotice.GetInt64(IDR("app.window.x")),
-            (float)gNotice.GetInt64(IDR("app.window.y")),
-            (float)gNotice.GetInt64(IDR("app.window.w")),
-            (float)gNotice.GetInt64(IDR("app.window.h")),
+            (float)gProps.GetInt64(IDR("app.window.x")),
+            (float)gProps.GetInt64(IDR("app.window.y")),
+            (float)gProps.GetInt64(IDR("app.window.w")),
+            (float)gProps.GetInt64(IDR("app.window.h")),
         };
 
 
@@ -126,8 +126,8 @@ namespace nugget::gl {
         ShowWindow(hwnd, SW_SHOW);
 
         SetWindowPos(hwnd, NULL,
-            (int)gNotice.GetInt64(ID("app.window.x")),
-            (int)gNotice.GetInt64(IDR("app.window.y")),
+            (int)gProps.GetInt64(ID("app.window.x")),
+            (int)gProps.GetInt64(IDR("app.window.y")),
             0, 0, SWP_NOZORDER | SWP_NOSIZE);
 
         hdc = GetDC(hwnd);
@@ -137,7 +137,7 @@ namespace nugget::gl {
         triangle_test();
 
         std::vector<Notice::Handler> handlers;
-        gNotice.RegisterHandlerOnChildren(Notice::Handler(IDR("shaders.biquad"), [](IDType id) {
+        gProps.RegisterHandlerOnChildren(Notice::Handler(IDR("shaders.biquad"), [](IDType id) {
             CompileShaderFromProperties(IDR("shaders.biquad"));
             }), handlers);
 
@@ -198,7 +198,7 @@ namespace nugget::gl {
 
         void Render() {
 
-            Vector3f RV = gNotice.GetVector3f(ID("testobj.section.rotation"));
+            Vector3f RV = gProps.GetVector3f(ID("testobj.section.rotation"));
             Matrix4f R;
             Matrix4f::SetFromEulers(RV.x, RV.y, RV.z, R);
             modelMatrix = R * modelMatrix;
@@ -244,7 +244,7 @@ namespace nugget::gl {
 
             IDType verts = IDR(nodeID, ID("verts"));
             Vector3fList vertices;
-            if (gNotice.GetVector3fList(verts, vertices)) {
+            if (gProps.GetVector3fList(verts, vertices)) {
                 for (auto&& z : vertices.data) {
                     vertData.push_back(z.x);
                     vertData.push_back(z.y);
@@ -255,7 +255,7 @@ namespace nugget::gl {
             }
             IDType uvsid = IDR(nodeID, ID("uvs"));
             Vector2fList uvs;
-            if (gNotice.GetVector2fList(uvsid, uvs)) {
+            if (gProps.GetVector2fList(uvsid, uvs)) {
                 for (auto&& z : uvs.data) {
                     uvData.push_back(z.x);
                     uvData.push_back(z.y);
@@ -265,7 +265,7 @@ namespace nugget::gl {
             }
             IDType colsid = IDR(nodeID, ID("colors"));
             ColorList cols;
-            if (gNotice.GetColorList(colsid, cols)) {
+            if (gProps.GetColorList(colsid, cols)) {
                 for (auto&& z : cols.data) {
                     colsData.push_back(z.r);
                     colsData.push_back(z.g);
@@ -337,7 +337,7 @@ namespace nugget::gl {
 
                 // texture load
                 IDType textureNode = IDR(nodeID, "texture");
-                IDType textureName = gNotice.GetID(textureNode);
+                IDType textureName = gProps.GetID(textureNode);
                 const nugget::asset::TextureData& texture = nugget::asset::GetTexture(textureName);
                 glBindTexture(GL_TEXTURE_2D, texID);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -348,7 +348,7 @@ namespace nugget::gl {
                 glBindTexture(GL_TEXTURE_2D, 0);
             }
 
-#define PROP(a,t1,t2) IDType a##ID = IDR(nodeID,#a);a = (t2)gNotice.Get##t1(a##ID)
+#define PROP(a,t1,t2) IDType a##ID = IDR(nodeID,#a);a = (t2)gProps.Get##t1(a##ID)
             // put it together
             {
                 PROP(start, Int64, GLuint);
@@ -370,26 +370,26 @@ namespace nugget::gl {
                     fov, nearClip, farClip, projectionMatrix);
 
                 IDType primitiveID = IDR(nodeID, "primitive");
-                primitive = primitiveMap.at(gNotice.GetID(primitiveID));
+                primitive = primitiveMap.at(gProps.GetID(primitiveID));
 
                 IDType shaderNodeHash = IDR(nodeID, "shader");
-                IDType usedShaderID = gNotice.GetID(shaderNodeHash);
+                IDType usedShaderID = gProps.GetID(shaderNodeHash);
                 std::string usedShaderPath = IDToString(usedShaderID);
                 IDType shaderProgramNoticeID = IDR({ usedShaderPath, "_internal", "_pglid" });
-                shader = (GLuint)gNotice.GetInt64(shaderProgramNoticeID);
+                shader = (GLuint)gProps.GetInt64(shaderProgramNoticeID);
 
                 Init();
 
 #if 0
 
-                gNotice.RegisterHandler(gNotice.Handler(startNoticeID, [this](IDType startid) {
-                    renderable.start = (GLint)gNotice.GetInt64(startid);
+                gProps.RegisterHandler(gProps.Handler(startNoticeID, [this](IDType startid) {
+                    renderable.start = (GLint)gProps.GetInt64(startid);
                     }));
-                gNotice.RegisterHandler(gNotice.Handler(lengthNoticeID, [this](IDType lengthid) {
-                    renderable.length = (GLint)gNotice.GetInt64(lengthid);
+                gProps.RegisterHandler(gProps.Handler(lengthNoticeID, [this](IDType lengthid) {
+                    renderable.length = (GLint)gProps.GetInt64(lengthid);
                     }));
-                gNotice.RegisterHandler(gNotice.Handler(primNoticeID, [this](IDType primid) {
-                    renderable.primitive = primitiveMap.at(gNotice.GetID(primid));
+                gProps.RegisterHandler(gProps.Handler(primNoticeID, [this](IDType primid) {
+                    renderable.primitive = primitiveMap.at(gProps.GetID(primid));
                     }));
 #endif
             }
@@ -400,27 +400,27 @@ namespace nugget::gl {
         void SetupFromPropertyTree(IDType nodeID, int sectionIndex) {
             output("-------@@@@@@@------------> {}\n", IDToString(nodeID));
             IDType shaderNoideHash = IDR(nodeID, "shader");
-            IDType shaderProgramNoticeID = IDR({ IDToString(gNotice.GetID(shaderNoideHash)), "_internal", "_pglid" });
+            IDType shaderProgramNoticeID = IDR({ IDToString(gProps.GetID(shaderNoideHash)), "_internal", "_pglid" });
             UpdateFromPropertyTree(nodeID, sectionIndex);
             UpdateFromPropertyTree(nodeID, sectionIndex);
 
-            gNotice.RegisterHandlerOnChildren(Notice::Handler(nodeID,
+            gProps.RegisterHandlerOnChildren(Notice::Handler(nodeID,
                 [this, nodeID, sectionIndex](IDType id) {
                 UpdateFromPropertyTree(nodeID, sectionIndex);
                 }), regsteredHandlers);
 
 
-            gNotice.RegisterHandler(Notice::Handler(IDR(nodeID, "uvs"),
+            gProps.RegisterHandler(Notice::Handler(IDR(nodeID, "uvs"),
                 [this, nodeID, sectionIndex](IDType uid) {
                 UpdateFromPropertyTree(nodeID, sectionIndex);
                 }), regsteredHandlers);
-            gNotice.RegisterHandler(Notice::Handler(IDR(nodeID, "colors"),
+            gProps.RegisterHandler(Notice::Handler(IDR(nodeID, "colors"),
                 [this, nodeID, sectionIndex](IDType cid) {
                 UpdateFromPropertyTree(nodeID, sectionIndex);
                 }), regsteredHandlers);
 
-            gNotice.RegisterHandler(Notice::Handler(shaderProgramNoticeID, [&, shaderProgramNoticeID](IDType id) {
-                shader = (GLuint)gNotice.GetInt64(shaderProgramNoticeID);
+            gProps.RegisterHandler(Notice::Handler(shaderProgramNoticeID, [&, shaderProgramNoticeID](IDType id) {
+                shader = (GLuint)gProps.GetInt64(shaderProgramNoticeID);
                 }), regsteredHandlers);
                     
         }
@@ -439,9 +439,9 @@ namespace nugget::gl {
         bool AddSections(IDType id) {
             check(VAO, "Ya didn't init, innit?");
             // id is a section in propertytree to populate the instance
-            check(gNotice.KeyExists(id), "Node does not exist: {}\n", IDToString(id));
+            check(gProps.KeyExists(id), "Node does not exist: {}\n", IDToString(id));
             std::vector<IDType> children;
-            gNotice.GetChildrenOfType(id, ValueAny::Type::parent_, children);
+            gProps.GetChildrenOfType(id, ValueAny::Type::parent_, children);
             glBindVertexArray(VAO);
             GLuint index = 0;
             for (auto&& x : children) {

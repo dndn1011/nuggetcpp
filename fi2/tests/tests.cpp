@@ -10,13 +10,13 @@ namespace nugget::tests {
 
     static void Init() {
         std::vector<IDType> list;
-        gNotice.GetChildrenWithNodeExisting(ID("tests"), ID("mat"), list);
+        gProps.GetChildrenWithNodeExisting(ID("tests"), ID("mat"), list);
         int errors = 0;
         int cases = 0;
         for (auto&& x : list) {
-            Matrix4f mat = gNotice.GetMatrix4f(IDR(x, ID("mat")));
-            Vector4f vec = gNotice.GetVector4f(IDR(x, ID("vec")));
-            Vector4f expected = gNotice.GetVector4f(IDR(x, ID("result")));
+            Matrix4f mat = gProps.GetMatrix4f(IDR(x, ID("mat")));
+            Vector4f vec = gProps.GetVector4f(IDR(x, ID("vec")));
+            Vector4f expected = gProps.GetVector4f(IDR(x, ID("result")));
             Vector4f value = mat * vec;
             if (value != expected) {
                 output("ERROR {} {} {}\n", IDToString(x), expected.to_string(), value.to_string());

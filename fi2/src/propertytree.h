@@ -10,6 +10,6 @@ namespace nugget::properties {
 	};
 	ParseState LoadPropertyTree(Notice::Board& board /*fill*/, const std::string filename);
 
-	extern Notice::Board gNotice;
+	extern Notice::Board gProps;
 
 }

@@ -20,10 +20,10 @@ namespace nugget::db {
         constexpr IDType prop_extension = ID(db_node, "extension");
         constexpr IDType prop_extension_entry = ID(db_node, "extension_entry");
         constexpr IDType prop_service = ID(db_node, "service");
-        check(gNotice.GetString(prop_service) == "sqlite3", "db not supported");
-        std::string path = gNotice.GetString(prop_file);
-        std::string extension = gNotice.GetString(prop_extension);
-        std::string extension_entry = gNotice.GetString(prop_extension_entry);
+        check(gProps.GetString(prop_service) == "sqlite3", "db not supported");
+        std::string path = gProps.GetString(prop_file);
+        std::string extension = gProps.GetString(prop_extension);
+        std::string extension_entry = gProps.GetString(prop_extension_entry);
 
         int rc = sqlite3_open(path.c_str(), &databaseConnection);
         if (rc != SQLITE_OK) {

@@ -22,7 +22,7 @@ using namespace nugget::identifier;
 using namespace properties;
 
 namespace nugget::properties {
-    Notice::Board gNotice;
+    Notice::Board gProps;
     static Notice::Board gNoticeBack;
 }
 
@@ -59,9 +59,9 @@ void ReloadPt(std::string filename) {
 
     auto result = properties::LoadPropertyTree(gNoticeBack, filename);
     if (result.successful) {
-        nugget::ui::entity::UpdateEntity(gNotice, gNoticeBack);
-        nugget::ui::entity::CreateEntity(gNotice,IDR("main"));
-        nugget::ui::entity::ManageGeometry(gNotice, IDR("main"));
+        nugget::ui::entity::UpdateEntity(gProps, gNoticeBack);
+        nugget::ui::entity::CreateEntity(gProps,IDR("main"));
+        nugget::ui::entity::ManageGeometry(gProps, IDR("main"));
     } else {
         auto absfilename = std::filesystem::absolute(filename);
 
@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
         file = std::string(argv[1]);
     }
     for (int i = 0; i<1; i++) {
-        auto result = properties::LoadPropertyTree(gNotice /*fill*/,file);
+        auto result = properties::LoadPropertyTree(gProps /*fill*/,file);
         if (!result.successful) {
             output("Could not load propertries for {}:\n", file);
             auto absfilename = std::filesystem::absolute(file);
@@ -91,13 +91,13 @@ int main(int argc, char* argv[]) {
 
     }   
 
-    auto result = gNotice.GetVector4f(ID("result"));
+    auto result = gProps.GetVector4f(ID("result"));
 
 
     nugget::system::Init();
 
-    nugget::ui::entity::CreateEntity(gNotice, IDR("main"));
-    nugget::ui::entity::ManageGeometry(gNotice, IDR("main"));
+    nugget::ui::entity::CreateEntity(gProps, IDR("main"));
+    nugget::ui::entity::ManageGeometry(gProps, IDR("main"));
 
 //    nugget::ui::entity::CreateEntity(ID("circle"));
 
@@ -105,14 +105,14 @@ int main(int argc, char* argv[]) {
 
 #if 0 // test of button events
     auto updateLambda = [](IDType changeId) {
-        int32_t count = gNotice.GetInt32(changeId);
-        gNotice.Set(IDR(GetParent(changeId), ID("text")), std::to_string(count));
+        int32_t count = gProps.GetInt32(changeId);
+        gProps.Set(IDR(GetParent(changeId), ID("text")), std::to_string(count));
         };
 
     std::vector<IDType> children;
-    gNotice.GetChildrenWithNodeOfValue(ID("main.sub"), ID("class"), ID("ui::Button"), children/*fill*/);
+    gProps.GetChildrenWithNodeOfValue(ID("main.sub"), ID("class"), ID("ui::Button"), children/*fill*/);
     for (auto& x : children) {
-        gNotice.RegisterHandler(gNotice.Handler{
+        gProps.RegisterHandler(gProps.Handler{
             IDR(x,ID("pressEventCount")),
             updateLambda
             });

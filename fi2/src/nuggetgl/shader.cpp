@@ -105,7 +105,7 @@ namespace nugget::gl {
         IDType programNode = IDR(node, IDR("program"));
 
         std::string nodeStr = IDToString(node);
-        gNotice.SetAsParent(IDR({ nodeStr, "_internal" }));
+        gProps.SetAsParent(IDR({ nodeStr, "_internal" }));
         IDType vertexIdNode = IDR({ nodeStr, "_internal","_vglid" });
         IDType geometryIdNode = IDR({ nodeStr, "_internal","_gglid" });
         IDType fragmentIdNode = IDR({ nodeStr, "_internal","_fglid" });
@@ -113,35 +113,35 @@ namespace nugget::gl {
 
         // e.g. shaders.foo.program.glid
 
-        if (gNotice.KeyExists(programIdNode)) {
-            auto id = gNotice.GetUint64(programIdNode);
+        if (gProps.KeyExists(programIdNode)) {
+            auto id = gProps.GetUint64(programIdNode);
             if (id) {
                 glDeleteProgram((GLuint)id);
             }
         }
-        if (gNotice.KeyExists(vertexIdNode)) {
-            auto id = gNotice.GetUint64(vertexIdNode);
+        if (gProps.KeyExists(vertexIdNode)) {
+            auto id = gProps.GetUint64(vertexIdNode);
             if (id) {
                 glDeleteShader((GLuint)id);
             }
         }
-        if (gNotice.KeyExists(geometryIdNode)) {
-            auto id = gNotice.GetUint64(geometryIdNode);
+        if (gProps.KeyExists(geometryIdNode)) {
+            auto id = gProps.GetUint64(geometryIdNode);
             if (id) {
                 glDeleteShader((GLuint)id);
             }
 
         }
-        if (gNotice.KeyExists(fragmentIdNode)) {
-            auto id = gNotice.GetUint64(fragmentIdNode);
+        if (gProps.KeyExists(fragmentIdNode)) {
+            auto id = gProps.GetUint64(fragmentIdNode);
             if (id) {
                 glDeleteShader((GLuint)id);
             }
         }
 
-        std::string vertexShaderSource = gNotice.GetString(vertexNode);
-        std::string geometryShaderSource = gNotice.GetString(geometryNode);
-        std::string fragmentShaderSource = gNotice.GetString(fragmentNode);
+        std::string vertexShaderSource = gProps.GetString(vertexNode);
+        std::string geometryShaderSource = gProps.GetString(geometryNode);
+        std::string fragmentShaderSource = gProps.GetString(fragmentNode);
 
             
         // Geometry Shader
@@ -161,10 +161,10 @@ namespace nugget::gl {
         GLuint shaderProgram = LinkProgram(geometryShader, vertexShader, fragmentShader);
         testAlways(shaderProgram != 0, ("fragment shader compilation failed\n"));
 
-        gNotice.Set(vertexIdNode, (int64_t)vertexShader);
-        gNotice.Set(geometryIdNode, (int64_t)geometryShader);
-        gNotice.Set(fragmentIdNode, (int64_t)fragmentShader);
-        gNotice.Set(programIdNode, (int64_t)shaderProgram);
+        gProps.Set(vertexIdNode, (int64_t)vertexShader);
+        gProps.Set(geometryIdNode, (int64_t)geometryShader);
+        gProps.Set(fragmentIdNode, (int64_t)fragmentShader);
+        gProps.Set(programIdNode, (int64_t)shaderProgram);
 
     }
      
