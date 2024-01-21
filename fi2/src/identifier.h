@@ -1,13 +1,16 @@
 #pragma once
-#include <string>
-#include "assert.h"
 
+#include <string>
 #include <cstdint>
 #include <optional>
 #include <vector>
 #include <unordered_set>
 
 #include <cctype>
+
+#include "assert.h"
+
+
 
 
 namespace nugget {

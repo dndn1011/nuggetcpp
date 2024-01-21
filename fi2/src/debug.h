@@ -1,4 +1,10 @@
 #pragma once
+
+#ifdef USE_MODULES
+import <string>;
+import <format>;
+#endif
+
 #include <string>
 
 namespace nugget::debug {
@@ -20,7 +26,9 @@ namespace nugget::debug {
 #else
 #define outputAlways(...)     (nugget::debug::OutputToDebuggerAndConsole((std::format("{}({}): {}: ",__FILE__, __LINE__, __FUNCTION__) + std::format(__VA_ARGS__))))
 #define testAlways(a,...)  ((a)?(void)0:(output(__VA_ARGS__)))
+#ifndef USE_MODULES
 #include <format>
+#endif
 #define IDC(a) (IDToString(a))
 #define output(...)     (nugget::debug::OutputToDebuggerAndConsole((std::format("{}({}): {}: ",__FILE__, __LINE__, __FUNCTION__) + std::format(__VA_ARGS__))))
 #define printid(a) output("@ID@ {}\n",IDC(a));

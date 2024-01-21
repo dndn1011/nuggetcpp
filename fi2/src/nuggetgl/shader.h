@@ -1,5 +1,5 @@
-#include "glinternal.h"
-#include <string>
+#pragma once
+//#include "glinternal.h"
 #include "identifier.h"
 
 namespace nugget::gl {

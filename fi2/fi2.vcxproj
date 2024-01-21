@@ -107,7 +107,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>USE_MODULES;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <AdditionalIncludeDirectories>$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -193,6 +193,8 @@
     <ClCompile Include="src\utils\TimeSampler.cpp" />
     <ClCompile Include="src\utils\utils.cpp" />
     <ClCompile Include="src\ValueAny.cpp" />
+    <ClCompile Include="PrimaryModule.ixx" />
+    <ClCompile Include="tests\tests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="config.pt" />

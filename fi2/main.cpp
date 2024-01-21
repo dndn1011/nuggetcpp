@@ -91,18 +91,6 @@ int main(int argc, char* argv[]) {
 
     }   
 
-    std::vector<IDType> list;
-    gNotice.GetChildrenWithNodeExisting(ID("tests"), ID("mat"), list);
-    for (auto&& x : list) {
-        Matrix4f mat = gNotice.GetMatrix4f(IDR(x, ID("mat")));
-        Vector4f vec = gNotice.GetVector4f(IDR(x, ID("vec")));
-        Vector4f expected = gNotice.GetVector4f(IDR(x, ID("result")));
-        Vector4f value = mat * vec;
-        if (value != expected) {
-            output("ERROR {} {} {}\n",IDToString(x),expected.to_string(),value.to_string());
-        }
-    }
-
     auto result = gNotice.GetVector4f(ID("result"));
 
 
