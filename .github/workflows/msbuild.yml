@@ -45,5 +45,5 @@ jobs:
 
     - name: Run Executable
       working-directory: ${{env.GITHUB_WORKSPACE}}fi2
-      run: ..\x64\Debug\fi2.exe
+      run: ..\x64\Debug\fi2.exe exitAfterTests= runHeadless=
       
