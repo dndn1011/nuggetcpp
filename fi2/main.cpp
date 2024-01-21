@@ -1,3 +1,6 @@
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -127,14 +130,29 @@ int main(int argc, char* argv[]) {
 
     nugget::ui::Init();
 
+    // Main loop        
+    MSG msg = {};
+    while (true) {
+        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+            if (msg.message == WM_QUIT) {
+                return 0;
+            }
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
 
-    nugget::ui::Exec([&watcher]() {
+        if (!nugget::system::Update()) {
+            // nothing to update, so just exit now
+            return 0;
+        }
+
         if (watcher.Check()) {
             ReloadPt(filename);
         }
-    });
 
-    getchar();
+    }
+
+    getchar();  
 
     return 0;
 }

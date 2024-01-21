@@ -17,7 +17,7 @@ namespace nugget::ui {
 
     void Exec(const std::function<void()>& updateCallback) {
 //        ui_imp::Exec(updateCallback);
-        nugget::gl::MainLoop(updateCallback);
+//        nugget::gl::MainLoop(updateCallback);
     }
 }
 

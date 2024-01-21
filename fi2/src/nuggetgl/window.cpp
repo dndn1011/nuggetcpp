@@ -501,10 +501,20 @@ namespace nugget::gl {
     }
 
 
-    static size_t init_dummy = nugget::system::RegisterModule([]() {
-        OpenWindow();
-        return 0;
-        }, 250);
-
+    static size_t init_dummy[] =
+    {
+        {
+            nugget::system::RegisterModule([]() {
+            OpenWindow();
+            return 0;
+           }, 250)
+        },
+        {
+            nugget::system::RegisterModule([]() {
+            Update();
+            return 0;
+            }, 250, ID("update"))
+        }
+    };
 }
 

@@ -173,7 +173,7 @@
     <ClCompile Include="src\notice.cpp" />
     <ClCompile Include="src\nuggetgl\glinternal.cpp" />
     <ClCompile Include="src\nuggetgl\shader.cpp" />
-    <ClCompile Include="src\nuggetgl\shader.h" />
+    <ClCompile Include="src\nuggetgl\window.cpp" />
     <ClCompile Include="src\propertytree.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Default</BasicRuntimeChecks>
@@ -189,7 +189,6 @@
     <ClCompile Include="src\ui.cpp" />
     <ClCompile Include="src\uientities.cpp" />
     <ClCompile Include="src\dimensions.cpp" />
-    <ClCompile Include="src\nuggetgl\window.cpp" />
     <ClCompile Include="src\utils\TimeSampler.cpp" />
     <ClCompile Include="src\utils\utils.cpp" />
     <ClCompile Include="src\ValueAny.cpp" />
@@ -211,11 +210,12 @@
     <ClInclude Include="src\expressions.h" />
     <ClInclude Include="src\expressions_operators.h" />
     <ClInclude Include="src\network.h" />
-    <ClInclude Include="src\nuggetgl\gl.h" />
-    <ClInclude Include="src\nuggetgl\gldefs.h" />
     <ClInclude Include="src\debug.h" />
     <ClInclude Include="src\filereader.h" />
+    <ClInclude Include="src\nuggetgl\gl.h" />
+    <ClInclude Include="src\nuggetgl\gldefs.h" />
     <ClInclude Include="src\nuggetgl\glinternal.h" />
+    <ClInclude Include="src\nuggetgl\shader.h" />
     <ClInclude Include="src\propertytree.h" />
     <ClInclude Include="src\propertytreetokeniser.h" />
     <ClInclude Include="src\system.h" />

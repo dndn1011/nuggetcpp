@@ -37,13 +37,17 @@ namespace nugget::system {
 		}
 	}
 
-	void Update() {
+	bool Update() {
 		auto& list = RegisterSingleton::GetInstance()->moduleList[ID("update")];
+		if(list.size() == 0) {
+			return false;
+		}
 		std::ranges::sort(list, [](const ModuleReg& a, const ModuleReg& b) {
 			return a.order < b.order;
 			});
 		for (auto&& x : list) {
 			x.func();
 		}
+		return true;
 	}
 }

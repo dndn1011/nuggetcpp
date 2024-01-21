@@ -45,19 +45,7 @@
     <ClCompile Include="src\uientities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\nuggetgl\window.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Color_plat.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\nuggetgl\shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\nuggetgl\shader.h">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\nuggetgl\glinternal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\propertytreetokeniser.cpp">
@@ -102,6 +90,15 @@
     <ClCompile Include="PrimaryModule.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\nuggetgl\glinternal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\nuggetgl\shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\nuggetgl\window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="config.pt" />
@@ -142,15 +139,6 @@
     <ClInclude Include="src\utils\StableVector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\nuggetgl\gldefs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\nuggetgl\gl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\nuggetgl\glinternal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\propertytreetokeniser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -182,6 +170,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\database\db.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\nuggetgl\gl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\nuggetgl\gldefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\nuggetgl\glinternal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\nuggetgl\shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
