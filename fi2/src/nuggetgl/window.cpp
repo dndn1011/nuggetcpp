@@ -505,13 +505,17 @@ namespace nugget::gl {
     {
         {
             nugget::system::RegisterModule([]() {
-            OpenWindow();
+            if (!Notice::gBoard.KeyExists(ID("commandLine.assignments.runHeadless"))) {
+                OpenWindow();
+            }
             return 0;
            }, 250)
         },
         {
             nugget::system::RegisterModule([]() {
-            Update();
+            if (!Notice::gBoard.KeyExists(ID("commandLine.assignments.runHeadless"))) {
+                Update();
+            }
             return 0;
             }, 250, ID("update"))
         }

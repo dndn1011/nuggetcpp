@@ -77,11 +77,30 @@ void ReloadPt(std::string filename) {
 
 static const std::string filename = "config.pt";
 int main(int argc, char* argv[]) {
-
     std::string file = filename;
-    if (argc > 1) {
-        file = std::string(argv[1]);
+
+    IDType commandLineHash = IDR("commandLine");
+    IDType rawHash = IDR(commandLineHash, "raw");
+    IDType assignmentHash = IDR(commandLineHash, "assignments");
+    Notice::gBoard.SetAsParent(commandLineHash);
+    Notice::gBoard.SetAsParent(rawHash);
+    Notice::gBoard.SetAsParent(assignmentHash);
+    for (int i = 0; i < argc; ++i) {
+        std::string arg(argv[i]);
+        Notice::gBoard.Set(IDR(rawHash, std::to_string(i)), arg);
+        size_t pos = arg.find('=');
+        if (pos != std::string::npos) {
+            std::string l = arg.substr(0, pos);
+            std::string r = arg.substr(pos + 1);
+            Notice::gBoard.Set(IDR(assignmentHash, l), r);
+        }
     }
+    IDType exitAfterTestsOptionKey = ID("commandLine.assignments.ptfile");
+    if (Notice::gBoard.KeyExists(exitAfterTestsOptionKey)) {
+        file = Notice::gBoard.GetString(exitAfterTestsOptionKey);
+    }
+
+
     for (int i = 0; i<1; i++) {
         auto result = properties::LoadPropertyTree(gProps /*fill*/,file);
         if (!result.successful) {
@@ -98,6 +117,7 @@ int main(int argc, char* argv[]) {
 
 
     nugget::system::Init();
+
 
     nugget::ui::entity::CreateEntity(gProps, IDR("main"));
     nugget::ui::entity::ManageGeometry(gProps, IDR("main"));

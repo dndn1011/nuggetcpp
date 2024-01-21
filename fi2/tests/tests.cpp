@@ -28,6 +28,9 @@ namespace nugget::tests {
         if (errors > 0) {
             exit(1);
         }
+        if (Notice::gBoard.KeyExists(ID("commandLine.assignments.exitAfterTests"))) {
+            exit(0 );
+        }
     }
 
     static size_t init_dummy = nugget::system::RegisterModule([]() {
