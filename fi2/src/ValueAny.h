@@ -25,6 +25,7 @@ namespace nugget {
         explicit ValueAny(const Vector2f& v);
         explicit ValueAny(const Matrix4f& v);
         explicit ValueAny(const Vector4f& v);
+        explicit ValueAny(const Int64List& v);
 
         // Copy constructor and assignment operator
         ValueAny(const ValueAny& other);
@@ -60,6 +61,7 @@ namespace nugget {
             Vector2f,
             Matrix4f,
             Vector4f,
+            Int64List,
 
             deleted
         };
@@ -84,6 +86,7 @@ namespace nugget {
         const Exception& AsException() const;
         const Matrix4f& AsMatrix4f() const;
         const Vector4f& AsVector4f() const;
+        const Int64List& AsInt64List() const;
 
         // Existing Set methods
         void Set(std::string val);
@@ -104,6 +107,7 @@ namespace nugget {
         void Set(const Vector2f& vect);
         void Set(const Exception& exception);
         void Set(const Matrix4f& mat);
+        void Set(const Int64List& ints);
 
         // Additional methods
         void SetAsParent();
@@ -133,6 +137,7 @@ namespace nugget {
             Vector3f* vector3fPtr;
             Vector2f* vector2fPtr;
             Matrix4f* matrix4fPtr;  // Pointer to Matrix4f
+            Int64List* int64ListPtr;
         } data = {};
 
         Type type = Type::void_;

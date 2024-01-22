@@ -51,6 +51,21 @@ std::string nugget::Vector2fList::to_string_imp(const Vector2fList& obj) {
 	return ss.str();
 }
 
+std::string nugget::Int64List::to_string_imp(const Int64List& obj) {
+	std::stringstream ss;
+	bool first = true;
+	ss << "[";
+	for (auto&& x : obj.data) {
+		if (!first) {
+			ss << ",";
+		}
+		first = false;
+		ss << std::to_string(x);
+	}
+	ss << "]";
+	return ss.str();
+}
+
 std::string nugget::Vector3f::to_string_imp(const Vector3f& obj) {
 	return std::format("{}{},{},{}{}", "{", obj.x, obj.y, obj.z, "}");
 }
@@ -179,6 +194,11 @@ namespace nugget {
 		return to_string_imp(*this);
 	}
 
+	// to_string method for Vector3fList
+	std::string Int64List::to_string() const {
+		return to_string_imp(*this);
+	}
+
 	// Equality operator for ColorList
 	bool ColorList::operator==(const ColorList& other) const {
 		if (data.size() != other.data.size()) {
@@ -260,6 +280,16 @@ namespace nugget {
 	// Inequality operator
 	bool Matrix4f::operator!=(const Matrix4f& other) const {
 		return !(*this == other);
+	}
+
+	// Inequality operator
+	bool Int64List::operator==(const Int64List& other) const {
+		for (int i = 0; i < data.size(); ++i) {
+			if (data[i] != other.data[i]) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	// Method to return the matrix as a string
@@ -424,6 +454,15 @@ namespace nugget {
 		float aspectRatio = screenWidth / screenHeight;
 		float fovRadians = 1.0f / tan(fov * 0.5f);
 		float frustumLength = farPlane - nearPlane;
+
+		/*
+		* 
+		*	fovRadians / aspectRatio		0						0												0
+		*	0								fovRadians				0												0
+		*	0								0						-(farPlane + nearPlane) / frustumLength			-1
+		*	0								0						-(2 * nearPlane * farPlane) / frustumLength		0
+		* 
+		*/
 
 		matrix.data[0] = fovRadians / aspectRatio;
 		matrix.data[5] = fovRadians;

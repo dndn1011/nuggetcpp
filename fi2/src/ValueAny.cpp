@@ -26,6 +26,7 @@ namespace nugget {
 	ValueAny::ValueAny(const Vector2f& v) : type(Type::Vector2f), data{ .vector2fPtr = new Vector2f(v) } {}
 	ValueAny::ValueAny(const Matrix4f& v) : type(Type::Matrix4f), data{ .matrix4fPtr = new Matrix4f(v) } {}
 	ValueAny::ValueAny(const Vector4f& v) : type(Type::Vector4f), data{ .vector4fPtr = new Vector4f(v) } {}
+	ValueAny::ValueAny(const Int64List& v) : type(Type::Int64List), data{ .int64ListPtr = new Int64List(v) } {}
 
 	ValueAny::ValueAny(const Exception& v) : type(Type::Exception), data{ .exceptionPtr = new Exception(v) } {}
 
@@ -91,6 +92,9 @@ namespace nugget {
 			} break;
 			case ValueAny::Type::Vector4f: {
 				return *data.vector4fPtr == *other.data.vector4fPtr;
+			} break;
+			case ValueAny::Type::Int64List: {
+				return *data.int64ListPtr == *other.data.int64ListPtr;
 			} break;
 			case ValueAny::Type::Vector2f: {
 				return *data.vector2fPtr == *other.data.vector2fPtr;
@@ -184,6 +188,9 @@ namespace nugget {
 		} break;
 		case ValueAny::Type::Vector4f: {
 			return data.vector4fPtr->to_string();
+		} break;
+		case ValueAny::Type::Int64List: {
+			return data.int64ListPtr->to_string();
 		} break;
 		case ValueAny::Type::Vector3f: {
 			return data.vector3fPtr->to_string();
@@ -424,6 +431,16 @@ namespace nugget {
 		}
 		data.vector4fPtr = new Vector4f(v);
 	}
+	void ValueAny::Set(const Int64List& v) {
+		if (type == Type::deleted) {
+			type = Type::Int64List;
+		}
+		assert(type == Type::Int64List);
+		if (data.int64ListPtr != nullptr) {
+			delete 	data.int64ListPtr;
+		}
+		data.int64ListPtr = new Int64List(v);
+	}
 	void ValueAny::SetAsParent() {
 		type = Type::parent_;
 	}
@@ -598,6 +615,9 @@ namespace nugget {
 			} break;
 			case Type::Vector4f: {
 				data.vector4fPtr = new Vector4f(*other.data.vector4fPtr);
+			} break;
+			case Type::Int64List: {
+				data.int64ListPtr = new Int64List(*other.data.int64ListPtr);
 			} break;
 			case Type::pointer: {
 				data.ptr = other.data.ptr;

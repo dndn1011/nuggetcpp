@@ -82,6 +82,16 @@ namespace nugget {
 		static std::string to_string_imp(const Vector3fList& obj);
 	};
 
+	struct Int64List {
+		std::vector<int64_t> data;
+
+		bool operator==(const Int64List& other) const;
+		std::string to_string() const;
+
+	private:
+		static std::string to_string_imp(const Int64List& obj);
+	};
+
 	struct ColorList {
 		std::vector<Color> data;
 

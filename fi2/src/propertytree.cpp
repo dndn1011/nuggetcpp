@@ -201,6 +201,18 @@ namespace nugget::properties {
                 },
             },
             {
+                "Int64List",[&]() {
+                    size_t size = initialiserList.size();
+                    Int64List ints;
+                    for (int i = 0; i < size; ++i) {
+                        auto v = initialiserList[i];
+                        ints.data.push_back(Expression::ConvertType(v, ValueAny::Type::int64_t_).AsInt64());
+                    }
+                    IDType id = IDR(IDR(currentPathName), currentValueName);
+                    board.Set(id, ints);
+                },
+            },
+            {
                 "Vector3f",[&]() {
                     check(initialiserList.size() == 3,"Incorrect number of arguments");
                     float x = Expression::ConvertType(initialiserList[0], ValueAny::Type::float_).AsFloat();

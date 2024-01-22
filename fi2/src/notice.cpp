@@ -321,6 +321,7 @@ namespace nugget {
 		template void Board::Set<Vector2f>(IDType id, const Vector2f& value);
 		template void Board::Set<Matrix4f>(IDType id, const Matrix4f& value);
 		template void Board::Set<Vector4f>(IDType id, const Vector4f& value);
+		template void Board::Set<Int64List>(IDType id, const Int64List& value);
 
 		void Board::RegisterHandler(const Handler& handler) {
 			if (!data.handlers.contains(handler.changeId)) {
