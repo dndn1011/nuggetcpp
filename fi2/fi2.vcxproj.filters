@@ -84,9 +84,6 @@
     <ClCompile Include="src\database\db.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\tests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="PrimaryModule.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -97,6 +94,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\nuggetgl\window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="external\stb_image_write.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="external\cgltf.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="external\cgltf_write.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -182,6 +191,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\nuggetgl\shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="external\json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="external\stb_image_write.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="external\cgltf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="external\cgltf_write.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

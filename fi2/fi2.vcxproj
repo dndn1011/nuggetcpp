@@ -107,7 +107,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>USE_MODULES;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>xUSE_MODULES;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <AdditionalIncludeDirectories>$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -153,7 +153,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="external\cgltf.cpp" />
+    <ClCompile Include="external\cgltf_write.cpp" />
     <ClCompile Include="external\stb_image.cpp" />
+    <ClCompile Include="external\stb_image_write.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\asset\asset.cpp" />
     <ClCompile Include="src\asset\png.cpp" />
@@ -202,8 +205,12 @@
     <None Include="sqlite3.dll" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="external\cgltf.h" />
+    <ClInclude Include="external\cgltf_write.h" />
+    <ClInclude Include="external\json.hpp" />
     <ClInclude Include="external\stb_image.h" />
     <ClInclude Include="external\sqlite3.h" />
+    <ClInclude Include="external\stb_image_write.h" />
     <ClInclude Include="src\asset\asset.h" />
     <ClInclude Include="src\asset\png.h" />
     <ClInclude Include="src\database\db.h" />
