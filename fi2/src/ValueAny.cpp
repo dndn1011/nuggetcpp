@@ -542,6 +542,12 @@ namespace nugget {
 				if (data.vector4fPtr) {
 					delete data.vector4fPtr;
 					data.vector4fPtr = nullptr;
+				}							   
+			} break;
+			case Type::Int64List: {
+				if (data.int64ListPtr) {
+					delete data.int64ListPtr;
+					data.int64ListPtr = nullptr;
 				}
 			} break;
 			case Type::void_:
