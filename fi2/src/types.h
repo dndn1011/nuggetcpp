@@ -78,6 +78,7 @@ namespace nugget {
 		bool operator==(const Vector3fList& other) const;
 		std::string to_string() const;
 
+		void ToFloats(std::vector<float>& out) const;
 	private:
 		static std::string to_string_imp(const Vector3fList& obj);
 	};
@@ -98,6 +99,8 @@ namespace nugget {
 		bool operator==(const ColorList& other) const;
 		std::string to_string() const;
 
+		void ToFloats(std::vector<float>& out) const;
+
 	private:
 		static std::string to_string_imp(const ColorList& obj);
 	};
@@ -107,6 +110,7 @@ namespace nugget {
 
 		bool operator==(const Vector2fList& other) const;
 		std::string to_string() const;
+		void ToFloats(std::vector<float>& out) const;
 
 	private:
 		static std::string to_string_imp(const Vector2fList& obj);

@@ -108,6 +108,12 @@
     <ClCompile Include="external\cgltf_write.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\nuggetgl\render.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\nuggetgl\IndexedMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="config.pt" />
@@ -203,6 +209,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="external\cgltf_write.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\nuggetgl\render.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

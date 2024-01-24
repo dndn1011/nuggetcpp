@@ -194,6 +194,15 @@ namespace nugget {
 		return to_string_imp(*this);
 	}
 
+	void Vector3fList::ToFloats(std::vector<float>& out) const
+	{
+		for (auto&& x : data) {
+			out.push_back(x.x);
+			out.push_back(x.y);
+			out.push_back(x.z);
+		}
+	}
+
 	// to_string method for Vector3fList
 	std::string Int64List::to_string() const {
 		return to_string_imp(*this);
@@ -217,6 +226,16 @@ namespace nugget {
 		return to_string_imp(*this);
 	}
 
+	void ColorList::ToFloats(std::vector<float>& out) const
+	{
+		for (auto&& x : data) {
+			out.push_back(x.r);
+			out.push_back(x.g);
+			out.push_back(x.b);
+			out.push_back(x.a);
+		}
+	}
+
 	// Equality operator for Vector2fList
 	bool Vector2fList::operator==(const Vector2fList& other) const {
 		if (data.size() != other.data.size()) {
@@ -233,6 +252,14 @@ namespace nugget {
 	// to_string method for Vector2fList
 	std::string Vector2fList::to_string() const {
 		return to_string_imp(*this);
+	}
+
+	void Vector2fList::ToFloats(std::vector<float>& out) const
+	{
+		for (auto&& x : data) {
+			out.push_back(x.x);
+			out.push_back(x.y);
+		}
 	}
 
 	// Default constructor for Matrix4f

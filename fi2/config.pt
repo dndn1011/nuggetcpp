@@ -1,12 +1,4 @@
-
-a {
-    b = 1;
-}
-
-
-// stop pasring here
-//@stop = 1;
-
+@degrees = 3.141592654 / 180.0;
 
 tests {
     t0001 {
@@ -682,8 +674,8 @@ shaders {
                     vec2 r = vec2(-uv_f.y,-uv_f.x)*1.0;
 
     //                FragColor = c;
-   //                 FragColor = vec4(1,0,0,1);
-                        FragColor = texture(quadTexture, r) + c/2;
+                    FragColor = vec4(1,0,0,1);
+    //                    FragColor = texture(quadTexture, r) + c/2;
                 }
 
 >>;
@@ -691,77 +683,102 @@ shaders {
 }
 
 indexedCube {
-    @S = 1.0;
-    verts : Vector3fList = {
-         @S ,  @S , @S,
-         @S , -@S , @S,
-        -@S ,  @S , @S,
-        -@S , -@S , @S,
-         @S ,  @S , -@S,
-         @S , -@S , -@S,
-        -@S ,  @S , -@S,
-        -@S , -@S , -@S,
-    };
+    section {
+        shader = shaders.biquad;
+        primitive = GL_TRIANGLES;
+        start = 0;
+        length = 36;
+        texture = spaceship;
 
-    indices : Int64List = {
-        0, 1, 2, 2, 1, 3, // Front face
-        0, 1, 4, 4, 1, 5, // Right face
-        4, 5, 6, 6, 5, 7, // Back face
-        6, 7, 2, 2, 7, 3, // Left face
-        0, 2, 4, 4, 2, 6, // Top face
-        1, 3, 5, 5, 3, 7  // Bottom face   
-    };
+        nearClip : float = 0.1;
+        farClip : float = 1000.0;
+        fov : float = 60 * @degrees;
 
-    normal : Vector3fList = {
-        0, 0, 1, // Front face vertices normals (0, 1, 2, 3)
-        1, 0, 0, // Right face vertices normals (0, 1, 4, 5)
-        0, 0, -1, // Back face vertices normals (4, 5, 6, 7)
-        -1, 0, 0, // Left face vertices normals (2, 3, 6, 7)
-        0, 1, 0, // Top face vertices normals (0, 2, 4, 6)
-        0, -1, 0  // Bottom face vertices normals (1, 3, 5, 7)
-    };
+        cameraPos : Vector3f = {
+            1,-1,2
+        };
 
-    uvs : Vector2fList = {
-        0, 0, // Bottom-left of texture
-        1, 0, // Bottom-right of texture
-        0, 1, // Top-left of texture
-        1, 1, // Top-right of texture
-        0, 0, // Repeat for each face
-        1, 0,
-        0, 1,
-        1, 1,
-        0, 0,
-        1, 0,
-        0, 1,
-        1, 1,
-        0, 0,
-        1, 0,
-        0, 1,
-        1, 1,
-        0, 0,
-        1, 0,
-        0, 1,
-        1, 1,
-        0, 0,
-        1, 0,
-        0, 1,
-        1, 1
-    };
+        lookAtPos : Vector3f = {
+            0,0,0
+        };
+        lookAtUp : Vector3f = {
+            0,1,0
+        };
 
-    colors : ColorList = {
-        1, 0, 0,       // Red
-        1, 0.5, 0,     // Orange
-        1, 1, 0,       // Yellow
-        0, 1, 0,       // Green
-        0, 0, 1,       // Blue
-        0.29, 0, 0.51, // Indigo
-        0.56, 0, 1,    // Violet
-        1, 1, 1        // White
-    };
+        @S = 1.0;
+        verts : Vector3fList = {
+             @S ,  @S , @S,
+             @S , -@S , @S,
+            -@S ,  @S , @S,
+            -@S , -@S , @S,
+             @S ,  @S , -@S,
+             @S , -@S , -@S,
+            -@S ,  @S , -@S,
+            -@S , -@S , -@S,
+        };
+
+        indices : Int64List = {
+            0, 1, 2, 2, 1, 3, // Front face
+            0, 1, 4, 4, 1, 5, // Right face
+            4, 5, 6, 6, 5, 7, // Back face
+            6, 7, 2, 2, 7, 3, // Left face
+            0, 2, 4, 4, 2, 6, // Top face
+            1, 3, 5, 5, 3, 7  // Bottom face   
+        };
+
+        normals : Vector3fList = {
+            0, 0, 1, // Front face vertices normals (0, 1, 2, 3)
+            1, 0, 0, // Right face vertices normals (0, 1, 4, 5)
+            0, 0, -1, // Back face vertices normals (4, 5, 6, 7)
+            -1, 0, 0, // Left face vertices normals (2, 3, 6, 7)
+            0, 1, 0, // Top face vertices normals (0, 2, 4, 6)
+            0, -1, 0,  // Bottom face vertices normals (1, 3, 5, 7)
+            0, 1, 0,
+            0, 1, 0,
+        };
+
+        uvs : Vector2fList = {
+            0, 0, // Bottom-left of texture
+            1, 0, // Bottom-right of texture
+            0, 1, // Top-left of texture
+            1, 1, // Top-right of texture
+            0, 0, // Repeat for each face
+            1, 0,
+            0, 1,
+            1, 1,
+        };
+
+        colors : ColorList = {
+            1,      0,      0,      1,      // Red
+            1,      0.5,    0,      1,     // Orange
+            1,      1,      0,      1,       // Yellow
+            0,      1,      0,      1,       // Green
+            0,      0,      1,      1,       // Blue
+            0.29,   0,      0.51,   1, // Indigo
+            0.56,   0,      1,      1,   // Violet
+            1,      1,      1,       1,      // White
+        };
+                
+        viewMatrix : Matrix4f = {
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, -1, 1.0,
+        };
+
+        modelMatrix : Matrix4f = {
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0,
+        };
+
+
+    }
 }
 
 quad {
-    @S = 1.0;
+    @S = 0.25;
     verts : Vector3fList = {
          @S ,  @S , @S,
          @S , -@S , @S,
@@ -874,8 +891,6 @@ quad {
     };
 }
 
-@degrees = 3.141592654 / 180.0;
-
 testobj {
     section {
         texture = spaceship;
@@ -950,7 +965,8 @@ testobj {
 
         @sxy = 0.5;
         s1 : Vector3f = { @sxy,@sxy, @sxy };
-        verts = ref(quad.verts) * ref(@here.s1);
+        t1 : Vector3f = { 0.5,0.5,0.0 };
+        verts = ref(quad.verts) * ref(@here.s1) + ref(@here.t1) ;
 
         uvs = concat(ref(quad.uvs),ref(quad.uvs),ref(quad.uvs),ref(quad.uvs));
         colors = concat(ref(quad.colors),ref(quad.colors),ref(quad.colors),ref(quad.colors));

@@ -175,6 +175,8 @@
     </ClCompile>
     <ClCompile Include="src\notice.cpp" />
     <ClCompile Include="src\nuggetgl\glinternal.cpp" />
+    <ClCompile Include="src\nuggetgl\IndexedMesh.cpp" />
+    <ClCompile Include="src\nuggetgl\render.cpp" />
     <ClCompile Include="src\nuggetgl\shader.cpp" />
     <ClCompile Include="src\nuggetgl\window.cpp" />
     <ClCompile Include="src\propertytree.cpp">
@@ -222,6 +224,7 @@
     <ClInclude Include="src\nuggetgl\gl.h" />
     <ClInclude Include="src\nuggetgl\gldefs.h" />
     <ClInclude Include="src\nuggetgl\glinternal.h" />
+    <ClInclude Include="src\nuggetgl\render.h" />
     <ClInclude Include="src\nuggetgl\shader.h" />
     <ClInclude Include="src\propertytree.h" />
     <ClInclude Include="src\propertytreetokeniser.h" />

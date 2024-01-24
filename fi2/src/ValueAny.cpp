@@ -279,6 +279,11 @@ namespace nugget {
 		assert(type == Type::Vector2fList);
 		return *data.vector2fListPtr;
 	}
+	const Int64List& ValueAny::AsInt64List() const {
+		assert(NotDeleted());
+		assert(type == Type::Int64List);
+		return *data.int64ListPtr;
+	}
 	const ColorList& ValueAny::AsColorList() const {
 		assert(NotDeleted());
 		assert(type == Type::ColorList);

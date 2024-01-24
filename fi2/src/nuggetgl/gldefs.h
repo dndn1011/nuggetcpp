@@ -27,3 +27,5 @@ GLDEF(glGetUniformLocation, (GLuint program, const GLchar* name), GLint)
 GLDEF(glActiveTexture, (GLenum texture), void)
 GLDEF(glDeleteBuffers, (GLsizei n, const GLuint* buffers), void)
 GLDEF(glUniformMatrix4fv, (GLint location, GLsizei count, GLboolean transpose, const GLfloat* value), void)
+GLDEF(wglCreateContextAttribsARB, (HDC, HGLRC, const int*), HGLRC)
+

@@ -20,6 +20,13 @@ typedef char GLchar;
 #define GL_GEOMETRY_SHADER 0x8DD9
 
 #define GL_TRIANGLES_ADJACENCY 0x000C
+#define GL_ELEMENT_ARRAY_BUFFER 0x8893
+
+#define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
+#define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
+#define WGL_CONTEXT_PROFILE_MASK_ARB 0x9126
+#define WGL_CONTEXT_CORE_PROFILE_BIT_ARB 0x00000001
+
 
 namespace nugget::gl {
 	// Function pointer typedef for OpenGL functions

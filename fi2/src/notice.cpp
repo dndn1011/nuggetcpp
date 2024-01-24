@@ -194,6 +194,7 @@ namespace nugget {
 			auto& v = data.valueEntries.at(id);
 			return  v.AsPointer();
 		}
+
 		Dimension Board::GetDimension(IDType id)
 		{
 			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
@@ -216,6 +217,16 @@ namespace nugget {
 			}
 			return false;
 		}
+		bool Board::GetInt64List(IDType id, Int64List& result) {
+			if (KeyExists(id)) {
+				auto& v = GetValueAny(id);
+				if (v.GetType() == ValueAny::Type::Int64List) {
+					result = v.AsInt64List();
+					return true;
+				}
+			}
+			return false;
+		}
 		bool Board::GetVector2fList(IDType id, Vector2fList& result) {
 			if (KeyExists(id)) {
 				auto& v = GetValueAny(id);
@@ -225,6 +236,16 @@ namespace nugget {
 				}
 			}
 			return false;
+		}
+		const Vector2fList& Board::GetVector2fList(IDType id) {
+			check(KeyExists(id), "Key not found: {}\n", IDToString(id));
+			auto& v = data.valueEntries.at(id);
+			return v.AsVector2fList();
+		}
+		const ColorList& Board::GetColorList(IDType id) {
+			check(KeyExists(id), "Key not found: {}\n", IDToString(id));
+			auto& v = data.valueEntries.at(id);
+			return v.AsColorList();
 		}
 		bool Board::GetColorList(IDType id, ColorList& result) {
 			if (KeyExists(id)) {
