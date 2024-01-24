@@ -64,6 +64,12 @@ namespace nugget::gl::indexedMesh {
         }
 
         void Render() {
+            Vector3f RV = gProps.GetVector3f(ID("indexedCube.section.rotation"));
+            Matrix4f R;
+            Matrix4f::SetFromEulers(RV.x, RV.y, RV.z, R);
+            modelMatrix = R * modelMatrix;
+
+
             GLint modMatLocation = glGetUniformLocation(shader, "modelMatrix");
             if (modMatLocation >= 0) {
                 glUniformMatrix4fv(modMatLocation, 1, GL_FALSE, modelMatrix.GetArray());

@@ -79,7 +79,7 @@ namespace nugget::gl {
         wglDeleteContext(hglrcTemp);
 
 
-        CompileShaderFromProperties(IDR("shaders.biquad"));
+        CompileShaderFromProperties(IDR("shaders.simple"));
 
         GLCameraSetProjectionFromProperties(ID("testobj.section"));
     }
@@ -146,8 +146,8 @@ namespace nugget::gl {
         nugget::gl::Init(hdc);
 
         std::vector<Notice::Handler> handlers;
-        gProps.RegisterHandlerOnChildren(Notice::Handler(IDR("shaders.biquad"), [](IDType id) {
-            CompileShaderFromProperties(IDR("shaders.biquad"));
+        gProps.RegisterHandlerOnChildren(Notice::Handler(IDR("shaders.simple"), [](IDType id) {
+            CompileShaderFromProperties(IDR("shaders.simple"));
             }), handlers);
 
         return 0;

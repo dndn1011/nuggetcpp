@@ -606,6 +606,65 @@ test5 :  horizontal_container {
 }
 
 shaders {
+    simple {
+        vertex <<
+            #version 450 core
+            out vec2 uv_g;
+            out vec4 col_g;
+            layout (location = 0) in vec3 aPos;
+            layout (location = 1) in vec2 aTexCoord;
+            layout (location = 2) in vec4 aColour;
+
+            uniform mat4 modelMatrix;     // Add a uniform for the model matrix
+            uniform mat4 viewMatrix;      // Add a uniform for the view matrix
+            uniform mat4 projectionMatrix;
+
+            void main()
+            {
+                uv_g = aTexCoord;
+                col_g = aColour;
+
+                // Modify the gl_Position to include model, view, and projection matrices
+                gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(aPos, 1.0);
+            }
+>>;
+        geometry <<
+                #version 450 core
+
+                layout(triangles) in;
+                layout(triangle_strip, max_vertices = 3) out;
+                       
+                in vec2 uv_g[3];
+                out vec2 uv_f;
+                in vec4 col_g[3];
+                out vec4 col_f;
+
+                void main()
+                {
+                    for(int i = 0; i < gl_in.length(); i++)
+                    {
+                        col_f = col_g[i];
+                        uv_f = uv_g[i];
+                        gl_Position = gl_in[i].gl_Position;
+                        EmitVertex();
+                    }
+                    EndPrimitive();
+                }
+>>;
+    fragment  <<
+                #version 450 core
+                in vec2 uv_f;
+                in vec4 col_f;
+                out vec4 FragColor;
+                uniform sampler2D quadTexture;
+
+                void main()
+                {
+                    FragColor = texture(quadTexture, uv_f) + col_f*0.5;
+                }
+
+>>;
+    }
     biquad {
         vertex <<
             #version 450 core
@@ -655,7 +714,7 @@ shaders {
                 EmitVertex();
             }
             EndPrimitive();
-}
+        }
 >>;
     fragment  <<
                 #version 450 core
@@ -684,7 +743,7 @@ shaders {
 
 indexedCube {
     section {
-        shader = shaders.biquad;
+        shader = shaders.simple;
         primitive = GL_TRIANGLES;
         start = 0;
         length = 36;
@@ -695,7 +754,7 @@ indexedCube {
         fov : float = 60 * @degrees;
 
         cameraPos : Vector3f = {
-            1,-1,2
+            -1,1,3
         };
 
         lookAtPos : Vector3f = {
@@ -773,6 +832,9 @@ indexedCube {
             0.0, 0.0, 0.0, 1.0,
         };
 
+        rotation : Vector3f = {
+            0.007, 0.005, 0.003
+        };
 
     }
 }

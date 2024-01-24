@@ -66,7 +66,7 @@ namespace nugget::gl::sandbox {
             Vector3f RV = gProps.GetVector3f(ID("testobj.section.rotation"));
             Matrix4f R;
             Matrix4f::SetFromEulers(RV.x, RV.y, RV.z, R);
-            modelMatrix = R * modelMatrix;
+            //modelMatrix = R * modelMatrix;
             GLint modMatLocation = glGetUniformLocation(shader, "modelMatrix");
             if (modMatLocation >= 0) {
                 glUniformMatrix4fv(modMatLocation, 1, GL_FALSE, modelMatrix.GetArray());
