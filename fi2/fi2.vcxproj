@@ -198,6 +198,7 @@
     <ClCompile Include="src\utils\utils.cpp" />
     <ClCompile Include="src\ValueAny.cpp" />
     <ClCompile Include="PrimaryModule.ixx" />
+    <ClCompile Include="tests\test.cpp" />
     <ClCompile Include="tests\tests.cpp" />
   </ItemGroup>
   <ItemGroup>

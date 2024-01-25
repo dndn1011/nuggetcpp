@@ -754,7 +754,7 @@ indexedCube {
         fov : float = 60 * @degrees;
 
         cameraPos : Vector3f = {
-            -1,1,300
+            -1,1,3
         };
 
         lookAtPos : Vector3f = {
