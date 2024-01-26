@@ -16,7 +16,8 @@ namespace nugget::asset {
     namespace fs = std::filesystem;
 
     static const size_t MaxTextures = 100;
-    std::unordered_map<IDType,TextureData> textures;
+    std::unordered_map<IDType, TextureData> textures;
+    std::unordered_map<IDType, ModelData> models;
 
     std::string MakeValidIdentifier(const std::string& input) {
         // Ensure the first character is a letter or underscore
@@ -41,14 +42,16 @@ namespace nugget::asset {
     
 
     void CollectFiles(const fs::path& directory) {
+        db::StartTransaction();
         for (const auto& entry : fs::recursive_directory_iterator(directory)) {
             if (fs::is_regular_file(entry.path())) {
                 std::string ppath = entry.path().string();
                     std::replace(ppath.begin(), ppath.end(), '\\', '/');
                     output("{}\n", ppath);
-                db::AddAsset(ppath, MakeValidIdentifier(ppath), "texture");
+                 db::AddAsset(ppath, MakeValidIdentifier(ppath), "texture");
             }
         }
+        db::CommitTransaction();
     }
 
     void CollectAssetMetadata(IDType node) {
@@ -68,6 +71,8 @@ namespace nugget::asset {
     void Init() {
         std::string textureDir = gProps.GetString(ID("assets.config.textures"));
         CollectFiles(textureDir);
+        std::string modelDir = gProps.GetString(ID("assets.config.models"));
+        CollectFiles(modelDir);
         CollectAssetMetadata(ID("assets.meta"));
     }
 
@@ -93,9 +98,28 @@ namespace nugget::asset {
                 check(0, "No information available on asset '{}'\n", IDToString(id));
                 return t;
             }
-            bool rl = Load(path, t);
+            bool rl = LoadPNG(path, t);
             assert(rl);  
             return t;
+        }
+    }
+
+    const ModelData& GetModel(IDType id) {
+        static ModelData nullData = {};
+        if (models.contains(id)) {
+            return models.at(id);
+        } else {
+            auto re = models.emplace(std::piecewise_construct, std::forward_as_tuple(id), std::forward_as_tuple());
+            ModelData& t = re.first->second;
+            // look up the texture
+
+            std::string path;
+            bool r = db::LookupAsset(id, path);
+            if (!r) {
+                check(0, "No information available on asset '{}'\n", IDToString(id));
+                return nullData;
+            }
+            return nullData;
         }
     }
 
@@ -103,6 +127,10 @@ namespace nugget::asset {
         if (data) {
             stbi_image_free(data);
         }
+    }
+
+    ModelData::~ModelData() {
+        assert(0);   // check if we have to do somethin here?
     }
 
 

@@ -180,7 +180,7 @@ namespace nugget::db {
             // Execute the statement to insert the data
             rc = sqlite3_step(stmt);
 
-            if (rc != SQLITE_DONE) {
+             if (rc != SQLITE_DONE) {
                 check(0, "Error executing SQL statement: {}\n", sqlite3_errmsg(databaseConnection));
                 sqlite3_finalize(stmt);
                 return false;
@@ -191,6 +191,25 @@ namespace nugget::db {
 
             return true;
         }
+
+    void StartTransaction() {
+        char* errMsg = 0;
+        int rc;
+        rc = sqlite3_exec(databaseConnection, "BEGIN TRANSACTION;", NULL, NULL, &errMsg);
+        if (rc != SQLITE_OK) {
+            check(0, "Error executing SQL statement: {}\n", sqlite3_errmsg(databaseConnection));
+        }
+    }
+
+    void CommitTransaction() {
+        char* errMsg = 0;
+        int rc;
+        rc = sqlite3_exec(databaseConnection, "COMMIT;", NULL, NULL, &errMsg);
+        if (rc != SQLITE_OK) {
+            check(0, "Error executing SQL statement: {}\n", sqlite3_errmsg(databaseConnection));
+        }
+    }
+
 #if 0
 
 

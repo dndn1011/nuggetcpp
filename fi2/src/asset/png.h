@@ -3,5 +3,5 @@
 
 namespace nugget::asset {
 
-	bool Load(std::string filename, TextureData& data);
+	bool LoadPNG(std::string filename, TextureData& data);
 }

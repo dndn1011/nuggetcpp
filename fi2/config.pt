@@ -182,12 +182,19 @@ database {
 assets {
     config {
         textures = "assets/textures";
+        models = "assets/models";
     }
     meta {
         spaceship {
             path = "assets/textures/spaceship.png";
             type = texture;
             description = "test image";
+        }
+        teapot {
+            path = "assets/models/utah_teapot_pbr/scene.gltf";
+            type = model;
+            format = gltf;
+            description = "Utah Teapot";
         }
     }
 }
