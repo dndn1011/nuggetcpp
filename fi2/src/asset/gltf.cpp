@@ -15,9 +15,6 @@ namespace nugget::asset {
             return cgltf_write_file(&options, path, data);
         }
 
-        cgltf_data* gData = NULL;
-
-
         void FetchVertices(cgltf_data* data, size_t offset, size_t stride, float dataOut[]) {
             size_t outIndex = offset;
 
@@ -338,113 +335,62 @@ namespace nugget::asset {
             }
         }
 
-#if 0
-        void DumpVertices() {
-            for (cgltf_size i = 0; i < data->meshes_count; ++i) {
-                cgltf_mesh* mesh = &data->meshes[i];
-                for (cgltf_size j = 0; j < mesh->primitives_count; ++j) {
-                    cgltf_primitive* primitive = &mesh->primitives[j];
-                    for (cgltf_size k = 0; k < primitive->attributes_count; ++k) {
-                        cgltf_attribute* attr = &primitive->attributes[k];
-                        if (attr->type == cgltf_attribute_type_position) {
-                            cgltf_accessor* accessor = attr->data;
-                            cgltf_buffer_view* buffer_view = accessor->buffer_view;
-                            cgltf_buffer* buffer = buffer_view->buffer;
-                            float* positions = (float*)(buffer->data + buffer_view->offset + accessor->offset);
+        //////////////////////////////////////
 
-                            for (cgltf_size v = 0; v < accessor->count; ++v) {
-                                float x = positions[v * 3 + 0];
-                                float y = positions[v * 3 + 1];
-                                float z = positions[v * 3 + 2];
-                                // Process vertex position (x, y, z)
-                            }
-                        }
+        struct OnExit {
+            std::function<void()> func;
+            ~OnExit() {
+                func();
+            }
+        };
+
+        bool LoadModel(std::string path, ModelData& dataOut) {
+            
+            return true;
+
+            cgltf_data* gData = NULL;
+            OnExit onExit{ [&gData]() {
+                    if (gData != NULL) {
+                        cgltf_free(gData);
                     }
                 }
-            }
-        }
-#endif
+            };
 
-#if 0
-        std::vector<GLfloat> buffer();
-
-        void ExposeData() {
-            for (cgltf_size i = 0; i < data->nodes_count; ++i) {
-                cgltf_node* node = &data->nodes[i];
-                if (node->mesh) {
-                    size_t numVertices = node->mesh->
-                        size_t numIndices = node->mesh->primitives_count;
-
-                    buffer.resize();
-                    for (cgltf_size j = 0; j < node->mesh->primitives_count; ++j) {
-                        list_faces(&node->mesh->primitives[j]);
-                    }
-                }
-                // one only for now
-                break;
-            }
-            buffer.push_back();
-        }
-#endif
-
-        std::vector<float> loadBuffer;
-        std::vector<uint16_t> indexBuffer;
-
-        static void Init() {
-
-            const char* filename = "assets/models/utah_teapot_pbr/scene.gltf";
+            const char* filename = path.c_str();
 
             cgltf_options options = {};
             cgltf_result result = cgltf_parse_file(&options, filename, &gData);
-            if (result == cgltf_result_success)
-            {
-                result = cgltf_load_buffers(&options, gData, filename);
-                if (result != cgltf_result_success) {
-                    check(0, "");
-                }
-
-                cgltf_result valid = cgltf_validate(gData);
-                if (result == cgltf_result_success) {
-                    if (result == 0) {
-#if 0
-                        DumpVertices();
-                        DumpFaceCount();
-                        DumpVertexCount();
-                        DumpUVs();
-                        DumpNormals();
-                        DumpColors();
-#endif
-                        size_t vertCount = FetchVertexCount(gData);
-                        size_t indexCount = FetchIndexCount(gData);
-                        loadBuffer.resize(vertCount * 12);
-                        indexBuffer.resize(indexCount);
-                        FetchVertices(gData, 0, 12, loadBuffer.data());
-                        FetchUVs(gData, 3, 12, loadBuffer.data());
-                        FetchColors(gData, 5, 12, loadBuffer.data());
-                        FetchNormals(gData, 9, 12, loadBuffer.data());
-                        FetchIndices(gData, indexBuffer.data());
-                    } else {
-                        check(0, "Could not load file\n");
-                    }
-                } else {
-                    check(0, "Failed to write GLB file.\n");
-                }
-
-                cgltf_free(gData);
+            if (result != cgltf_result_success) {
+                return false;
             }
 
-        }
+            result = cgltf_load_buffers(&options, gData, filename);
+            if (result != cgltf_result_success) {
+                return false;
+            }
 
+            result = cgltf_validate(gData);
+            if (result != cgltf_result_success) {
+                return false;
+            }
+#if 0
+            DumpVertices();
+            DumpFaceCount();
+            DumpVertexCount();
+            DumpUVs();
+            DumpNormals();
+            DumpColors();
+#endif
+            size_t vertCount = FetchVertexCount(gData);
+            size_t indexCount = FetchIndexCount(gData);
+            dataOut.loadBuffer.resize(vertCount * 12);
+            dataOut.indexBuffer.resize(indexCount);
+            FetchVertices(gData, 0, 12, dataOut.loadBuffer.data());
+            FetchUVs(gData, 3, 12, dataOut.loadBuffer.data());
+            FetchColors(gData, 5, 12, dataOut.loadBuffer.data());
+            FetchNormals(gData, 9, 12, dataOut.loadBuffer.data());
+            FetchIndices(gData, dataOut.indexBuffer.data());
 
-
-        static size_t init_dummy = nugget::system::RegisterModule([]() {
-            Init();
-            return 0;
-            }, 150);
-
-        bool LoadModel(std::string path, ModelData& data) {
-            data.indexBuffer = indexBuffer;
-            data.loadBuffer = loadBuffer;
             return true;
         }
 
