@@ -345,9 +345,6 @@ namespace nugget::asset {
         };
 
         bool LoadModel(std::string path, ModelData& dataOut) {
-            
-            return true;
-
             cgltf_data* gData = NULL;
             OnExit onExit{ [&gData]() {
                     if (gData != NULL) {

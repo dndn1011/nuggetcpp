@@ -27,6 +27,8 @@ namespace nugget::gl::indexedMesh {
         std::vector<GLuint> textures;
         std::vector<GLuint> textureUniforms;
 
+        IDType modelID;
+
         GLuint IBO;
 
         const std::string shaderTexturePrefix = "texture";
@@ -90,7 +92,7 @@ namespace nugget::gl::indexedMesh {
                 glUniform1i(loc, i);
             }
 
-            const nugget::asset::ModelData& modelData = nugget::asset::GetModel(ID("teapot"));
+            const nugget::asset::ModelData& modelData = nugget::asset::GetModel(modelID);
 
             glDrawElements(GL_TRIANGLES, (GLsizei) modelData.indexBuffer.size(), GL_UNSIGNED_SHORT, 0);
 
@@ -179,7 +181,9 @@ namespace nugget::gl::indexedMesh {
                 // vbo allocation
                 GLuint VBO;
 
-                const nugget::asset::ModelData& modelData = nugget::asset::GetModel(ID("teapot"));
+                IDType modelNodeID = IDR(nodeID, ID("model"));
+                modelID = gProps.GetID(modelNodeID);
+                const nugget::asset::ModelData& modelData = nugget::asset::GetModel(modelID);
 
                 size_t VBOsize = modelData.loadBuffer.size() * sizeof(float);
 
