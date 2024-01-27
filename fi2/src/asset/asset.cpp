@@ -9,6 +9,7 @@
 #include "../../external/stb_image.h"
 #include "png.h"
 #include "propertytree.h"
+#include "gltf.h"
 
 namespace nugget::asset {
     using namespace identifier;
@@ -114,12 +115,14 @@ namespace nugget::asset {
             // look up the texture
 
             std::string path;
-            bool r = db::LookupAsset(id, path);
+            bool r = db::LookupAsset(id, path /*fill*/);
             if (!r) {
                 check(0, "No information available on asset '{}'\n", IDToString(id));
                 return nullData;
             }
-            return nullData;
+            bool rl = gltf::LoadModel(path, t);
+            assert(rl);
+            return t;
         }
     }
 

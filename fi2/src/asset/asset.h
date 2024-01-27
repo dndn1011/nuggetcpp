@@ -18,10 +18,8 @@ namespace nugget::asset {
 	struct ModelData {
 		APPLY_RULE_OF_MINUS_4(ModelData);
 		ModelData() {}
-		std::vector<char> data;
-		int width;
-		int height;
-		int channels;
+		std::vector<float> loadBuffer;
+		std::vector<uint16_t> indexBuffer;
 		~ModelData();
 	};
 

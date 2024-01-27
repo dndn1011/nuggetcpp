@@ -6,11 +6,6 @@
 #include "asset/asset.h"
 #include "utils/StableVector.h"
 
-namespace nugget::gltf {
-    extern std::vector<float> loadBuffer;
-    extern std::vector<uint16_t> indexBuffer;
-}
-
 namespace nugget::gl::indexedMesh {
     using namespace identifier;
     using namespace properties;
@@ -31,6 +26,7 @@ namespace nugget::gl::indexedMesh {
         std::vector<VBOInfo> VBOs;
         std::vector<GLuint> textures;
         std::vector<GLuint> textureUniforms;
+
         GLuint IBO;
 
         const std::string shaderTexturePrefix = "texture";
@@ -94,8 +90,9 @@ namespace nugget::gl::indexedMesh {
                 glUniform1i(loc, i);
             }
 
-//            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-            glDrawElements(GL_TRIANGLES,(GLsizei) nugget::gltf::indexBuffer.size(), GL_UNSIGNED_SHORT, 0);
+            const nugget::asset::ModelData& modelData = nugget::asset::GetModel(ID("teapot"));
+
+            glDrawElements(GL_TRIANGLES, (GLsizei) modelData.indexBuffer.size(), GL_UNSIGNED_SHORT, 0);
 
             GLenum error = glGetError();
             if (error != GL_NO_ERROR) {
@@ -181,11 +178,11 @@ namespace nugget::gl::indexedMesh {
             {
                 // vbo allocation
                 GLuint VBO;
-#if 0
-                size_t VBOsize = bufferNumFloats * sizeof(float);
-#else
-                size_t VBOsize = nugget::gltf::loadBuffer.size() * sizeof(float);
-#endif
+
+                const nugget::asset::ModelData& modelData = nugget::asset::GetModel(ID("teapot"));
+
+                size_t VBOsize = modelData.loadBuffer.size() * sizeof(float);
+
                 if (sectionIndex >= VBOs.size()) {
                     check(sectionIndex == VBOs.size(), "Need to increment smoothly through section indices");
                     VBOs.push_back({});
@@ -205,12 +202,8 @@ namespace nugget::gl::indexedMesh {
                     glBindBuffer(GL_ARRAY_BUFFER, vboInfo.slot);
                 }
 
-#if 0
-                // vbo data
-                glBufferSubData(GL_ARRAY_BUFFER, 0, bufferNumFloats*sizeof(float), buffer.data());
-#else
-                glBufferSubData(GL_ARRAY_BUFFER, 0, nugget::gltf::loadBuffer.size() * sizeof(float), nugget::gltf::loadBuffer.data());
-#endif
+                glBufferSubData(GL_ARRAY_BUFFER, 0, modelData.loadBuffer.size() * sizeof(float), modelData.loadBuffer.data());
+
                 for (size_t step = 0, i = 0; i < layers.size(); step += layers[i].numFloats, ++i) {
                     // Set up vertex attributes
                     glVertexAttribPointer((GLuint)i, (GLuint)layers[i].numFloats, GL_FLOAT, GL_FALSE, (GLsizei)(stride * sizeof(float)), (void*)(step*sizeof(float)));
@@ -219,16 +212,10 @@ namespace nugget::gl::indexedMesh {
 
                 glGenBuffers(1, &IBO);
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-#if 0
-                glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size()*sizeof(uint16_t), indices.data(), GL_STATIC_DRAW);
-#else
                 glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                    nugget::gltf::indexBuffer.size() * sizeof(uint16_t),
-                    nugget::gltf::indexBuffer.data(),
+                    modelData.indexBuffer.size() * sizeof(uint16_t),
+                    modelData.indexBuffer.data(),
                     GL_STATIC_DRAW);
-#endif
-//                glBindBuffer(GL_ARRAY_BUFFER, 0);
-//                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
             }
 
             // Texture
