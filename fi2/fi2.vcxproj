@@ -188,6 +188,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="src\propertytreetokeniser.cpp" />
+    <ClCompile Include="src\scene\scene.cpp" />
     <ClCompile Include="src\serialise.h" />
     <ClCompile Include="src\serialse.cpp" />
     <ClCompile Include="src\system.cpp" />
@@ -231,6 +232,7 @@
     <ClInclude Include="src\nuggetgl\shader.h" />
     <ClInclude Include="src\propertytree.h" />
     <ClInclude Include="src\propertytreetokeniser.h" />
+    <ClInclude Include="src\scene\scene.h" />
     <ClInclude Include="src\system.h" />
     <ClInclude Include="src\ui.h" />
     <ClInclude Include="src\uientities.h" />

@@ -48,8 +48,12 @@ namespace nugget {
 			if (id == IDType::null) {
 				return "{null}";
 			} else {
-				auto& s = data.toStringMap.at(id);
-				return(s);
+				if (data.toStringMap.contains(id)) {
+					auto& s = data.toStringMap.at(id);
+					return(s);
+				} else {
+					return "{unknown}";
+				}
 			}
 		}
 

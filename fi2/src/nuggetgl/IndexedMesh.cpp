@@ -6,9 +6,18 @@
 #include "asset/asset.h"
 #include "utils/StableVector.h"
 
+/*
+* rcrnstn: yeah, what do you have there? Usually there is a way
+* in the context creation api to specify that you want an
+* sRGB-capable framebuffer. GLFW has `glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE)`,
+* SDL has `SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, SDL_TRUE)`
+* 
+*/
+
 namespace nugget::gl::indexedMesh {
     using namespace identifier;
     using namespace properties;
+
 
     std::vector<Notice::Handler> regsteredHandlers;
     
@@ -42,7 +51,7 @@ namespace nugget::gl::indexedMesh {
         Vector3f lookAtPos;
         Vector3f lookAtUp;
 
-        void Init() {
+        void InitUniforms() {
 
             // get the locations of the texture uniforms for the shader
             for (GLuint i = 0; i < textures.size(); i++) {
@@ -67,7 +76,8 @@ namespace nugget::gl::indexedMesh {
         }
 
         void Render() {
-            Vector3f RV = gProps.GetVector3f(ID("indexedCube.section.rotation"));
+            // TODO get rid of this hardwired thingy
+            Vector3f RV = gProps.GetVector3f(ID("indexedMesh.section.rotation"));
             Matrix4f R;
             Matrix4f::SetFromEulers(RV.x, RV.y, RV.z, R);
             modelMatrix = R * modelMatrix;
@@ -121,60 +131,19 @@ namespace nugget::gl::indexedMesh {
                 std::vector<float> data;
             };
 
-            std::vector<Layer> layers = {
-                {
+            static const GLsizei layerNumFloats[] = {
                     3,
-                    ID("verts"),
-                    [&](IDType node, std::vector<float>& fill) { gProps.GetVector3fList(node).ToFloats(fill); },
-                },
-                {
                     2,
-                    ID("uvs"),
-                    [&](IDType node, std::vector<float>& fill) { gProps.GetVector2fList(node).ToFloats(fill); },
-                },
-                {
                     4,
-                    ID("colors"),
-                    [&](IDType node, std::vector<float>& fill) { gProps.GetColorList(node).ToFloats(fill); },
-                },
-                {
                     3,
-                    ID("normals"),
-                    [&](IDType node, std::vector<float>& fill) { gProps.GetVector3fList(node).ToFloats(fill); },
-                },
             };
 
-            size_t bufferNumFloats = 0;
+            static const size_t bufferNumFloats = std::size(layerNumFloats);
+
             size_t stride = 0;
-
-            for (auto&& x : layers) {
-                x.getFloats(IDR(nodeID, x.nodeID),x.data);
-                bufferNumFloats += x.data.size();
-                stride += x.numFloats;
+            for(auto &&x : layerNumFloats) {
+                stride += x;
             }
-
-            size_t numVerts = bufferNumFloats / stride;
-
-            check(numVerts* stride == bufferNumFloats, "incomplete data");
-
-            std::vector<GLfloat> buffer(bufferNumFloats);
-
-            for (size_t offset=0, i = 0; i < layers.size(); offset+= layers[i].numFloats, ++i) {
-                for (size_t j = 0; j < numVerts; ++j) {
-                    for (size_t k = 0; k < layers[i].numFloats; ++k) {
-                        buffer[offset + j * stride + k] = layers[i].data[j * layers[i].numFloats + k];
-            //            output("index {} = {} of layer {}\n", offset + j * stride + k, j* layers[i].numFloats + k,i);
-                    }
-                }
-            }
-
-            Int64List indexData;
-            gProps.GetInt64List(IDR(nodeID, ID("indices")), indexData);
-            std::vector<uint16_t> indices;
-            indices.reserve(indexData.data.size());
-            for (int i = 0; i < indexData.data.size(); ++i) {
-                indices.push_back((GLushort)indexData.data[i]);
-            }            
 
             // Vertex buffer
             {
@@ -208,9 +177,9 @@ namespace nugget::gl::indexedMesh {
 
                 glBufferSubData(GL_ARRAY_BUFFER, 0, modelData.loadBuffer.size() * sizeof(float), modelData.loadBuffer.data());
 
-                for (size_t step = 0, i = 0; i < layers.size(); step += layers[i].numFloats, ++i) {
+                for (size_t step = 0, i = 0; i < bufferNumFloats; step += layerNumFloats[i], ++i) {
                     // Set up vertex attributes
-                    glVertexAttribPointer((GLuint)i, (GLuint)layers[i].numFloats, GL_FLOAT, GL_FALSE, (GLsizei)(stride * sizeof(float)), (void*)(step*sizeof(float)));
+                    glVertexAttribPointer((GLuint)i, (GLuint)layerNumFloats[i], GL_FLOAT, GL_FALSE, (GLsizei)(stride * sizeof(float)), (void*)(step*sizeof(float)));
                     glEnableVertexAttribArray((GLuint)i);
                 }
 
@@ -244,7 +213,7 @@ namespace nugget::gl::indexedMesh {
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, texture.width, texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8, texture.width, texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data);
                 glBindTexture(GL_TEXTURE_2D, 0);
             }
 
@@ -268,35 +237,15 @@ namespace nugget::gl::indexedMesh {
                 IDType shaderProgramNoticeID = IDR({ usedShaderPath, "_internal", "_pglid" });
                 shader = (GLuint)gProps.GetInt64(shaderProgramNoticeID);
 
-                Init();
-
-#if 0
-
-                gProps.RegisterHandler(gProps.Handler(startNoticeID, [this](IDType startid) {
-                    renderable.start = (GLint)gProps.GetInt64(startid);
-                    }));
-                gProps.RegisterHandler(gProps.Handler(lengthNoticeID, [this](IDType lengthid) {
-                    renderable.length = (GLint)gProps.GetInt64(lengthid);
-                    }));
-                gProps.RegisterHandler(gProps.Handler(primNoticeID, [this](IDType primid) {
-                    renderable.primitive = primitiveMap.at(gProps.GetID(primid));
-                    }));
-#endif
+                InitUniforms();
             }
         }
 
-        void SetupFromPropertyTree(IDType nodeID, int sectionIndex) {
-            output("-------@@@@@@@------------> {}\n", IDToString(nodeID));
-            IDType shaderNoideHash = IDR(nodeID, "shader");
-            IDType shaderProgramNoticeID = IDR({ IDToString(gProps.GetID(shaderNoideHash)), "_internal", "_pglid" });
-            UpdateFromPropertyTree(nodeID, sectionIndex);
-
+        void RegisterHotReloadHandlers(IDType nodeID, int sectionIndex) {
             gProps.RegisterHandlerOnChildren(Notice::Handler(nodeID,
                 [this, nodeID, sectionIndex](IDType id) {
                     UpdateFromPropertyTree(nodeID, sectionIndex);
                 }), regsteredHandlers);
-
-
             gProps.RegisterHandler(Notice::Handler(IDR(nodeID, "uvs"),
                 [this, nodeID, sectionIndex](IDType uid) {
                     UpdateFromPropertyTree(nodeID, sectionIndex);
@@ -306,15 +255,27 @@ namespace nugget::gl::indexedMesh {
                     UpdateFromPropertyTree(nodeID, sectionIndex);
                 }), regsteredHandlers);
 
+            IDType shaderNoideHash = IDR(nodeID, "shader");
+            IDType shaderProgramNoticeID = IDR({ IDToString(gProps.GetID(shaderNoideHash)), "_internal", "_pglid" });
             gProps.RegisterHandler(Notice::Handler(shaderProgramNoticeID, [&, shaderProgramNoticeID](IDType id) {
                 shader = (GLuint)gProps.GetInt64(shaderProgramNoticeID);
                 }), regsteredHandlers);
+        }
 
+        void SetupFromPropertyTree(IDType nodeID, int sectionIndex) {
+            UpdateFromPropertyTree(nodeID, sectionIndex);
+
+            RegisterHotReloadHandlers(nodeID, sectionIndex);
         }
 
     };
 
     struct Renderable {
+        APPLY_RULE_OF_MINUS_4(Renderable);
+
+        Renderable() {
+        }
+
         GLuint VAO = 0;
         StableVector<RenderableSection, 100> sections;
 
@@ -343,23 +304,41 @@ namespace nugget::gl::indexedMesh {
         }
     };
 
-    static Renderable renderable;
+    static StableVector<Renderable, 100> renderables;
+
+    static Renderable& NewRenderable() {
+        renderables.emplace_back();
+        return renderables.back();
+    }
+
+    static void InitRenderables() {
+        // TODO pull the object from property tree with all sections
+        Renderable& renderable = NewRenderable(); 
+        renderable.Init();
+        renderable.AddSections(ID("indexedMesh"));  // TODO get rid of hard wiring
+    }
 
     void Init() {
-        renderable.Init();
-        renderable.AddSections(ID("indexedCube"));
+        system::RegisterFunctionByID(IDR("CreateIndexedMesh"), [](IDType node) {
+            int a = 0;
+        });
+
+        InitRenderables();
     }
 
     void Update() {
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
         glDepthMask(GL_TRUE);
+        glEnable(GL_FRAMEBUFFER_SRGB);
 
-        glBindVertexArray(renderable.VAO);
+        for (auto&& x : renderables) {
+            glBindVertexArray(x.VAO);
+            for (auto&& y : x.sections) {
+                y.Render();
+            } 
+        }
 
-        for (auto&& x : renderable.sections) {
-            x.Render();
-        } 
     }
 
     static size_t init_dummy[] =

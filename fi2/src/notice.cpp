@@ -421,7 +421,7 @@ namespace nugget {
 			if (KeyExists(id)) {
 				if (auto set = identifier::IDGetChildren(id)) {
 					for (const auto& x : *set) {
-						check(KeyExists(x), "Key should exist: {}", IDToString(x));
+//						check(KeyExists(x), "Key should exist: {}", IDToString(x));
 						if (KeyExists(IDR(x, leaf))) {
 							fill.push_back(x);
 						}
