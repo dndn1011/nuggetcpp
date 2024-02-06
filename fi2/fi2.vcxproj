@@ -114,7 +114,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <DisableSpecificWarnings>4189;4100;4702</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4189;4100;4702;4820;4464;4668</DisableSpecificWarnings>
       <MinimalRebuild>false</MinimalRebuild>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <TreatSpecificWarningsAsErrors>4062</TreatSpecificWarningsAsErrors>
@@ -139,8 +139,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
-      <DisableSpecificWarnings>
-      </DisableSpecificWarnings>
+      <DisableSpecificWarnings>4189;4100;4702;4820;4464;4668</DisableSpecificWarnings>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
@@ -176,7 +175,11 @@
     </ClCompile>
     <ClCompile Include="src\notice.cpp" />
     <ClCompile Include="src\nuggetgl\glinternal.cpp" />
-    <ClCompile Include="src\nuggetgl\IndexedMesh.cpp" />
+    <ClCompile Include="src\nuggetgl\graphicsapi.cpp" />
+    <ClCompile Include="src\nuggetgl\IndexedMesh.cpp">
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Level4</WarningLevel>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4189;4100;4702;4820;4464;4668</DisableSpecificWarnings>
+    </ClCompile>
     <ClCompile Include="src\nuggetgl\render.cpp" />
     <ClCompile Include="src\nuggetgl\shader.cpp" />
     <ClCompile Include="src\nuggetgl\window.cpp" />
@@ -188,6 +191,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="src\propertytreetokeniser.cpp" />
+    <ClCompile Include="src\renderer\renderer.cpp" />
     <ClCompile Include="src\scene\scene.cpp" />
     <ClCompile Include="src\serialise.h" />
     <ClCompile Include="src\serialse.cpp" />
@@ -228,10 +232,13 @@
     <ClInclude Include="src\nuggetgl\gl.h" />
     <ClInclude Include="src\nuggetgl\gldefs.h" />
     <ClInclude Include="src\nuggetgl\glinternal.h" />
+    <ClInclude Include="src\nuggetgl\graphicsapi_private.h" />
     <ClInclude Include="src\nuggetgl\render.h" />
     <ClInclude Include="src\nuggetgl\shader.h" />
     <ClInclude Include="src\propertytree.h" />
     <ClInclude Include="src\propertytreetokeniser.h" />
+    <ClInclude Include="src\renderer\graphicsapi.h" />
+    <ClInclude Include="src\renderer\renderer.h" />
     <ClInclude Include="src\scene\scene.h" />
     <ClInclude Include="src\system.h" />
     <ClInclude Include="src\ui.h" />

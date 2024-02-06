@@ -8,10 +8,10 @@ namespace nugget::asset {
 	struct TextureData {
 		APPLY_RULE_OF_MINUS_4(TextureData);
 		TextureData() {}
-		unsigned char* data;
-		int width;
-		int height;
-		int channels;
+		unsigned char* data=nullptr;
+		int width=0;
+		int height=0;
+		int channels=0;
 		~TextureData();
 	};
 

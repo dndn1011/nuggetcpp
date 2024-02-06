@@ -8,13 +8,13 @@ namespace nugget::system {
 
 	using RegisterFunction = std::function<void()>;
 	
-	using FunctionByIDLambda = std::function<void(IDType id)>;
+	using FunctionByIDLambda = std::function<void(IDType id,IDType parent)>;
 
 	size_t RegisterModule(RegisterFunction func,int64_t order,identifier::IDType phase = identifier::ID("init"));
 	void Init();
 	bool Update();
 
 	void RegisterFunctionByID(IDType node, FunctionByIDLambda func);
-	void CallFunctionByID(IDType node);
+	void CallFunctionByID(IDType node,IDType parent);
 
 }

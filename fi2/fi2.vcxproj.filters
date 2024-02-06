@@ -123,6 +123,12 @@
     <ClCompile Include="src\scene\scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\nuggetgl\graphicsapi.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="config.pt" />
@@ -227,6 +233,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\scene\scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\graphicsapi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\nuggetgl\graphicsapi_private.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

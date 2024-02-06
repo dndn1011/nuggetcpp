@@ -1,28 +1,32 @@
 #include "system.h"
 #include "propertytree.h"
+#include "renderer/renderer.h"
 
 namespace nugget::scene {
     using namespace identifier;
     using namespace properties;
 
     namespace {
+        const IDType baseSceneNodeID = ID("scene");
         void Init() {
-            IDType baseSceneNodeID = ID("scene");
+            
             std::vector<IDType> children;
             gProps.GetChildrenWithNodeExisting(baseSceneNodeID, ID("model"), children /*fill*/);
             for (auto&& x : children) {
                 IDType model_nid = IDR(x,"model");
                 IDType model_refnid = gProps.GetID(model_nid);
-                std::vector<IDType> sections;
-                gProps.GetChildrenWithNodeExisting(model_refnid,ID("function"),sections);
-                for (auto&& y : sections) {
-                    IDType funcID = gProps.GetID(IDR(y, ID("function")));
-                    system::CallFunctionByID(funcID);
-                }
+                renderer::ResModel(model_refnid);
             }
         }
 
         void Update() {
+            std::vector<IDType> children;
+            gProps.GetChildrenWithNodeExisting(baseSceneNodeID, ID("model"), children /*fill*/);
+            for (auto&& x : children) {
+                IDType model_nid = IDR(x, "model");
+                IDType model_refnid = gProps.GetID(model_nid);
+                renderer::RenderModel(model_refnid);
+            }
         }
 
         size_t init_dummy[] =

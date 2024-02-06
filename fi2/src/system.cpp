@@ -90,9 +90,9 @@ namespace nugget::system {
 	void RegisterFunctionByID(IDType node, FunctionByIDLambda func) {
 		registeredFunctions[node] = func;
 	}
-	void CallFunctionByID(IDType node) {
+	void CallFunctionByID(IDType node,IDType parent) {
 		check(registeredFunctions.contains(node),"Node {} does not exist",IDToString(node));
-		registeredFunctions.at(node)(node);
+		registeredFunctions.at(node)(node,parent);
 	}
 
 }
