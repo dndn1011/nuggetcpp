@@ -15,7 +15,7 @@ namespace nugget::scene {
             for (auto&& x : children) {
                 IDType model_nid = IDR(x,"model");
                 IDType model_refnid = gProps.GetID(model_nid);
-                renderer::ResModel(model_refnid);
+                renderer::ConfigureRenderModel(model_refnid);
             }
         }
 
@@ -23,9 +23,14 @@ namespace nugget::scene {
             std::vector<IDType> children;
             gProps.GetChildrenWithNodeExisting(baseSceneNodeID, ID("model"), children /*fill*/);
             for (auto&& x : children) {
-                IDType model_nid = IDR(x, "model");
-                IDType model_refnid = gProps.GetID(model_nid);
-                renderer::RenderModel(model_refnid);
+                IDType model_node = IDR(x, "model");
+                IDType model_refnid = gProps.GetID(model_node);
+
+                // TODO - cache this
+                IDType model_modelMatrix = IDR(x, "modelMatrix");
+                const Matrix4f &modelMatrix = gProps.GetMatrix4f(model_modelMatrix);
+                
+                renderer::RenderModel(model_refnid, modelMatrix);
             }
         }
 

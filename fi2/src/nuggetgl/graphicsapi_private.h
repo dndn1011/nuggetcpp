@@ -7,7 +7,7 @@
 namespace nugget::renderer {
 
     struct RenderSectionInfo;
-    using SectionRenderCallback = std::function<void()>;
+    using SectionRenderCallback = std::function<void(const Matrix4f &modelMatrix)>;
 
     struct RenderModelInfo;
     using RenderSetupCallback = std::function<void(IDType sectionNode,RenderModelInfo& model)>;
@@ -18,5 +18,6 @@ namespace nugget::renderer {
         std::vector<SectionRenderCallback> renderSectionCallbacks;
     };
     void RegisterRenderSetupCallback(IDType nodeID,const RenderSetupCallback &renderCallback);
+
 }
 

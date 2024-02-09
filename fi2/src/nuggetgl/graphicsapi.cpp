@@ -11,27 +11,27 @@ namespace nugget::renderer {
     std::unordered_map<IDType, RenderModelInfo> renderModels;
     std::unordered_map<IDType, RenderSetupCallback> renderSetupCallbacks;
 
-    void RenderModel(IDType nodeID) {
+    void RenderModel(IDType nodeID,const Matrix4f &modelMatrix) {
         RenderModelInfo& renderModel = renderModels.at(nodeID);
         for (auto&& x : renderModel.renderSectionCallbacks) {
-            x();
+            x(modelMatrix);
         }
     }
 
     void ConfigureModel(IDType nodeID,const std::vector<IDType> sections) {
         RenderModelInfo& modelInfo = renderModels[nodeID];
+        // if model not configured
         if (modelInfo.nodeID == IDType::null) {
             modelInfo.nodeID = nodeID;
             check(modelInfo.VAOHandle == 0, "This should have been uninitialised (zero)");
             glGenVertexArrays(1, &modelInfo.VAOHandle);
+            glBindVertexArray(modelInfo.VAOHandle);
+            for (auto&& node : sections) {
+                IDType funcID = gProps.GetID(IDR(node, ID("function")));
+                renderSetupCallbacks.at(funcID)(node, modelInfo);
+            }
+            glBindVertexArray(0);
         }
-        glBindVertexArray(modelInfo.VAOHandle);
-        for (auto&& node : sections) {
-            IDType funcID = gProps.GetID(IDR(node, ID("function")));
-            renderSetupCallbacks.at(funcID)(node, modelInfo);
-        }
-
-        glBindVertexArray(0);
     }
 
     RenderModelInfo &GetRenderModelInfo(IDType nodeID) {

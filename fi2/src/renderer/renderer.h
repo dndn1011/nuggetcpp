@@ -1,11 +1,12 @@
 #pragma once
 #include "identifier.h"
 #include <functional>
+#include "types.h"
 
 namespace nugget::renderer {
 	using namespace identifier;
 
-	void RenderModel(IDType nodeID);
+	void RenderModel(IDType nodeID,const Matrix4f& modelMatrix);
 
-	void ResModel(IDType idNode);
+	void ConfigureRenderModel(IDType idNode);
 }

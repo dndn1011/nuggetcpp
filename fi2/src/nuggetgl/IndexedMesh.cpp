@@ -3,6 +3,7 @@
 #include "glinternal.h"
 #include "debug.h"
 #include "render.h"
+#include "shader.h"
 #include "asset/asset.h"
 #include "utils/StableVector.h"
 #include "../renderer/renderer.h"
@@ -53,8 +54,9 @@ namespace nugget::gl::indexedMesh {
         GLenum primitive=0;
         GLint start=0;
         GLsizei length=0;
-        Matrix4f modelMatrix;
-        Matrix4f viewMatrix;
+
+//        Matrix4f modelMatrix;
+//        Matrix4f viewMatrix;
 
         Vector3f cameraPos = {};
         Vector3f lookAtPos = {};
@@ -69,22 +71,15 @@ namespace nugget::gl::indexedMesh {
                 textureUniforms.push_back(loc);
             }
 
-            glUseProgram(shader);
-            GLint projMatLocation = glGetUniformLocation(shader, "projectionMatrix");
-            if (projMatLocation >= 0) {
-                glUniformMatrix4fv(projMatLocation, 1, GL_FALSE, GLCameraProjectionMatrix());
-            }
-            GLint modMatLocation = glGetUniformLocation(shader, "modelMatrix");
-            if (modMatLocation >= 0) {
-                glUniformMatrix4fv(modMatLocation, 1, GL_FALSE, modelMatrix.GetArray());
-            }
+#if 0
             GLint viewMatLocation = glGetUniformLocation(shader, "viewMatrix");
             if (viewMatLocation >= 0) {
                 glUniformMatrix4fv(viewMatLocation, 1, GL_FALSE, viewMatrix.GetArray());
             }
+#endif
         }
 
-        void Render() {
+        void Render(const Matrix4f &modelMatrix) {
 
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LEQUAL);
@@ -93,24 +88,31 @@ namespace nugget::gl::indexedMesh {
 
             glBindVertexArray(renderModelInfo.VAOHandle);
 
+#if 0
+            // move this to scene
             // TODO get rid of this hardwired thingy
-            Vector3f RV = gProps.GetVector3f(ID("indexedMesh.section.rotation"));
+            Vector3f RV = gProps.GetVector3f(ID("pomegranate.rotation"));
             Matrix4f R;
             Matrix4f::SetFromEulers(RV.x, RV.y, RV.z, R);
             modelMatrix = R * modelMatrix;
+#endif
 
-
+            // we are setting for each section, but in reality this is often shared, so will need some optimisation later
             GLint modMatLocation = glGetUniformLocation(shader, "modelMatrix");
             if (modMatLocation >= 0) {
                 glUniformMatrix4fv(modMatLocation, 1, GL_FALSE, modelMatrix.GetArray());
             }
 
+#if 0
+            // move this to start of entire scene render (shared by all render objects)
             Matrix4f::LookAt(cameraPos, lookAtPos, lookAtUp, viewMatrix);
             GLint viewMatLocation = glGetUniformLocation(shader, "viewMatrix");
             if (viewMatLocation >= 0) {
                 glUniformMatrix4fv(viewMatLocation, 1, GL_FALSE, viewMatrix.GetArray());
             }
+#endif
 
+            check(shader, "shader is not set");
             glUseProgram(shader);
             for (GLuint i = 0; i < textures.size(); i++) {
                 glActiveTexture(GL_TEXTURE0 + i);
@@ -147,7 +149,7 @@ namespace nugget::gl::indexedMesh {
             }
 
             // Vertex buffer
-            {
+            if(VBO == 0) {
                 IDType modelNodeID = IDR(nodeID, ID("model"));
                 modelID = gProps.GetID(modelNodeID);
                 const nugget::asset::ModelData& modelData = nugget::asset::GetModel(modelID);
@@ -159,14 +161,10 @@ namespace nugget::gl::indexedMesh {
                 size_t VBOsize = modelData.loadBuffer.size() * sizeof(float);
                 void* VBOdata = (void*)(modelData.loadBuffer.data());
 
-                if (VBO == 0) {
-                    glGenBuffers(1, &VBO);
-                    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-                    glBufferData(GL_ARRAY_BUFFER, VBOsize, VBOdata, GL_STATIC_DRAW);
-                } else {
-                    assert(0);
-                }
-
+                glGenBuffers(1, &VBO);
+                glBindBuffer(GL_ARRAY_BUFFER, VBO);
+                glBufferData(GL_ARRAY_BUFFER, VBOsize, VBOdata, GL_STATIC_DRAW);
+ 
                 for (size_t step = 0, i = 0; i < bufferNumFloats; step += layerNumFloats[i], ++i) {
                     // Set up vertex attributes
                     glVertexAttribPointer((GLuint)i, (GLuint)layerNumFloats[i], GL_FLOAT, GL_FALSE, (GLsizei)(stride * sizeof(float)), (void*)(step * sizeof(float)));
@@ -182,15 +180,15 @@ namespace nugget::gl::indexedMesh {
             }
 
             // Texture
-            {
+            if(textures.size() == 0) {
                 // texture allocation
                 if (textures.size()==0) {
                     textures.push_back({});
                 }
                 GLuint& texID = textures[0];
-                if (texID != 0) {
-                    glDeleteTextures(1, &texID);
-                }
+//                if (texID != 0) {
+//                    glDeleteTextures(1, &texID);
+//                }
                 glGenTextures(1, &texID);
 
                 // texture load
@@ -211,8 +209,8 @@ namespace nugget::gl::indexedMesh {
             {
                 PROP(start, Int64, GLuint);
                 PROP(length, Int64, GLsizei);
-                PROP(modelMatrix, Matrix4f, Matrix4f);
-                PROP(viewMatrix, Matrix4f, Matrix4f);
+//                PROP(modelMatrix, Matrix4f, Matrix4f);
+//                PROP(viewMatrix, Matrix4f, Matrix4f);
                 PROP(cameraPos, Vector3f, Vector3f);
                 PROP(lookAtPos, Vector3f, Vector3f);
                 PROP(lookAtUp, Vector3f, Vector3f);
@@ -221,11 +219,9 @@ namespace nugget::gl::indexedMesh {
                 primitive = GLPrimitiveFromIdentifier(gProps.GetID(primitiveID));
 
                 IDType shaderNodeHash = IDR(nodeID, "shader");
-                IDType usedShaderID = gProps.GetID(shaderNodeHash);
-                std::string usedShaderPath = IDToString(usedShaderID);
-                IDType shaderProgramNoticeID = IDR({ usedShaderPath, "_internal", "_pglid" });
-                shader = (GLuint)gProps.GetInt64(shaderProgramNoticeID);
-
+                IDType usedShaderNode = gProps.GetID(shaderNodeHash);
+                shader = GetShaderHandle(usedShaderNode);
+                check(shader != 0, "Failed to get shader handle for {}", IDToString(usedShaderNode));
                 InitUniforms();
             }
         }
@@ -257,8 +253,8 @@ namespace nugget::gl::indexedMesh {
             RegisterHotReloadHandlers(nodeID);
 
             // add to list of render functions
-            renderModelInfo.renderSectionCallbacks.push_back([this]() {
-                Render();
+            renderModelInfo.renderSectionCallbacks.push_back([this](const Matrix4f &modelMatrix) {
+                Render(modelMatrix);
                 });
         }
 
@@ -272,14 +268,20 @@ namespace nugget::gl::indexedMesh {
 //    }
 
     static void Init() {
-        RegisterRenderSetupCallback(IDR("CreateIndexedMesh"), [](IDType sectionNode, RenderModelInfo& modelInfo) {
-            auto [iterator,succeed] = renderableSections.emplace(std::piecewise_construct, std::forward_as_tuple(sectionNode), std::forward_as_tuple(modelInfo));
+        RegisterRenderSetupCallback(IDR("CreateIndexedMesh"), 
+            [](IDType sectionNode, RenderModelInfo& modelInfo) {
+            auto [iterator,succeed] = 
+                renderableSections.emplace(
+                    std::piecewise_construct,
+                    std::forward_as_tuple(sectionNode),
+                    std::forward_as_tuple(modelInfo));
+            check(succeed,"could not add section");
             (*iterator).second.SetupFromPropertyTree(sectionNode);
             });
     }
 
 
-//    static void Render(IDType sectionNode) {
+//    static void Render(IDType sect ionNode) {
 //        sections[sectionNode].Render();
 //    }
 

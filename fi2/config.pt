@@ -648,7 +648,8 @@ shaders {
                 col_g = aColour;
 
                 // Modify the gl_Position to include model, view, and projection matrices
-                gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(aPos, 1.0);
+                //gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(aPos, 1.0);
+                gl_Position = projectionMatrix * modelMatrix * vec4(aPos-vec3(0,0,1), 7.0);
             }
 >>;
         geometry <<
@@ -764,7 +765,7 @@ shaders {
     }
 }
 
-indexedMesh {
+indexedMeshPomogranate {
     section {
         function = CreateIndexedMesh;
         shader = shaders.simple;
@@ -775,46 +776,12 @@ indexedMesh {
         model = pomegranate;
 //        texture = teapot_base_texture;
 //        model = teapot;
-        
-
-        nearClip : float = 0.1;
-        farClip : float = 1000.0;
-        fov : float = 60 * @degrees;
-
-        cameraPos : Vector3f = {
-            -1,1,1
-        };
-
-        lookAtPos : Vector3f = {
-            0,0,0
-        };
-        lookAtUp : Vector3f = {
-            0,1,0
-        };
-
-        viewMatrix : Matrix4f = {
-            1.0, 0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, -1, 1.0,
-        };
-
-        modelMatrix : Matrix4f = {
-                1.0, 0.0, 0.0, 0.0,
-                0.0, 1.0, 0.0, 0.0,
-                0.0, 0.0, 1.0, 0.0,
-                0.0, 0.0, 0.0, 1.0,
-        };
-
-        rotation : Vector3f = {
-                0.007, 0.005, 0.003
-        };
     }
 }
 
 sceneObject {
-    model = indexedMesh;
-
+    model = indexedMeshPomogranate;   // default model
+    
     modelMatrix : Matrix4f = {
             1.0, 0.0, 0.0, 0.0,
             0.0, 1.0, 0.0, 0.0,
@@ -827,9 +794,48 @@ sceneObject {
     };
 }
 
+pomegranate : sceneObject {
+    model = indexedMeshPomogranate;
+    rotation : Vector3f = {
+            0.007, 0.005, 0.003
+    };
+}
+
 scene {
-    : sceneObject {
+
+    nearClip : float = 0.1;
+    farClip : float = 1000.0;
+    fov : float = 60 * @degrees;
+
+    cameraPos : Vector3f = {
+        -1,1,1
+    };
+
+    lookAtPos : Vector3f = {
+        0,0,0
+    };
+    lookAtUp : Vector3f = {
+        0,1,0
+    };
+
+    viewMatrix : Matrix4f = {
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, -1, 1.0,
+    };
+
+
+    ObjectA : pomegranate {
+        modelMatrix : Matrix4f = {
+                1.0, 0.0, 0.0, 0.0,
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                0.0, 0.0, 0.0, 1.0,
+        };
     }
+//    ObjectB : pomegranate {
+//    }
 }
 
 quad {

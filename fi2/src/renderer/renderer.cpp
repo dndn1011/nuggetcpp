@@ -10,7 +10,7 @@ namespace nugget::renderer {
     using namespace nugget::properties;
 
 
-    void ResModel(IDType nodeID) {
+    void ConfigureRenderModel(IDType nodeID) {
         std::vector<IDType> sections;
         gProps.GetChildrenWithNodeExisting(nodeID, ID("function"), sections);
         ConfigureModel(nodeID, sections);
