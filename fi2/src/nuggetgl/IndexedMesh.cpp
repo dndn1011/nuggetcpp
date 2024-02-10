@@ -70,16 +70,9 @@ namespace nugget::gl::indexedMesh {
                     std::format("{}{}", shaderTexturePrefix, i).c_str());
                 textureUniforms.push_back(loc);
             }
-
-#if 0
-            GLint viewMatLocation = glGetUniformLocation(shader, "viewMatrix");
-            if (viewMatLocation >= 0) {
-                glUniformMatrix4fv(viewMatLocation, 1, GL_FALSE, viewMatrix.GetArray());
-            }
-#endif
         }
 
-        void Render(const Matrix4f &modelMatrix) {
+        void Render(const Matrix4f &modelMatrix,const Matrix4f &viewMatrix) {
 
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LEQUAL);
@@ -103,6 +96,11 @@ namespace nugget::gl::indexedMesh {
                 glUniformMatrix4fv(modMatLocation, 1, GL_FALSE, modelMatrix.GetArray());
             }
 
+            GLint viewMatLocation = glGetUniformLocation(shader, "viewMatrix");
+            if (viewMatLocation >= 0) {
+                glUniformMatrix4fv(viewMatLocation, 1, GL_FALSE, viewMatrix.GetArray());
+            }
+
 #if 0
             // move this to start of entire scene render (shared by all render objects)
             Matrix4f::LookAt(cameraPos, lookAtPos, lookAtUp, viewMatrix);
@@ -117,7 +115,7 @@ namespace nugget::gl::indexedMesh {
             for (GLuint i = 0; i < textures.size(); i++) {
                 glActiveTexture(GL_TEXTURE0 + i);
                 glBindTexture(GL_TEXTURE_2D, textures[i]);
-                auto loc = textureUniforms[i];
+                auto loc = textureUniforms[i]; 
                 glUniform1i(loc, i);
             }
 
@@ -253,8 +251,8 @@ namespace nugget::gl::indexedMesh {
             RegisterHotReloadHandlers(nodeID);
 
             // add to list of render functions
-            renderModelInfo.renderSectionCallbacks.push_back([this](const Matrix4f &modelMatrix) {
-                Render(modelMatrix);
+            renderModelInfo.renderSectionCallbacks.push_back([this](const Matrix4f &modelMatrix, const Matrix4f& viewMatrix) {
+                Render(modelMatrix, viewMatrix);
                 });
         }
 

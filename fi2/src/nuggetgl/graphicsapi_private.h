@@ -7,7 +7,7 @@
 namespace nugget::renderer {
 
     struct RenderSectionInfo;
-    using SectionRenderCallback = std::function<void(const Matrix4f &modelMatrix)>;
+    using SectionRenderCallback = std::function<void(const Matrix4f &modelMatrix, const Matrix4f& viewMatrix)>;
 
     struct RenderModelInfo;
     using RenderSetupCallback = std::function<void(IDType sectionNode,RenderModelInfo& model)>;

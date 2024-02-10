@@ -648,8 +648,8 @@ shaders {
                 col_g = aColour;
 
                 // Modify the gl_Position to include model, view, and projection matrices
-                //gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(aPos, 1.0);
-                gl_Position = projectionMatrix * modelMatrix * vec4(aPos-vec3(0,0,1), 7.0);
+                gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(aPos, 1.0);
+                //gl_Position = projectionMatrix * modelMatrix * vec4(aPos, 1.0);
             }
 >>;
         geometry <<
@@ -779,6 +779,20 @@ indexedMeshPomogranate {
     }
 }
 
+indexedMeshTeapot {
+    section {
+        function = CreateIndexedMesh;
+        shader = shaders.simple;
+        primitive = GL_TRIANGLES;
+        start = 0;
+        length = 36;
+//        texture = pomegranate_base_texture;
+//        model = pomegranate;
+        texture = teapot_base_texture;
+        model = teapot;
+    }
+}
+
 sceneObject {
     model = indexedMeshPomogranate;   // default model
     
@@ -796,6 +810,13 @@ sceneObject {
 
 pomegranate : sceneObject {
     model = indexedMeshPomogranate;
+    rotation : Vector3f = {
+            0.007, 0.005, 0.003
+    };
+}
+
+teapot: sceneObject {
+    model = indexedMeshTeapot;
     rotation : Vector3f = {
             0.007, 0.005, 0.003
     };
@@ -822,20 +843,89 @@ scene {
         1.0, 0.0, 0.0, 0.0,
         0.0, 1.0, 0.0, 0.0,
         0.0, 0.0, 1.0, 0.0,
-        0.0, 0.0, -1, 1.0,
+        0.0, 0.0, -4, 1.0,
     };
 
 
-    ObjectA : pomegranate {
+    : pomegranate {
         modelMatrix : Matrix4f = {
                 1.0, 0.0, 0.0, 0.0,
                 0.0, 1.0, 0.0, 0.0,
                 0.0, 0.0, 1.0, 0.0,
-                0.0, 0.0, 0.0, 1.0,
+                1, 0.0, 0.0, 1.0,
         };
     }
-//    ObjectB : pomegranate {
-//    }
+    : pomegranate {
+        modelMatrix : Matrix4f = {
+                1.0, 0.0, 0.0, 0.0,
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                -1, 0.0, 0.0, 1.0,
+        };
+    }
+    : pomegranate {
+        modelMatrix : Matrix4f = {
+                1.0, 0.0, 0.0, 0.0,
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                0.0, 1.0, 0.0, 1.0,
+        };
+    }
+    : pomegranate {
+        modelMatrix : Matrix4f = {
+                1.0, 0.0, 0.0, 0.0,
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                0.0, -1.0, 0.0, 1.0,
+        };
+        rotation : Vector3f = {
+            0.007, 0.005, -0.003
+        };
+    }
+    : pomegranate {
+        modelMatrix : Matrix4f = {
+                1.0, 0.0, 0.0, 0.0,
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                1, 0.0, 1.0, 1.0,
+        };
+        rotation : Vector3f = {
+            0.007, -0.005, -0.003
+        };
+    }
+    : pomegranate {
+        modelMatrix : Matrix4f = {
+                1.0, 0.0, 0.0, 0.0,
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                -1, 0.0, 1.0, 1.0,
+        };
+        rotation : Vector3f = {
+            -0.007, -0.005, -0.003
+        };
+    }
+    : pomegranate {
+        modelMatrix : Matrix4f = {
+                1.0, 0.0, 0.0, 0.0,
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                0.0, 1.0, 1.0, 1.0,
+        };
+       rotation : Vector3f = {
+            -0.007, -0.005, 0.003
+        };
+    }
+    : teapot {
+        modelMatrix : Matrix4f = {
+                0.01, 0.0, 0.0, 0.0,
+                0.0, 0.01, 0.0, 0.0,
+                0.0, 0.0, 0.01, 0.0,
+                0.0, -1.0, 1.0, 1.0,
+        };
+        rotation : Vector3f = {
+            -0.007, 0.005, 0.003
+        };
+    }
 }
 
 quad {
