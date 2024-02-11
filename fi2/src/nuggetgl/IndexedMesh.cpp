@@ -42,7 +42,7 @@ namespace nugget::gl::indexedMesh {
         }
 
         GLuint shader = 0;
-        std::vector<GLuint> textures;
+        std::vector<GLuint> glTextureHandles;
         std::vector<GLuint> textureUniforms;
 
         IDType modelID=IDType::null;
@@ -52,8 +52,6 @@ namespace nugget::gl::indexedMesh {
 
         const std::string shaderTexturePrefix = "texture";
         GLenum primitive=0;
-        GLint start=0;
-        GLsizei length=0;
 
 //        Matrix4f modelMatrix;
 //        Matrix4f viewMatrix;
@@ -65,7 +63,7 @@ namespace nugget::gl::indexedMesh {
         void InitUniforms() {
 
             // get the locations of the texture uniforms for the shader
-            for (GLuint i = 0; i < textures.size(); i++) {
+            for (GLuint i = 0; i < glTextureHandles.size(); i++) {
                 auto loc = glGetUniformLocation(shader,
                     std::format("{}{}", shaderTexturePrefix, i).c_str());
                 textureUniforms.push_back(loc);
@@ -112,9 +110,9 @@ namespace nugget::gl::indexedMesh {
 
             check(shader, "shader is not set");
             glUseProgram(shader);
-            for (GLuint i = 0; i < textures.size(); i++) {
+            for (GLuint i = 0; i < glTextureHandles.size(); i++) {
                 glActiveTexture(GL_TEXTURE0 + i);
-                glBindTexture(GL_TEXTURE_2D, textures[i]);
+                glBindTexture(GL_TEXTURE_2D, glTextureHandles[i]);
                 auto loc = textureUniforms[i]; 
                 glUniform1i(loc, i);
             }
@@ -177,38 +175,35 @@ namespace nugget::gl::indexedMesh {
                     GL_STATIC_DRAW);
             }
 
-            // Texture
-            if(textures.size() == 0) {
-                // texture allocation
-                if (textures.size()==0) {
-                    textures.push_back({});
-                }
-                GLuint& texID = textures[0];
-//                if (texID != 0) {
-//                    glDeleteTextures(1, &texID);
-//                }
-                glGenTextures(1, &texID);
+            // todo handle reloading
+            assert(glTextureHandles.size() == 0);
 
-                // texture load
-                IDType textureNode = IDR(nodeID, "texture");
-                IDType textureName = gProps.GetID(textureNode);
-                const nugget::asset::TextureData& texture = nugget::asset::GetTexture(textureName);
-                glBindTexture(GL_TEXTURE_2D, texID);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8, texture.width, texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data);
-                glBindTexture(GL_TEXTURE_2D, 0);
+            // Texture
+            {
+                // texture allocation
+
+                IDType texturesNode = IDR(nodeID, "textures");
+                const IdentifierList& list = gProps.GetIdentifierList(texturesNode);
+
+                for (size_t i = 0; i < list.data.size(); ++i) {
+                    const nugget::asset::TextureData& textureData = nugget::asset::GetTexture(list.data[i]);
+                    GLuint glTexID;
+                    glGenTextures(1, &glTexID);
+                    glBindTexture(GL_TEXTURE_2D, glTexID);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8, textureData.width, textureData.height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData.data);
+                    glBindTexture(GL_TEXTURE_2D, 0);
+
+                    glTextureHandles.push_back(glTexID);
+                }
             }
 
 #define PROP(a,t1,t2) IDType a##ID = IDR(nodeID,#a);a = (t2)gProps.Get##t1(a##ID)
             // put it together
             {
-                PROP(start, Int64, GLuint);
-                PROP(length, Int64, GLsizei);
-//                PROP(modelMatrix, Matrix4f, Matrix4f);
-//                PROP(viewMatrix, Matrix4f, Matrix4f);
                 PROP(cameraPos, Vector3f, Vector3f);
                 PROP(lookAtPos, Vector3f, Vector3f);
                 PROP(lookAtUp, Vector3f, Vector3f);

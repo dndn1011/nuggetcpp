@@ -4,8 +4,10 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include "identifier.h"
 
 namespace nugget {
+	using namespace identifier;
 	struct Color;
 	struct Color {
 		float r;
@@ -91,6 +93,16 @@ namespace nugget {
 
 	private:
 		static std::string to_string_imp(const Int64List& obj);
+	};
+
+	struct IdentifierList {
+		std::vector<IDType> data;
+
+		bool operator==(const IdentifierList& other) const;
+		std::string to_string() const;
+
+	private:
+		static std::string to_string_imp(const IdentifierList& obj);
 	};
 
 	struct ColorList {

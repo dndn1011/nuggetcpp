@@ -27,6 +27,7 @@ namespace nugget {
 	ValueAny::ValueAny(const Matrix4f& v) : type(Type::Matrix4f), data{ .matrix4fPtr = new Matrix4f(v) } {}
 	ValueAny::ValueAny(const Vector4f& v) : type(Type::Vector4f), data{ .vector4fPtr = new Vector4f(v) } {}
 	ValueAny::ValueAny(const Int64List& v) : type(Type::Int64List), data{ .int64ListPtr = new Int64List(v) } {}
+	ValueAny::ValueAny(const IdentifierList& v) : type(Type::IdentifierList), data{ .identifierListPtr = new IdentifierList(v) } {}
 
 	ValueAny::ValueAny(const Exception& v) : type(Type::Exception), data{ .exceptionPtr = new Exception(v) } {}
 
@@ -284,6 +285,11 @@ namespace nugget {
 		assert(type == Type::Int64List);
 		return *data.int64ListPtr;
 	}
+	const IdentifierList& ValueAny::AsIdentifierList() const {
+		assert(NotDeleted());
+		assert(type == Type::IdentifierList);
+		return *data.identifierListPtr;
+	}
 	const ColorList& ValueAny::AsColorList() const {
 		assert(NotDeleted());
 		assert(type == Type::ColorList);
@@ -445,6 +451,16 @@ namespace nugget {
 			delete 	data.int64ListPtr;
 		}
 		data.int64ListPtr = new Int64List(v);
+	}
+	void ValueAny::Set(const IdentifierList& v) {
+		if (type == Type::deleted) {
+			type = Type::IdentifierList;
+		}
+		assert(type == Type::IdentifierList);
+		if (data.identifierListPtr != nullptr) {
+			delete 	data.identifierListPtr;
+		}
+		data.identifierListPtr = new IdentifierList(v);
 	}
 	void ValueAny::SetAsParent() {
 		type = Type::parent_;
@@ -628,6 +644,9 @@ namespace nugget {
 				data.vector4fPtr = new Vector4f(*other.data.vector4fPtr);
 			} break;
 			case Type::Int64List: {
+				data.int64ListPtr = new Int64List(*other.data.int64ListPtr);
+			} break;
+			case Type::IdentifierList: {
 				data.int64ListPtr = new Int64List(*other.data.int64ListPtr);
 			} break;
 			case Type::pointer: {

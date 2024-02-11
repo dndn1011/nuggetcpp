@@ -156,13 +156,16 @@ namespace nugget::gl {
     static int count = 0;
     void UpdateBegin() {
         // Initialize OpenGL state
+#if 0
         if (++count % 100 < 50) {
             glClearColor(0.2f, 0.4f, 0.0f, 1.0f);
         } else {
             glClearColor(0.0f, 0.4f, 0.0f, 1.0f);
         }
+#else
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+#endif
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         SetAllUniforms("projectionMatrix", GLCameraProjectionMatrix());
 
     }

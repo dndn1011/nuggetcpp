@@ -32,6 +32,7 @@ namespace nugget::properties {
         {"Vector4f",Type::Vector4f},
         {"Matrix4f",Type::Matrix4f},
         {"Int64List",Type::Int64List},
+        {"Identifier",Type::identifier},
     };
 
     Token TokenisebyRegex(Token::Type type, const std::string regex, const std::string& next, size_t& point, bool& ok, size_t lineNumber) {

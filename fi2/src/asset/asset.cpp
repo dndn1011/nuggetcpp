@@ -48,7 +48,7 @@ namespace nugget::asset {
             if (fs::is_regular_file(entry.path())) {
                 std::string ppath = entry.path().string();
                     std::replace(ppath.begin(), ppath.end(), '\\', '/');
-                    output("{}\n", ppath);
+//                    output("{}\n", ppath);
                  db::AddAsset(ppath, MakeValidIdentifier(ppath), "texture");
             }
         }

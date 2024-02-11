@@ -60,6 +60,7 @@ namespace nugget {
 			const Vector4f& GetVector4f(IDType id);
 			const Vector3f& GetVector3f(IDType id);
 			bool GetInt64List(IDType id, Int64List& result);
+			const IdentifierList& GetIdentifierList(IDType id);
 
 			std::string AsString(IDType id);
 			std::string GetValueTypeAsString(const ValueAny& var);
