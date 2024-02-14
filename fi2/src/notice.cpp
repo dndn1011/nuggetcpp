@@ -292,11 +292,15 @@ namespace nugget {
 			}
 		}
 		const Matrix4f& Board::GetMatrix4f(IDType id) {
-			check(KeyExists(id),"Key not found: {}\n",IDToString(id));
+			check(KeyExists(id), "Key not found: {}\n", IDToString(id));
 			auto& v = data.valueEntries.at(id);
 			return v.AsMatrix4f();  // Assuming ValueAny has an AsMatrix4f method
 		}
-
+		const Matrix3f& Board::GetMatrix3f(IDType id) {
+			check(KeyExists(id), "Key not found: {}\n", IDToString(id));
+			auto& v = data.valueEntries.at(id);
+			return v.AsMatrix3f();  // Assuming ValueAny has an AsMatrix3f method
+		}
 		const IdentifierList& Board::GetIdentifierList(IDType id) {
 			check(KeyExists(id), "Key not found: {}\n", IDToString(id));
 			auto& v = data.valueEntries.at(id);
@@ -348,6 +352,7 @@ namespace nugget {
 		template void Board::Set<ColorList>(IDType id, const ColorList& value);
 		template void Board::Set<Vector2f>(IDType id, const Vector2f& value);
 		template void Board::Set<Matrix4f>(IDType id, const Matrix4f& value);
+		template void Board::Set<Matrix3f>(IDType id, const Matrix3f& value);
 		template void Board::Set<Vector4f>(IDType id, const Vector4f& val0ue);
 		template void Board::Set<Int64List>(IDType id, const Int64List& value);
 		template void Board::Set<IdentifierList>(IDType id, const IdentifierList& value);

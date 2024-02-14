@@ -24,6 +24,7 @@ namespace nugget {
         explicit ValueAny(const Vector3f& v);
         explicit ValueAny(const Vector2f& v);
         explicit ValueAny(const Matrix4f& v);
+        explicit ValueAny(const Matrix3f& v);
         explicit ValueAny(const Vector4f& v);
         explicit ValueAny(const Int64List& v);
         explicit ValueAny(const IdentifierList& v);
@@ -61,6 +62,7 @@ namespace nugget {
             Vector3f,
             Vector2f,
             Matrix4f,
+            Matrix3f,
             Vector4f,
             Int64List,
             IdentifierList,
@@ -87,6 +89,7 @@ namespace nugget {
         const Vector3f& AsVector3f() const;
         const Exception& AsException() const;
         const Matrix4f& AsMatrix4f() const;
+        const Matrix3f& AsMatrix3f() const;
         const Vector4f& AsVector4f() const;
         const Int64List& AsInt64List() const;
         const IdentifierList& AsIdentifierList() const;
@@ -110,6 +113,7 @@ namespace nugget {
         void Set(const Vector2f& vect);
         void Set(const Exception& exception);
         void Set(const Matrix4f& mat);
+        void Set(const Matrix3f& mat);
         void Set(const Int64List& ints);
         void Set(const IdentifierList& ints);
 
@@ -140,7 +144,8 @@ namespace nugget {
             Vector4f* vector4fPtr;
             Vector3f* vector3fPtr;
             Vector2f* vector2fPtr;
-            Matrix4f* matrix4fPtr;  // Pointer to Matrix4f
+            Matrix4f* matrix4fPtr;
+            Matrix3f* matrix3fPtr;
             Int64List* int64ListPtr;
             IdentifierList* identifierListPtr;
         } data = {};

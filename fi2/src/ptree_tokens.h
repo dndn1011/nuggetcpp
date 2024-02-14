@@ -49,6 +49,7 @@ __PTREE_TOKEN(uMinus)
 __PTREE_TOKEN(Vector4f)
 __PTREE_TOKEN(Matrix4f)
 __PTREE_TOKEN(Int64List)
+__PTREE_TOKEN(Matrix3f)
 
 ////////////////////////////////////////
 

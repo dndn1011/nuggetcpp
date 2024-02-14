@@ -57,6 +57,7 @@ namespace nugget {
 			const ColorList& GetColorList(IDType id);
 			bool GetColorList(IDType id, ColorList& result);
 			const Matrix4f& GetMatrix4f(IDType id);
+			const Matrix3f& GetMatrix3f(IDType id);
 			const Vector4f& GetVector4f(IDType id);
 			const Vector3f& GetVector3f(IDType id);
 			bool GetInt64List(IDType id, Int64List& result);

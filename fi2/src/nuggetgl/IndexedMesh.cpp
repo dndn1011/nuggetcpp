@@ -70,6 +70,8 @@ namespace nugget::gl::indexedMesh {
             }
         }
 
+        Vector3f lightPos = { 30,10,30 };
+
         void Render(const Matrix4f &modelMatrix,const Matrix4f &viewMatrix) {
 
             glEnable(GL_DEPTH_TEST);
@@ -78,6 +80,13 @@ namespace nugget::gl::indexedMesh {
             glEnable(GL_FRAMEBUFFER_SRGB);
 
             glBindVertexArray(renderModelInfo.VAOHandle);
+
+            GLint lightPosHandle = glGetUniformLocation(shader, "lightPos");
+            glUniform3f(lightPosHandle, lightPos.x, lightPos.y, lightPos.z);
+
+            float k = 32.0f;
+            //lightPos.x += lightPos.z / k;
+            //lightPos.z -= lightPos.x / k;
 
 #if 0
             // move this to scene

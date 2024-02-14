@@ -334,13 +334,13 @@ namespace nugget {
 
 	// Accessor for the elements
 	float& Matrix4f::operator[](int index) {
-		// No bounds checking
+		check(index >= 0 && index < 4 * 4, "index out of range");
 		return data[index];
 	}
 
 	// Const accessor for the elements
 	const float& Matrix4f::operator[](int index) const {
-		// No bounds checking
+		check(index >= 0 && index < 4 * 4, "index out of range");
 		return data[index];
 	}
 
@@ -578,4 +578,122 @@ namespace nugget {
 	const float(&nugget::Matrix4f::GetArray() const)[16] {
 		return data;
 	}
+
+
+
+	// Default constructor for Matrix3f
+	Matrix3f::Matrix3f() : data{} {
+		data[0] = 1.0f;
+		data[4] = 1.0f;
+		data[8] = 1.0f;
+	}
+
+	// Constructor to initialize with values
+	Matrix3f::Matrix3f(const float(&values)[9]) {
+		for (int i = 0; i < 9; ++i) {
+			data[i] = values[i];
+		}
+	}
+
+	// Copy constructor
+	Matrix3f::Matrix3f(const Matrix3f& other) {
+		for (int i = 0; i < 9; ++i) {
+			data[i] = other.data[i];
+		}
+	}
+
+	// Assignment operator
+	Matrix3f& Matrix3f::operator=(const Matrix3f& other) {
+		if (this != &other) {
+			for (int i = 0; i < 9; ++i) {
+				data[i] = other.data[i];
+			}
+		}
+		return *this;
+	}
+
+	// Equality operator
+	bool Matrix3f::operator==(const Matrix3f& other) const {
+		for (int i = 0; i < 9; ++i) {
+			if (data[i] != other.data[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	// Inequality operator
+	bool Matrix3f::operator!=(const Matrix3f& other) const {
+		return !(*this == other);
+	}
+
+	// Accessor for the elements
+	float& Matrix3f::operator[](int index) {
+		check(index >= 0 && index < 3 * 3, "index out of range");
+		return data[index];
+	}
+
+	// Const accessor for the elements
+	const float& Matrix3f::operator[](int index) const {
+		check(index >= 0 && index < 3 * 3, "index out of range");
+		return data[index];
+	}
+
+	Vector3f Matrix3f::operator*(const Vector3f& vec) const {
+		return Vector3f(
+			data[0] * vec.x + data[1] * vec.y + data[2] * vec.z,
+			data[3] * vec.x + data[4] * vec.y + data[5] * vec.z,
+			data[6] * vec.x + data[7] * vec.y + data[8] * vec.z
+		);
+	}
+
+	// Method to return the matrix as a string
+	std::string Matrix3f::to_string() const {
+		std::stringstream ss;
+		for (int i = 0; i < 9; ++i) {
+			ss << data[i];
+			if ((i + 1) % 3 == 0)
+				ss << "\n";
+			else
+				ss << " ";
+		}
+		return ss.str();
+	}
+
+	Matrix3f Matrix3f::operator*(const Matrix3f& other) const {
+		Matrix3f result;
+		for (int row = 0; row < 3; ++row) {
+			for (int col = 0; col < 3; ++col) {
+				result.data[col * 3 + row] = 0;
+				for (int k = 0; k < 3; ++k) {
+					result.data[col * 3 + row] += this->data[k * 3 + row] * other.data[col * 3 + k];
+				}
+			}
+		}
+		return result;
+	}
+
+	/*static*/
+	void Matrix3f::SetFromEulers(float radX, float radY, float radZ, Matrix3f& outMatrix) {
+		float cx = cos(radX);
+		float sx = sin(radX);
+		float cy = cos(radY);
+		float sy = sin(radY);
+		float cz = cos(radZ);
+		float sz = sin(radZ);
+		float* mat = outMatrix.data;
+
+		mat[0] = cz * cy;
+		mat[1] = cz * sy * sx - sz * cx;
+		mat[2] = cz * sy * cx + sz * sx;
+
+		mat[3] = sz * cy;
+		mat[4] = sz * sy * sx + cz * cx;
+		mat[5] = sz * sy * cx - cz * sx;
+
+		mat[6] = -sy;
+		mat[7] = cy * sx;
+		mat[8] = cy * cx;
+	}
+
 }

@@ -2,6 +2,7 @@
 #include "propertytree.h"
 #include "renderer/renderer.h"
 #include <unordered_map>
+#include "scene.h"
 
 
 #define PERFECT_EMPLACEMENT(a,...)  emplace(std::piecewise_construct, std::forward_as_tuple(a), std::forward_as_tuple(__VA_ARGS__))
@@ -23,11 +24,11 @@ namespace nugget::scene {
         struct InstanceData {
             APPLY_RULE_OF_MINUS_5(InstanceData);
 
-           InstanceData(IDType node, const Matrix4f modelMatrix) : modelMatrix(modelMatrix), node(node) {
+           InstanceData(IDType node, const Transform& transform) : transform(transform), node(node) {
            }
 
             IDType node = {};
-            Matrix4f modelMatrix;
+            Transform transform;
         };
 
         std::unordered_map<IDType, InstanceData> instances;
@@ -40,10 +41,16 @@ namespace nugget::scene {
                 IDType model_refnid = gProps.GetID(model_nid);
                 renderer::ConfigureRenderModel(model_refnid);
                 
-                IDType modelMatrixNode = IDR(x, "modelMatrix");
-                const Matrix4f modelMatrix = gProps.GetMatrix4f(modelMatrixNode);
+//                IDType modelMatrixNode = IDR(x, "modelMatrix");
+//                const Matrix4f modelMatrix = gProps.GetMatrix4f(modelMatrixNode);
 
-                instances.PERFECT_EMPLACEMENT(x,x,modelMatrix);
+                Transform t;
+                IDType transformNode = IDR(x, ID("transform"));
+                t.Pos(gProps.GetVector3f(IDR(transformNode, ID("pos"))));
+                t.Rot(gProps.GetMatrix3f(IDR(transformNode, ID("rot"))));
+                t.Scale(gProps.GetVector3f(IDR(transformNode, ID("scale"))));
+
+                instances.PERFECT_EMPLACEMENT(x,x,t);
             }
 
             sceneData.viewMatrix = gProps.GetMatrix4f(IDR(baseSceneNodeID, ID("viewMatrix")));
@@ -60,14 +67,14 @@ namespace nugget::scene {
                 IDType model_refnid = gProps.GetID(model_node);
                 InstanceData &instance = instances.at(x);
                
-                renderer::RenderModel(model_refnid, instance.modelMatrix, sceneData.viewMatrix);
+                renderer::RenderModel(model_refnid, instance.transform, sceneData.viewMatrix);
 
                 // move this to scene
                 // TODO get rid of this hardwired thingy
                 Vector3f RV = gProps.GetVector3f(IDR(x,ID("rotation")));
-                Matrix4f R;
-                Matrix4f::SetFromEulers(RV.x, RV.y, RV.z, R);
-                instance.modelMatrix = R * instance.modelMatrix;
+                Matrix3f R;
+                Matrix3f::SetFromEulers(RV.x, RV.y, RV.z, R);
+                instance.transform.Rot(R * instance.transform.Rot());
             }
         }
 

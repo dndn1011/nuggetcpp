@@ -180,6 +180,23 @@ namespace nugget::properties {
                 },
             },
             {
+                "Matrix3f", [&]() {
+                    check(initialiserList.size() == 9,"Incorrect number of arguments");
+
+                    // Create a 1D array of 9 floats for the 4x4 matrix
+                    float m[9];
+                    for (int i = 0; i < 9; ++i) {
+                        m[i] = Expression::ConvertType(initialiserList[i], ValueAny::Type::float_).AsFloat();
+                    }
+
+                    // Generate an ID for this matrix
+                    IDType id = IDR(IDR(currentPathName), currentValueName);
+
+                    // Set the notice with the matrix
+                    board.Set(id, Matrix3f(m));
+                },
+            },
+            {
                 "ColorList",[&]() {
                     size_t size = initialiserList.size();
                     assert(size / 4 * 4 == size);

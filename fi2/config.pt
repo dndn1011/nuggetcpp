@@ -654,16 +654,14 @@ shaders {
 
             void main()
             {
-                uv_g = aTexCoord;
-                col_g = aColour;
-                
-                fragPos_g = vec3(modelMatrix * vec4(aPos, 1.0)); // Convert to world space
-
-                // Modify the gl_Position to include model, view, and projection matrices
-
                 gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(aPos, 1.0);
                 normal_g = vec3(modelMatrix * vec4(aNormal,1.0));
-            }
+                fragPos_g = vec3(modelMatrix * vec4(aPos, 1.0)); // Convert to world space 
+                uv_g = aTexCoord;
+                col_g = aColour;
+            }   
+
+                // Modify the gl_Position to include model, view, and projection matrices
 >>;
         geometry <<
                 #version 450 core
@@ -703,30 +701,80 @@ shaders {
                 out vec4 FragColor;
                 uniform sampler2D texture0;   // base
                 uniform sampler2D texture1;   // normal
+                uniform vec3 lightPos;
 
-                void main()
-                {
-                    vec4 texNormal = texture(texture0, uv_f);
-                    vec3 lightVector = normalize(vec3(4,1,1));
-                    vec3 combinedNormal = normalize(normal_f + vec3(texNormal));
 
-                    vec3 lightPos = vec3(5,3,2);
-                    vec3 camPos = vec3(0,0,-1);
+                void main() {
+                   vec3 camPos = vec3(0,0,500);
+                   vec3 lightVector = normalize(lightPos);
 
-                    vec3 A = fragPos_f - lightPos;
-                    vec3 C = normalize(camPos - fragPos_f);
-                    vec3 P = dot(A,combinedNormal) * combinedNormal;
-                    vec3 B = A - 2.0*P;
-                    float s = -dot(B,C);
+                   vec4 baseColor = texture(texture0, uv_f);
 
-                    vec4 baseColor = texture(texture0, uv_f);
-                    float d = (dot(lightVector,combinedNormal)+1)*0.5f;
-                    FragColor = (baseColor * d*d*d)*4.0f + baseColor * 0.01f;
-//                    FragColor = vec4(fragPos_f.x*fragPos_f.x,fragPos_f.y*fragPos_f.y,fragPos_f.z*fragPos_f.z,1);
-//                    FragColor = vec4(s,0,0,1);
+                   float diffuseDot = dot(normal_f,lightVector);
+
+                   vec3 A = normalize(fragPos_f - lightPos);
+                   vec3 C = normalize(camPos - fragPos_f);
+                   vec3 P = dot(A,normal_f) * normal_f;
+                   vec3 B = A - 2.0*P;
+                   float specCos = dot(B,C);
+
+                   float specular = smoothstep(0.55,1.0,specCos*specCos*specCos);                
+                   float diffuse = smoothstep(0.25,1.0,diffuseDot);                
+
+                   FragColor = baseColor + vec4(1,1,1,1)*specular*0.1f + vec4(1,1,1,1)*diffuse*0.1f;
                 }
 
+                void main2()
+                {
+//                   vec3 lightPos = vec3(200,0,500);
+                   vec3 camPos = vec3(0,0,500);
+
+                   vec3 A = normalize(fragPos_f - lightPos);
+                   vec3 C = normalize(camPos - fragPos_f);
+                   vec3 P = dot(A,normal_f) * normal_f;
+                   vec3 B = A - 2.0*P;
+                   float s = dot(B,C);
+
+                   vec4 baseColor = texture(texture0, uv_f);
+
+                   float testD = dot(A,normal_f);
+                   vec4 specular;
+                   if(s > 0.8) {
+                       specular = vec4(1,0,0,1);
+                   } else {
+                       specular = vec4(0.2,0,0,1);
+                   }
+                
+                   FragColor = baseColor;// + specular;
+
+                }
 >>;
+
+//                    vec4 texNormal = texture(texture0, uv_f);
+ //                   vec3 lightVector = normalize(vec3(4,1,1));
+ //                   vec3 combinedNormal = normalize(normal_f + vec3(texNormal));
+ //                   vec3 vertexNormal = normalize(normal_f);
+
+//                    float diffuseDot = dot(vertexNormal,lightVector);
+
+//                    vec3 A = fragPos_f - lightPos;
+//                    vec3 C = normalize(camPos - fragPos_f);
+//                    vec3 P = dot(A,combinedNormal) * combinedNormal;
+//                    vec3 B = A - 2.0*P;
+//                    float s = -dot(B,C);
+
+//                    vec4 baseColor = texture(texture0, uv_f);
+
+//                    FragColor = baseColor;
+
+//                    float d = (dot(lightVector,combinedNormal)+1)*0.5f;
+//                    FragColor = (baseColor * d)*1.0f;// + baseColor * 0.01f;
+//                    FragColor = vec4(fragPos_f.x*fragPos_f.x,fragPos_f.y*fragPos_f.y,fragPos_f.z*fragPos_f.z,1);
+
+//                      diffuseDot = 1.0f;
+//                      FragColor = vec4(1.0,1.0,1.0,1.0) * diffuseDot;
+
+
     }
     biquad {
         vertex <<
@@ -814,8 +862,8 @@ indexedMeshPomogranate {
             pomegranate_base_texture,
             pomegranate_normal_map,
         };
-        model = pomegranate;
 //        texture = teapot_base_texture;
+        model = pomegranate;
 //        model = teapot;
     }
 }
@@ -852,7 +900,7 @@ sceneObject {
 pomegranate : sceneObject {
     model = indexedMeshPomogranate;
     rotation : Vector3f = {
-            0.007, 0.005, 0.003
+         0.007, 0.005, 0.003
     };
 }
 
@@ -869,7 +917,7 @@ scene {
     fov : float = 60 * @degrees;
 
     cameraPos : Vector3f = {
-        -1,1,1
+        0,0,1
     };
 
     lookAtPos : Vector3f = {
@@ -888,15 +936,11 @@ scene {
 
 
     : pomegranate {
-        modelMatrix : Matrix4f = {
-                1.0, 0.0, 0.0, 0.0,
-                0.0, 1.0, 0.0, 0.0,
-                0.0, 0.0, 1.0, 0.0,
-                0.0, 0.0, 0.0, 1.0,
-        };
-//        rotation : Vector3f = {
-//            0,0.01,0
-//        };
+        transform {
+            pos : Vector3f = { 0,0,0 };
+            rot : Matrix3f = { 1,0,0,0,1,0,0,0,1};
+            scale : Vector3f = { 1.0,1.0,1.0 };
+        }
     }
 }
 

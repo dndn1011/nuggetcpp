@@ -159,12 +159,45 @@ namespace nugget {
 		float& operator[](int index);
 		const float& operator[](int index) const;
 
-		const float(&GetArray() const) [16];
+		const float(&GetArray() const)[16];
 
 		static void SetFromEulers(float radX, float radY, float radZ, Matrix4f& outMatrix);
 		static void CreateProjectionMatrix(float screenWidth, float screenHeight, float fov, float nearPlane, float farPlane, Matrix4f& matrix);
 		static void LookAt(const Vector3f& eye, const Vector3f& center, const Vector3f& normalisedUp, Matrix4f& outMatrix);
 	};
+
+	class Matrix3f {
+		float data[9];
+
+	public:
+		Matrix3f();
+		Matrix3f(const float(&values)[9]);
+		Matrix3f(const Matrix3f& other);
+
+		Matrix3f& operator=(const Matrix3f& other);
+		bool operator==(const Matrix3f& other) const;
+		bool operator!=(const Matrix3f& other) const;
+
+		Matrix3f operator+(const Matrix3f& other) const; // Addition
+		Matrix3f operator-(const Matrix3f& other) const; // Subtraction
+		Matrix3f operator*(const Matrix3f& other) const; // Matrix multiplication
+		Vector3f operator*(const Vector3f& vector) const; // Matrix-vector multiplication
+
+		// Utility Functions
+		float determinant() const; // Determinant of the matrix
+		Matrix3f transpose() const; // Transpose of the matrix
+		Matrix3f inverse() const; // Inverse of the matrix
+
+		std::string to_string() const;
+		float& operator[](int index);
+		const float& operator[](int index) const;
+
+		const float(&GetArray() const)[9];
+
+		static void SetFromEulers(float radX, float radY, float radZ, Matrix3f& outMatrix);
+		static void LookAt(const Vector3f& eye, const Vector3f& center, const Vector3f& normalisedUp, Matrix3f& outMatrix);
+	};
+
 
 	struct Vector4f {
 		// Member variables

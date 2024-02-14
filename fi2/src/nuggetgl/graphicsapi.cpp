@@ -3,18 +3,20 @@
 #include "graphicsapi_private.h"
 #include "propertytree.h"
 #include "system.h"
+#include "scene/scene.h"
 
 namespace nugget::renderer {
     using namespace nugget::gl;
     using namespace properties;
+    using namespace scene;
 
     std::unordered_map<IDType, RenderModelInfo> renderModels;
     std::unordered_map<IDType, RenderSetupCallback> renderSetupCallbacks;
 
-    void RenderModel(IDType nodeID,const Matrix4f &modelMatrix, const Matrix4f& viewMatrix) {
+    void RenderModel(IDType nodeID,const Transform &transform, const Matrix4f& viewMatrix) {
         RenderModelInfo& renderModel = renderModels.at(nodeID);
         for (auto&& x : renderModel.renderSectionCallbacks) {
-            x(modelMatrix,viewMatrix);
+            x(transform.Matrix(),viewMatrix);
         }
     }
 
