@@ -13,10 +13,10 @@ namespace nugget::renderer {
     std::unordered_map<IDType, RenderModelInfo> renderModels;
     std::unordered_map<IDType, RenderSetupCallback> renderSetupCallbacks;
 
-    void RenderModel(IDType nodeID,const Transform &transform, const Matrix4f& viewMatrix) {
+    void RenderModel(IDType nodeID,const Transform& transform, const Matrix4f& viewMatrix) {
         RenderModelInfo& renderModel = renderModels.at(nodeID);
         for (auto&& x : renderModel.renderSectionCallbacks) {
-            x(transform.Matrix(),viewMatrix);
+            x(transform,viewMatrix);
         }
     }
 

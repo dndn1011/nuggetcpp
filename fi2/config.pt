@@ -651,11 +651,12 @@ shaders {
             uniform mat4 modelMatrix;     // Add a uniform for the model matrix
             uniform mat4 viewMatrix;      // Add a uniform for the view matrix
             uniform mat4 projectionMatrix;
+            uniform mat3 rotationMatrix; 
 
             void main()
             {
                 gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(aPos, 1.0);
-                normal_g = vec3(modelMatrix * vec4(aNormal,1.0));
+                normal_g = vec3(rotationMatrix * aNormal);
                 fragPos_g = vec3(modelMatrix * vec4(aPos, 1.0)); // Convert to world space 
                 uv_g = aTexCoord;
                 col_g = aColour;
@@ -872,8 +873,8 @@ indexedMeshPomogranate {
             pomegranate_normal_map,
         };
 //        texture = teapot_base_texture;
-        model = pomegranate;
-//        model = teapot;
+//        model = pomegranate;
+        model = teapot;
     }
 }
 
@@ -909,7 +910,7 @@ sceneObject {
 pomegranate : sceneObject {
     model = indexedMeshPomogranate;
     rotation : Vector3f = {
-         0.007, 0.005, 0.003
+         0,0.005,0 //0.007, 0.005, 0.003
     };
 }
 
@@ -946,9 +947,9 @@ scene {
 
     : pomegranate {
         transform {
-            pos : Vector3f = { 0,0,0 };
+            pos : Vector3f = { 0,-0.25,0 };
             rot : Matrix3f = { 1,0,0,0,1,0,0,0,1};
-            scale : Vector3f = { 1.0,1.0,1.0 };
+            scale : Vector3f = { 0.005,0.005,0.005 };
         }
     }
 }

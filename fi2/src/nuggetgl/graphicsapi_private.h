@@ -4,13 +4,16 @@
 #include "nuggetgl/glinternal.h"
 #include "identifier.h"
 
-namespace nugget::renderer {
+namespace nugget::scene {
+    struct Transform;
+}
 
+namespace nugget::renderer {
     struct RenderSectionInfo;
-    using SectionRenderCallback = std::function<void(const Matrix4f &modelMatrix, const Matrix4f& viewMatrix)>;
+    using SectionRenderCallback = std::function<void(const nugget::scene::Transform &transform, const Matrix4f& viewMatrix)>;
 
     struct RenderModelInfo;
-    using RenderSetupCallback = std::function<void(IDType sectionNode,RenderModelInfo& model)>;
+    using RenderSetupCallback = std::function<void(IDType sectionNode, RenderModelInfo& model)>;
     struct RenderModelInfo {
         IDType nodeID = IDType::null;
         GLuint VAOHandle = 0;

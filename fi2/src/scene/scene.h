@@ -3,7 +3,7 @@
 
 namespace nugget::scene {
     struct Transform {
-        const Matrix3f& Rot() {
+        const Matrix3f& Rot() const {
             return rot;
         }
         const Matrix4f& Matrix() const {

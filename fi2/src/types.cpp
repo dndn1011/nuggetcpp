@@ -579,7 +579,9 @@ namespace nugget {
 		return data;
 	}
 
-
+	const float(&nugget::Matrix3f::GetArray() const)[9] {
+		return data;
+	}
 
 	// Default constructor for Matrix3f
 	Matrix3f::Matrix3f() : data{} {

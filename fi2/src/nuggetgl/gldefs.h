@@ -29,4 +29,4 @@ GLDEF(glDeleteBuffers, (GLsizei n, const GLuint* buffers), void)
 GLDEF(glUniformMatrix4fv, (GLint location, GLsizei count, GLboolean transpose, const GLfloat* value), void)
 GLDEF(wglCreateContextAttribsARB, (HDC, HGLRC, const int*), HGLRC)
 GLDEF(glUniform3f, (GLint location, GLfloat v0, GLfloat v1, GLfloat v2), void)
-
+GLDEF(glUniformMatrix3fv, (GLint location, GLsizei count, GLboolean transpose, const GLfloat* value), void)

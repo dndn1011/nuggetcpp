@@ -72,7 +72,7 @@ namespace nugget::gl::indexedMesh {
 
         Vector3f lightPos = { 100,50,100 };
 
-        void Render(const Matrix4f &modelMatrix,const Matrix4f &viewMatrix) {
+        void Render(const Transform &transform,const Matrix4f &viewMatrix) {
 
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LEQUAL);
@@ -85,8 +85,8 @@ namespace nugget::gl::indexedMesh {
             glUniform3f(lightPosHandle, lightPos.x, lightPos.y, lightPos.z);
 
             float k = 32.0f;
-   //         lightPos.x += lightPos.z / k;
-   //         lightPos.z -= lightPos.x / k;
+            lightPos.x += lightPos.z / k;
+            lightPos.z -= lightPos.x / k;
 
 #if 0
             // move this to scene
@@ -100,12 +100,18 @@ namespace nugget::gl::indexedMesh {
             // we are setting for each section, but in reality this is often shared, so will need some optimisation later
             GLint modMatLocation = glGetUniformLocation(shader, "modelMatrix");
             if (modMatLocation >= 0) {
-                glUniformMatrix4fv(modMatLocation, 1, GL_FALSE, modelMatrix.GetArray());
+                glUniformMatrix4fv(modMatLocation, 1, GL_FALSE, transform.Matrix().GetArray());
             }
 
             GLint viewMatLocation = glGetUniformLocation(shader, "viewMatrix");
             if (viewMatLocation >= 0) {
                 glUniformMatrix4fv(viewMatLocation, 1, GL_FALSE, viewMatrix.GetArray());
+            }
+
+            // we are setting for each section, but in reality this is often shared, so will need some optimisation later
+            GLint modRotLocation = glGetUniformLocation(shader, "rotationMatrix");
+            if (modRotLocation >= 0) {
+                glUniformMatrix3fv(modRotLocation, 1, GL_FALSE, transform.Rot().GetArray());
             }
 
 #if 0
@@ -255,8 +261,8 @@ namespace nugget::gl::indexedMesh {
             RegisterHotReloadHandlers(nodeID);
 
             // add to list of render functions
-            renderModelInfo.renderSectionCallbacks.push_back([this](const Matrix4f &modelMatrix, const Matrix4f& viewMatrix) {
-                Render(modelMatrix, viewMatrix);
+            renderModelInfo.renderSectionCallbacks.push_back([this](const Transform &transform, const Matrix4f& viewMatrix) {
+                Render(transform, viewMatrix);
                 });
         }
 
