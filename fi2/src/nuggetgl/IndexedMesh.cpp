@@ -70,7 +70,7 @@ namespace nugget::gl::indexedMesh {
             }
         }
 
-        Vector3f lightPos = { 30,10,30 };
+        Vector3f lightPos = { 100,50,100 };
 
         void Render(const Matrix4f &modelMatrix,const Matrix4f &viewMatrix) {
 
@@ -85,8 +85,8 @@ namespace nugget::gl::indexedMesh {
             glUniform3f(lightPosHandle, lightPos.x, lightPos.y, lightPos.z);
 
             float k = 32.0f;
-            //lightPos.x += lightPos.z / k;
-            //lightPos.z -= lightPos.x / k;
+   //         lightPos.x += lightPos.z / k;
+   //         lightPos.z -= lightPos.x / k;
 
 #if 0
             // move this to scene

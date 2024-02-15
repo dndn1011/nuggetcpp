@@ -196,6 +196,9 @@ namespace nugget {
 
 		static void SetFromEulers(float radX, float radY, float radZ, Matrix3f& outMatrix);
 		static void LookAt(const Vector3f& eye, const Vector3f& center, const Vector3f& normalisedUp, Matrix3f& outMatrix);
+	
+		void OrthoNormalize();
+	
 	};
 
 

@@ -30,6 +30,10 @@ namespace nugget::scene {
             matrixValid = false;
             scale = scaleIn;
         }
+        void OrthoNormalize() {
+            matrixValid = false;
+            rot.OrthoNormalize();
+        }
     private:
         mutable Matrix4f matrix = {};
         mutable bool matrixValid = false;

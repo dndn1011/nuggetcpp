@@ -673,6 +673,29 @@ namespace nugget {
 		return result;
 	}
 
+	inline void Cross(const float*t, const float* o, float *r) {
+		const int x = 0;
+		const int y = 1;
+		const int z = 2;
+
+		r[x] = t[y] * o[z] - t[z] * o[y];
+		r[y] = t[z] * o[x] - t[x] * o[z];
+		r[z] = t[x] * o[y] - t[y] * o[x];
+	}
+
+	inline void Normalize(float* t) {
+		const int x = 0;
+		const int y = 1;
+		const int z = 2;
+
+		float d2 = t[x] * t[x] + t[y] * t[y] + t[z] * t[z];
+		float d = sqrt(d2);
+		t[x] /= d;
+		t[y] /= d;
+		t[z] /= d;
+	}
+
+
 	/*static*/
 	void Matrix3f::SetFromEulers(float radX, float radY, float radZ, Matrix3f& outMatrix) {
 		float cx = cos(radX);
@@ -694,6 +717,14 @@ namespace nugget {
 		mat[6] = -sy;
 		mat[7] = cy * sx;
 		mat[8] = cy * cx;
+	}
+
+	void Matrix3f::OrthoNormalize() {
+		Cross(&data[0], &data[3], &data[6]);   // cross X,Y -> Z
+		Cross(&data[3], &data[6], &data[0]);   // cross Y,Z -> X
+		Normalize(&data[0]);
+		Normalize(&data[3]);
+		Normalize(&data[6]);
 	}
 
 }

@@ -705,23 +705,32 @@ shaders {
 
 
                 void main() {
+                   vec3 normal = normalize(normal_f + vec3(texture(texture1, uv_f)));
+//                   vec3 normal = normalize(normal_f);
                    vec3 camPos = vec3(0,0,500);
+
                    vec3 lightVector = normalize(lightPos);
 
                    vec4 baseColor = texture(texture0, uv_f);
 
-                   float diffuseDot = dot(normal_f,lightVector);
+                   float diffuseDot = dot(normal,lightVector);
 
                    vec3 A = normalize(fragPos_f - lightPos);
                    vec3 C = normalize(camPos - fragPos_f);
-                   vec3 P = dot(A,normal_f) * normal_f;
+                   vec3 P = dot(A,normal) * normal;
                    vec3 B = A - 2.0*P;
-                   float specCos = dot(B,C);
+                   float specCos = clamp(dot(B,C),0,1);
 
-                   float specular = smoothstep(0.55,1.0,specCos*specCos*specCos);                
-                   float diffuse = smoothstep(0.25,1.0,diffuseDot);                
+//                   if(diffuseDot < 0) {
+//                       FragColor = vec4(1,0,0,1);
+//                       return; 
+//                   }
 
-                   FragColor = baseColor + vec4(1,1,1,1)*specular*0.1f + vec4(1,1,1,1)*diffuse*0.1f;
+                   float specular = smoothstep(0.5,1.0,pow(specCos,5));                
+                   float diffuse = smoothstep(0.0,1.0,diffuseDot);                
+
+                   FragColor = baseColor*0.05 + vec4(1,0.5,0.5,1)*specular*0.15f + baseColor*diffuse*1.0f;
+                  
                 }
 
                 void main2()

@@ -75,6 +75,7 @@ namespace nugget::scene {
                 Matrix3f R;
                 Matrix3f::SetFromEulers(RV.x, RV.y, RV.z, R);
                 instance.transform.Rot(R * instance.transform.Rot());
+                instance.transform.OrthoNormalize();
             }
         }
 
