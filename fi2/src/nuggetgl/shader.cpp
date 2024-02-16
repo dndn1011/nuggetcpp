@@ -23,6 +23,14 @@ namespace nugget::gl {
         return shaderMap[node].shaderProgram;
     }
 
+    void FreeShader(IDType node) {
+        ShaderProgramInfo info = shaderMap.at(node);
+        glDeleteShader(info.vertexShader);
+        glDeleteShader(info.geometryShader);
+        glDeleteShader(info.fragmentShader);
+        glDeleteShader(info.shaderProgram);
+    }
+
     void SetAllUniforms(const char* name, const float* matrix) {
         for (auto&& x : shaderMap) {
             GLint projMatLocation = glGetUniformLocation(x.second.shaderProgram, "projectionMatrix");
@@ -122,6 +130,11 @@ namespace nugget::gl {
     }
 
     void CompileShaderFromProperties(IDType node) {
+
+        if (shaderMap.contains(node)) {
+            FreeShader(node);
+        }
+
         IDType vertexNode = IDR(node, ID("vertex"));
         IDType geometryNode = IDR(node, ID("geometry"));
         IDType fragmentNode = IDR(node, ID("fragment"));
@@ -156,6 +169,13 @@ namespace nugget::gl {
         info.geometryShader = geometryShader;
         info.fragmentShader = fragmentShader;
         info.shaderProgram = shaderProgram;
+
+        IDType notice = IDR("nugget.gl.shaders", node);
+        if (Notice::gBoard.KeyExists(notice)) {
+            Notice::gBoard.Set(notice, Notice::gBoard.GetInt32(notice) + 1);
+        } else {
+            Notice::gBoard.Set(notice, 0);
+        }
 
     }
      

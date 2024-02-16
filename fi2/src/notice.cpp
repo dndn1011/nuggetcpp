@@ -330,8 +330,8 @@ namespace nugget {
 					data.valueEntries[id].Set(value);
 				}
 			} else {
-				auto parent = Notice::GetParentTry(id);
-				check(parent != IDType::null && IsValueTypeParent(parent), "Cannot make a child of a leaf node, or parent does not exist: {}\n",IDToString(id));
+//				auto parent = Notice::GetParentTry(id);
+//				check(parent != IDType::null && IsValueTypeParent(parent), "Cannot make a child of a leaf node, or parent does not exist: {}\n",IDToString(id));
 				auto r = data.valueEntries.emplace(id,value);
 				check(r.second, ("Emplace failed"));
 			}

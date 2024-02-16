@@ -729,4 +729,13 @@ namespace nugget {
 		Normalize(&data[6]);
 	}
 
+	bool IdentifierList::operator==(const IdentifierList& other) const {
+		for (int i = 0; i < data.size(); ++i) {
+			if (data[i] != other.data[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 }

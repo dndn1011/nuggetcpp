@@ -228,7 +228,19 @@ namespace nugget::gl::indexedMesh {
 
                 IDType shaderNodeHash = IDR(nodeID, "shader");
                 IDType usedShaderNode = gProps.GetID(shaderNodeHash);
-                shader = GetShaderHandle(usedShaderNode);
+          
+                {   // get the shader handle and update the shader handle when notified
+                    shader = GetShaderHandle(usedShaderNode);
+
+                    Notice::gBoard.RegisterHandler(
+                        Notice::Handler(
+                            IDR("nugget.gl.shaders", usedShaderNode),
+                            [this, usedShaderNode](IDType id) {
+                                shader = GetShaderHandle(usedShaderNode);
+                            }),
+                        regsteredHandlers);
+                }
+
                 check(shader != 0, "Failed to get shader handle for {}", IDToString(usedShaderNode));
                 InitUniforms();
             }

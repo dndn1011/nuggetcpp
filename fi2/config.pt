@@ -210,7 +210,12 @@ assets {
         teapot_base_texture {
             path = "assets/models/utah_teapot_pbr/textures/UtahTeapot_baseColor.png";
             type = texture;
-            description = "pom base texture";
+            description = "teapot base texture";
+        }
+        teapot_normal_texture {
+            path = "assets/models/utah_teapot_pbr/textures/UtahTeapot_normal.png";
+            type = texture;
+            description = "teapot normal texture";
         }
         pomegranate {
             path = "assets/models/PomegranateScan_GLTF/pomegranate.gltf";
@@ -706,6 +711,10 @@ shaders {
 
 
                 void main() {
+
+                  FragColor = vec4(1,0,0,1);
+          //return;
+
                    vec3 normal = normalize(normal_f + vec3(texture(texture1, uv_f)));
 //                   vec3 normal = normalize(normal_f);
                    vec3 camPos = vec3(0,0,500);
@@ -867,14 +876,13 @@ indexedMeshPomogranate {
         function = CreateIndexedMesh;
         shader = shaders.simple;
         primitive = GL_TRIANGLES;
-//        texture = pomegranate_base_texture;
         textures : Identifier = {
             pomegranate_base_texture,
             pomegranate_normal_map,
         };
 //        texture = teapot_base_texture;
-//        model = pomegranate;
-        model = teapot;
+        model = pomegranate;
+//        model = teapot;
     }
 }
 
@@ -883,10 +891,10 @@ indexedMeshTeapot {
         function = CreateIndexedMesh;
         shader = shaders.simple;
         primitive = GL_TRIANGLES;
-        start = 0;
-        length = 36;
-//        texture = pomegranate_base_texture;
-//        model = pomegranate;
+        textures : Identifier = {
+            teapot_base_texture,
+            teapot_normal_texture,
+        };
         texture = teapot_base_texture;
         model = teapot;
     }
@@ -919,6 +927,11 @@ teapot: sceneObject {
     rotation : Vector3f = {
             0.007, 0.005, 0.003
     };
+    transform {
+        pos : Vector3f = { 0,0,-1 };
+        rot : Matrix3f = { 1,0,0,0,1,0,0,0,1};
+        scale : Vector3f = { 0.005,0.005,0.005 };
+    }
 }
 
 scene {
@@ -947,10 +960,21 @@ scene {
 
     : pomegranate {
         transform {
-            pos : Vector3f = { 0,-0.25,0 };
+            pos : Vector3f = { -2,0,-3 };
             rot : Matrix3f = { 1,0,0,0,1,0,0,0,1};
-            scale : Vector3f = { 0.005,0.005,0.005 };
+            scale : Vector3f = { 1,1,1 };
         }
+    }
+
+    : pomegranate {
+        transform {
+            pos : Vector3f = { 2,0,-3 };
+            rot : Matrix3f = { 1,0,0,0,1,0,0,0,1};
+            scale : Vector3f = { 1,1,1 };
+        }
+    }
+
+    : teapot {
     }
 }
 

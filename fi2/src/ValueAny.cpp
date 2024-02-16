@@ -110,6 +110,9 @@ namespace nugget {
 			case ValueAny::Type::ColorList: {
 				return *data.colorListPtr == *other.data.colorListPtr;
 			} break;
+			case ValueAny::Type::IdentifierList: {
+				return *data.identifierListPtr == *other.data.identifierListPtr;
+			} break;
 			case ValueAny::Type::void_: {
 				check(0, "should not compare a void!");
 				return false;
@@ -580,6 +583,12 @@ namespace nugget {
 				if (data.matrix4fPtr) {
 					delete data.matrix4fPtr;
 					data.matrix4fPtr = nullptr;
+				}
+			} break;
+			case Type::Matrix3f: {
+				if (data.matrix3fPtr) {
+					delete data.matrix3fPtr;
+					data.matrix3fPtr = nullptr;
 				}
 			} break;
 			case Type::Vector4f: {
