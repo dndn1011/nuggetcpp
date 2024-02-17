@@ -136,9 +136,12 @@ namespace nugget::db {
         return true;
     }
           
-    bool AddAsset(std::string path, std::string name, std::string type) {
-            // SQL query for insertion
-            const char* sqlQuery = "INSERT INTO assets (path, name, type, hash) VALUES (?, ?, ?, nidhash(?))";
+    bool AddAsset(std::string table, std::string path, std::string name, std::string type,int64_t epoch) {
+        std::string qstr = std::format("INSERT INTO {} (path, name, type, hash, epoch) VALUES (?, ?, ?, nidhash(?), ?)", table).c_str();
+
+        
+        // SQL query for insertion
+        const char* sqlQuery = qstr.c_str();
 
             sqlite3_stmt* stmt;
             // Prepare the SQL statement
@@ -177,6 +180,13 @@ namespace nugget::db {
                 return false;
             }
 
+            rc = sqlite3_bind_int64(stmt, 5, epoch);
+            if (rc != SQLITE_OK) {
+                check(0, "Error binding type parameter: {}\n", sqlite3_errmsg(databaseConnection));
+                sqlite3_finalize(stmt);
+                return false;
+            }
+
             // Execute the statement to insert the data
             rc = sqlite3_step(stmt);
 
@@ -209,6 +219,93 @@ namespace nugget::db {
             check(0, "Error executing SQL statement: {}\n", sqlite3_errmsg(databaseConnection));
         }
     }
+
+    void ClearTable(const std::string &table) {
+        std::string qstr = std::format("delete from {}", table).c_str();
+
+        char* errMsg = 0;
+        int rc;
+        rc = sqlite3_exec(databaseConnection, qstr.c_str(), NULL, NULL, &errMsg);
+        if (rc != SQLITE_OK) {
+            check(0, "Error executing SQL statement: {}\n", sqlite3_errmsg(databaseConnection));
+        }
+    }
+
+    void InsertChanges() {
+        std::string qstr = std::format("insert into need_to_reconcile (path,type) select* from find_all_changes").c_str();
+
+        char* errMsg = 0;
+        int rc;
+        rc = sqlite3_exec(databaseConnection, qstr.c_str(), NULL, NULL, &errMsg);
+        if (rc != SQLITE_OK) {
+            check(0, "Error executing SQL statement: {}\n", sqlite3_errmsg(databaseConnection));
+        }
+    }
+    void ApplyChanges() {
+        ClearTable("assets");
+
+        std::string qstr = std::format("insert into assets select * from asset_changes").c_str();
+
+        char* errMsg = 0;
+        int rc;
+        rc = sqlite3_exec(databaseConnection, qstr.c_str(), NULL, NULL, &errMsg);
+        if (rc != SQLITE_OK) {
+            check(0, "Error executing SQL statement: {}\n", sqlite3_errmsg(databaseConnection));
+        }
+    }
+    void ReconcileAssetChanges() {
+        InsertChanges();
+        ApplyChanges();
+    }
+
+    bool GetNextToReconcile(ReconcileInfo& result) {
+        SQLite sql;
+        ERR(sql.Query("select * from need_to_reconcile where coalesce(state, '') <> 'done' order by id limit 1"));
+        ERR(sql.Step());
+        std::vector<ValueAny> results;
+        ERR(sql.FetchRow({ ValueAny::Type::int64_t_ ,ValueAny::Type::string, ValueAny::Type::string }, results));
+        result.id = results[0].AsInt64();
+        result.path = results[1].AsString();
+        result.type = results[2].AsString();
+       return true;
+    }
+
+    bool MarkReconciled(int64_t id) {
+        std::string sqlQuery = std::format("update need_to_reconcile set state='done' where id=?");
+
+        sqlite3_stmt* stmt;
+        // Prepare the SQL statement
+        auto rc = sqlite3_prepare_v2(databaseConnection, sqlQuery.c_str(), -1, &stmt, nullptr);
+        if (rc != SQLITE_OK) {
+            check(0, "Error preparing SQL statement: {}\n", sqlite3_errmsg(databaseConnection));
+            return false;
+        }
+
+        // Bind values to the prepared statement
+        rc = sqlite3_bind_int64(stmt, 1, id);
+        if (rc != SQLITE_OK) {
+            check(0, "Error binding path parameter: {}\n", sqlite3_errmsg(databaseConnection));
+            sqlite3_finalize(stmt);
+            return false;
+        }
+
+        // Execute the statement to insert the data
+        rc = sqlite3_step(stmt);
+
+        if (rc != SQLITE_DONE) {
+            check(0, "Error executing SQL statement: {}\n", sqlite3_errmsg(databaseConnection));
+            sqlite3_finalize(stmt);
+            return false;
+        }
+
+        // Finalize the statement and close the database
+        sqlite3_finalize(stmt);
+
+        return true;
+
+
+    }
+
 
 #if 0
 

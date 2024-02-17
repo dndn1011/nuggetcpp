@@ -10,6 +10,8 @@
 #include "png.h"
 #include "propertytree.h"
 #include "gltf.h"
+#include <chrono>
+#include "system/FileMonitoring.h"
 
 namespace nugget::asset {
     using namespace identifier;
@@ -19,6 +21,9 @@ namespace nugget::asset {
     static const size_t MaxTextures = 100;
     std::unordered_map<IDType, TextureData> textures;
     std::unordered_map<IDType, ModelData> models;
+
+    static volatile int32_t needToReconcile = 0;
+    static int32_t lastReconciled = 0;
 
     std::string MakeValidIdentifier(const std::string& input) {
         // Ensure the first character is a letter or underscore
@@ -42,17 +47,24 @@ namespace nugget::asset {
     }
     
 
-    void CollectFiles(const fs::path& directory) {
-        db::StartTransaction();
+    void CollectFiles(const std::string &table,const fs::path& directory) {
         for (const auto& entry : fs::recursive_directory_iterator(directory)) {
             if (fs::is_regular_file(entry.path())) {
                 std::string ppath = entry.path().string();
                     std::replace(ppath.begin(), ppath.end(), '\\', '/');
 //                    output("{}\n", ppath);
-                 db::AddAsset(ppath, MakeValidIdentifier(ppath), "texture");
+                    auto ftime = fs::last_write_time(entry.path().string());
+
+                    // Convert file_time_type to time_point of system_clock
+                    auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+                        ftime - fs::file_time_type::clock::now() + std::chrono::system_clock::now()
+                    );
+                    // Now convert to UNIX timestamp using system_clock's to_time_t
+                    auto epoch = std::chrono::system_clock::to_time_t(sctp);
+
+                    db::AddAsset(table, ppath, MakeValidIdentifier(ppath), "", epoch);
             }
         }
-        db::CommitTransaction();
     }
 
     void CollectAssetMetadata(IDType node) {
@@ -69,21 +81,51 @@ namespace nugget::asset {
         }
     }
 
-    void Init() {
+    void ScanAssets(bool update=false) {
+        std::string table = update ? "asset_changes" : "assets";
+        
+        db::StartTransaction();
+
+        if (update) {
+            db::ClearTable(table);
+        }
         std::string textureDir = gProps.GetString(ID("assets.config.textures"));
-        CollectFiles(textureDir);
+        CollectFiles(table,textureDir);
         std::string modelDir = gProps.GetString(ID("assets.config.models"));
-        CollectFiles(modelDir);
-        CollectAssetMetadata(ID("assets.meta"));
+        CollectFiles(table,modelDir);
+
+        if (update) {
+            db::ReconcileAssetChanges();
+        }
+        db::CommitTransaction();
     }
 
+    void Init() {
+        std::string root = gProps.GetString(ID("assets.config.root"));
+        ScanAssets();
+     
+        system::files::Monitor(root, [](const std::string& path) {
+            ScanAssets(true);
+            needToReconcile++;
+            });
+    
+        CollectAssetMetadata(ID("assets.meta"));
 
+    }
 
-    size_t init_dummy = nugget::system::RegisterModule([]() {
-        Init();
-        return 0;
-        },200);
-
+    void Update() {
+        if (needToReconcile > lastReconciled) {
+            db::ReconcileInfo info;
+            if (db::GetNextToReconcile(info /*fill*/)) {
+                if (info.type == "modified") {
+                    output("@@@ {} {} \n", info.path, info.type);
+                }
+                db::MarkReconciled(info.id);
+            } else {
+                lastReconciled = needToReconcile;
+            }
+        }
+    }
 
     const TextureData& GetTexture(IDType id) {
         if (textures.contains(id)) {
@@ -136,5 +178,23 @@ namespace nugget::asset {
         assert(0);   // check if we have to do somethin here?
     }
 
+    static size_t init_dummy[] =
+    {
+        {
+            nugget::system::RegisterModule([]() {
+                Init();
+                return 0;
+            }, 200)
+        },
+        {
+            // frame begin
+            nugget::system::RegisterModule([]() {
+                Update();
+                return 0;
+            }, 200, ID("update"))
+        },
+    };
 
 }
+
+

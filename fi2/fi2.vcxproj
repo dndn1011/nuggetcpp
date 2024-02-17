@@ -196,6 +196,7 @@
     <ClCompile Include="src\serialise.h" />
     <ClCompile Include="src\serialse.cpp" />
     <ClCompile Include="src\system.cpp" />
+    <ClCompile Include="src\System\FileMonitoring.cpp" />
     <ClCompile Include="src\types.cpp" />
     <ClCompile Include="src\ui.cpp" />
     <ClCompile Include="src\uientities.cpp" />
@@ -241,6 +242,7 @@
     <ClInclude Include="src\renderer\renderer.h" />
     <ClInclude Include="src\scene\scene.h" />
     <ClInclude Include="src\system.h" />
+    <ClInclude Include="src\System\FileMonitoring.h" />
     <ClInclude Include="src\ui.h" />
     <ClInclude Include="src\uientities.h" />
     <ClInclude Include="src\ui_imp.h" />
