@@ -17,4 +17,6 @@ namespace nugget::system {
 	void RegisterFunctionByID(IDType node, FunctionByIDLambda func);
 	void CallFunctionByID(IDType node,IDType parent);
 
+	void Shutdown();
+
 }

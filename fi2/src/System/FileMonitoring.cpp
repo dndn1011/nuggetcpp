@@ -58,7 +58,7 @@ namespace nugget::system::files {
     }
         
 
-    void MonitorDirectory(std::string directoryPath, std::function<void(std::string)> callback) {
+    void MonitorDirectory(std::stop_token stopToken,std::string directoryPath, std::function<void(std::string)> callback) {
         LPCSTR directoryToMonitor = directoryPath.c_str();
 
         WideString widePath(directoryPath);
@@ -92,14 +92,18 @@ namespace nugget::system::files {
                 NULL
             );
 
-            WaitForSingleObject(overlapped.hEvent, INFINITE);
-
-            if (result) {
-                ProcessChanges(buffer, bytesReturned, widePath.GetWStr(), callback);
-            } else {
-                // An error occurred
-                std::cerr << "Failed to monitor directory changes." << std::endl;
+            auto r = WaitForSingleObject(overlapped.hEvent, 500);
+            if (stopToken.stop_requested()) {
                 break;
+            }
+            if (WAIT_OBJECT_0 == r) {
+                if (result) {
+                    ProcessChanges(buffer, bytesReturned, widePath.GetWStr(), callback);
+                } else {
+                    // An error occurred
+                    std::cerr << "Failed to monitor directory changes." << std::endl;
+                    break;
+                }
             }
         }
 
@@ -123,5 +127,22 @@ namespace nugget::system::files {
             });
      
     }
+
+    void Exit() {
+        for (auto&& x : monitors) {
+            x.thread.request_stop();
+        }
+    }
+
+    static size_t init_dummy[] =
+    {
+        {
+            // frame begin
+            nugget::system::RegisterModule([]() {
+                Exit();
+                return 0;
+            }, 200, ID("shutdown"))
+        },
+    };
 
 }

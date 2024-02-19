@@ -118,6 +118,11 @@ int main(int argc, char* argv[]) {
 
     nugget::system::Init();
 
+    if (Notice::gBoard.KeyExists(ID("exit"))) {
+        int32_t exitCode = Notice::gBoard.GetInt32(ID("exit"));
+        system::Shutdown();
+        exit(exitCode);
+    }
 
     nugget::ui::entity::CreateEntity(gProps, IDR("main"));
     nugget::ui::entity::ManageGeometry(gProps, IDR("main"));

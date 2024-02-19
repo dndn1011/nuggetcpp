@@ -108,7 +108,7 @@ namespace nugget::asset {
             ScanAssets(true);
             needToReconcile++;
             });
-    
+
         CollectAssetMetadata(ID("assets.meta"));
 
     }

@@ -25,14 +25,15 @@ namespace nugget::tests {
             cases++;
         }
         output("TEST COMPLETED: {} cases, {} errors\n", cases, errors);
-        if (errors > 0) {
-            exit(1);
-        }
         if (Notice::gBoard.KeyExists(ID("commandLine.assignments.exitAfterTests"))) {
-            exit(0 );
+            if (errors > 0) {
+                Notice::gBoard.Set(IDR("exit"), 1);
+            } else {
+                Notice::gBoard.Set(IDR("exit"), 0);
+            }
         }
     }
-
+      
     static size_t init_dummy = nugget::system::RegisterModule([]() {
         Init();
         return 0;
