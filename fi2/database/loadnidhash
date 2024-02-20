@@ -1,0 +1,1 @@
+.load ../../sqlite3_extensions/x64/Debug/sqlite3_nidhash.dll sqlite3_nidhash_init

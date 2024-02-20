@@ -87,7 +87,7 @@ namespace nugget::scene {
                     Init();
                 }
                 return 0;
-               }, 200)
+               }, 200,identifier::ID("init"),__FILE__)
             },
             {
                 nugget::system::RegisterModule([]() {

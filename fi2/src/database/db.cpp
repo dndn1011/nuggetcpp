@@ -106,7 +106,7 @@ namespace nugget::db {
         }
     };
 
-#define ERR(a) if(!(a)) { return false; }
+#define ERR(a) if(!(a)) {check(0,"db error"); return false; }
 
     bool DeleteAllFromTable(const std::string &table) {
         SQLite sql;
@@ -136,6 +136,21 @@ namespace nugget::db {
         return true;
     }
           
+    bool IsAssetCacheDirty(IDType id) {
+        SQLite sql;
+
+        ERR(sql.Query("select c.epoch - b.epoch from asset_meta a, cache_info b,assets c where id=b.path and c.path = a.path and nidhash(a.id)=?;"));
+        ERR(sql.Bind(1, id));
+        if (sql.Step()) {
+            std::vector<ValueAny> results;
+            ERR(sql.FetchRow({ ValueAny::Type::int64_t_ }, results));
+            int64_t result = results[0].AsInt64();
+            return result >= 0;
+        } else {
+            return true;
+        }
+    }
+
     bool AddAsset(std::string table, std::string path, std::string name, std::string type,int64_t epoch) {
         std::string qstr = std::format("INSERT INTO {} (path, name, type, hash, epoch) VALUES (?, ?, ?, nidhash(?), ?)", table).c_str();
 
@@ -357,5 +372,5 @@ namespace nugget::db {
     size_t init_dummy = nugget::system::RegisterModule([]() {
         Init();
         return 0;
-        }, 110);
+        }, 110, identifier::ID("init"), __FILE__);
 }

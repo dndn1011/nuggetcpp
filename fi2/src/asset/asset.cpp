@@ -47,27 +47,29 @@ namespace nugget::asset {
     }
     
 
-    void CollectFiles(const std::string &table,const fs::path& directory) {
+    void CollectFiles(const std::string &table,const fs::path& directory,bool withoutRoot=false) {
         for (const auto& entry : fs::recursive_directory_iterator(directory)) {
             if (fs::is_regular_file(entry.path())) {
                 std::string ppath = entry.path().string();
-                    std::replace(ppath.begin(), ppath.end(), '\\', '/');
 //                    output("{}\n", ppath);
-                    auto ftime = fs::last_write_time(entry.path().string());
+                std::replace(ppath.begin(), ppath.end(), '\\', '/');
+                std::string rpath = withoutRoot ? fs::relative(ppath, directory).string() : ppath;
+                auto ftime = fs::last_write_time(entry.path().string());
 
-                    // Convert file_time_type to time_point of system_clock
-                    auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
-                        ftime - fs::file_time_type::clock::now() + std::chrono::system_clock::now()
-                    );
-                    // Now convert to UNIX timestamp using system_clock's to_time_t
-                    auto epoch = std::chrono::system_clock::to_time_t(sctp);
+                // Convert file_time_type to time_point of system_clock
+                auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+                    ftime - fs::file_time_type::clock::now() + std::chrono::system_clock::now()
+                );
+                // Now convert to UNIX timestamp using system_clock's to_time_t
+                auto epoch = std::chrono::system_clock::to_time_t(sctp);
 
-                    db::AddAsset(table, ppath, MakeValidIdentifier(ppath), "", epoch);
+                db::AddAsset(table, rpath, MakeValidIdentifier(ppath), "", epoch);
             }
         }
     }
 
     void CollectAssetMetadata(IDType node) {
+        db::StartTransaction();
         std::vector<IDType> children;
         gProps.GetChildrenWithNodeExisting(node, ID("path"), children);
         for (auto&& x : children) {
@@ -79,6 +81,7 @@ namespace nugget::asset {
             const std::string &description = gProps.GetString(idDescription);
             db::AddAssetMeta(IDToString(GetLeaf(x)), path, type, description);
         }
+        db::CommitTransaction();
     }
 
     void ScanAssets(bool update=false) {
@@ -100,9 +103,42 @@ namespace nugget::asset {
         db::CommitTransaction();
     }
 
+    void ScanCache() {
+        std::string table = "cache_info";
+
+        db::StartTransaction();
+
+        db::ClearTable(table);
+
+
+        std::string cacheDir = gProps.GetString(ID("assets.config.cache"));
+
+        if (!fs::exists(cacheDir)) {
+            std::error_code ec; // For error handling without exceptions
+            if (!fs::create_directories(cacheDir, ec)) { // Automatically creates all directories in the path
+                check(0, "Could not create cache directory");
+            }
+        } else {
+            check(fs::is_directory(cacheDir), "The cache directory is a file!?");
+        }
+
+        CollectFiles(table, cacheDir, true);
+
+        db::CommitTransaction();
+    }
+
+    std::string GetCachePathForAsset(IDType id) {
+        fs::path cacheDir = gProps.GetString(ID("assets.config.cache"));
+        fs::path cachePath = cacheDir / IDToString(id);
+        return cachePath.string();
+    }
+
+
     void Init() {
         std::string root = gProps.GetString(ID("assets.config.root"));
+        
         ScanAssets();
+        ScanCache();
      
         system::files::Monitor(root, [](const std::string& path) {
             ScanAssets(true);
@@ -118,12 +154,30 @@ namespace nugget::asset {
             db::ReconcileInfo info;
             if (db::GetNextToReconcile(info /*fill*/)) {
                 if (info.type == "modified") {
+                    // reload the texture
                     output("@@@ {} {} \n", info.path, info.type);
+
                 }
                 db::MarkReconciled(info.id);
             } else {
                 lastReconciled = needToReconcile;
             }
+        }
+    }
+
+    void SerialiseTexture(const TextureData& data, const std::string& outPath) {
+        if (auto file = std::ofstream(outPath, std::ios::binary)) {
+            file.write(reinterpret_cast<const char*>(&data), sizeof(data));
+            file.write(reinterpret_cast<const char*>(data.data), data.DataSize());
+        }
+    }
+
+    void DeserialiseTexture(TextureData& data, const std::string& inPath) {
+        if (auto file = std::ifstream(inPath, std::ios::binary)) {
+            file.read(reinterpret_cast<char*>(&data), sizeof(data));
+            data.data = new unsigned char[data.DataSize()];
+            file.read(reinterpret_cast<char*>(data.data), data.DataSize());
+            data.fromCache = true;
         }
     }
 
@@ -135,15 +189,27 @@ namespace nugget::asset {
             TextureData& t = re.first->second;
             // look up the texture
 
-            std::string path;
-            bool r = db::LookupAsset(id, path);
-            if (!r) {
-                check(0, "No information available on asset '{}'\n", IDToString(id));
+            if (!db::IsAssetCacheDirty(id)) {
+                // deserialise binary texture
+                DeserialiseTexture(t, GetCachePathForAsset(id));
+                return t;
+            } else {
+                // serialise
+
+                std::string path;
+                bool r = db::LookupAsset(id, path);
+                if (!r) {
+                    check(0, "No information available on asset '{}'\n", IDToString(id));
+                    return t;
+                }
+
+                bool rl = LoadPNG(path, t);
+
+                SerialiseTexture(t, GetCachePathForAsset(id));
+
+                assert(rl);
                 return t;
             }
-            bool rl = LoadPNG(path, t);
-            assert(rl);  
-            return t;
         }
     }
 
@@ -162,15 +228,21 @@ namespace nugget::asset {
                 check(0, "No information available on asset '{}'\n", IDToString(id));
                 return nullData;
             }
+            output("Model Load...\n");
             bool rl = gltf::LoadModel(path, t);
+            output("...ed\n");
             assert(rl);
             return t;
         }
     }
 
     TextureData::~TextureData() {
-        if (data) {
-            stbi_image_free(data);
+        if (fromCache) {
+            delete data;
+        } else {
+            if (data) {
+                stbi_image_free(data);
+            }
         }
     }
 
@@ -184,7 +256,7 @@ namespace nugget::asset {
             nugget::system::RegisterModule([]() {
                 Init();
                 return 0;
-            }, 200)
+            }, 200,identifier::ID("init"),__FILE__)
         },
         {
             // frame begin

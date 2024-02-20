@@ -184,6 +184,7 @@ assets {
         root = "assets";
         textures = "assets/textures";
         models = "assets/models";
+        cache = "cache";
     }
     meta {
         spaceship {

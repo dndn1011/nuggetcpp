@@ -12,6 +12,10 @@ namespace nugget::asset {
 		int width=0;
 		int height=0;
 		int channels=0;
+		bool fromCache = false;
+		size_t DataSize() const {
+			return (size_t)width * height * channels;
+		}
 		~TextureData();
 	};
 

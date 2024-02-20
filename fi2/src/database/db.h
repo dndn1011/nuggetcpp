@@ -18,5 +18,6 @@ namespace nugget::db {
 
 	bool GetNextToReconcile(ReconcileInfo& result);
 	bool MarkReconciled(int64_t id);
+	bool IsAssetCacheDirty(IDType id);
 }
 

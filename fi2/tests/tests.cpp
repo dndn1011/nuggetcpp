@@ -37,6 +37,6 @@ namespace nugget::tests {
     static size_t init_dummy = nugget::system::RegisterModule([]() {
         Init();
         return 0;
-        }, 999);
+        }, 999, identifier::ID("init"), __FILE__);
 
 }

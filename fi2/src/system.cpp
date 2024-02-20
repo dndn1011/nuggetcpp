@@ -10,6 +10,7 @@ namespace nugget::system {
 		struct ModuleReg {
 			RegisterFunction func;
 			int64_t order;
+			std::string label;
 		};
 		struct RegisterSingleton;
 		extern RegisterSingleton* staticEntityRegistrations;
@@ -57,8 +58,8 @@ namespace nugget::system {
 		std::unordered_map<IDType, FunctionByIDLambda> registeredFunctions;
 
 	}
-	size_t RegisterModule(RegisterFunction func, int64_t order, IDType phase) {
-		RegisterSingleton::GetInstance()->moduleList[phase].push_back(ModuleReg{ func, order });
+	size_t RegisterModule(RegisterFunction func, int64_t order, IDType phase,const std::string &label) {
+		RegisterSingleton::GetInstance()->moduleList[phase].push_back(ModuleReg{ func, order, label });
 		return size_t();
 	}
 
@@ -69,6 +70,7 @@ namespace nugget::system {
 			return a.order < b.order;
 			});
 		for (auto&& x : list) {
+			output("{}\n", x.label);
 			x.func();
 		}
 	}

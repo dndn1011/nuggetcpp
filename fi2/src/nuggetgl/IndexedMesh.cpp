@@ -201,7 +201,9 @@ namespace nugget::gl::indexedMesh {
                 const IdentifierList& list = gProps.GetIdentifierList(texturesNode);
 
                 for (size_t i = 0; i < list.data.size(); ++i) {
+                    output("LoadPNG LOAD...\n");
                     const nugget::asset::TextureData& textureData = nugget::asset::GetTexture(list.data[i]);
+                    output("LoadPNG ...ED\n");
                     GLuint glTexID;
                     glGenTextures(1, &glTexID);
                     glBindTexture(GL_TEXTURE_2D, glTexID);
@@ -313,7 +315,7 @@ namespace nugget::gl::indexedMesh {
                 Init();
             }
             return 0;
-            }, 200)
+            }, 200,identifier::ID("init"),__FILE__)
         }
     };
 
