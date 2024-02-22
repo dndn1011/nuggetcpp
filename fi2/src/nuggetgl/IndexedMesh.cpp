@@ -83,11 +83,11 @@ namespace nugget::gl::indexedMesh {
 
             GLint lightPosHandle = glGetUniformLocation(shader, "lightPos");
             glUniform3f(lightPosHandle, lightPos.x, lightPos.y, lightPos.z);
-
+#if 0
             float k = 32.0f;
             lightPos.x += lightPos.z / k;
             lightPos.z -= lightPos.x / k;
-
+#endif
 #if 0
             // move this to scene
             // TODO get rid of this hardwired thingy

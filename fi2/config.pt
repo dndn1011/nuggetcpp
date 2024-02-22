@@ -210,7 +210,8 @@ assets {
             description = "Utah Teapot";
         }
         teapot_base_texture {
-            path = "assets/models/utah_teapot_pbr/textures/UtahTeapot_baseColor.png";
+ //           path = "assets/models/utah_teapot_pbr/textures/UtahTeapot_baseColor.png";
+            path = "assets/textures/spaceship - Copy.png";
             type = texture;
             description = "teapot base texture";
         }
@@ -930,7 +931,7 @@ teapot: sceneObject {
             0.007, 0.005, 0.003
     };
     transform {
-        pos : Vector3f = { 0,0,-1 };
+        pos : Vector3f = { 0,0,0 };
         rot : Matrix3f = { 1,0,0,0,1,0,0,0,1};
         scale : Vector3f = { 0.005,0.005,0.005 };
     }
@@ -959,19 +960,21 @@ scene {
         0.0, 0.0, -1, 1.0,
     };
 
-    : pomegranate {
-        transform {
-            pos : Vector3f = { -2,0,-3 };
-            rot : Matrix3f = { 1,0,0,0,1,0,0,0,1};
-            scale : Vector3f = { 1,1,1 };
+    out {
+        : pomegranate {
+            transform {
+                pos : Vector3f = { -2,0,-3 };
+                rot : Matrix3f = { 1,0,0,0,1,0,0,0,1};
+                scale : Vector3f = { 1,1,1 };
+            }
         }
-    }
 
-    : pomegranate {
-        transform {
-            pos : Vector3f = { 2,0,-3 };
-            rot : Matrix3f = { 1,0,0,0,1,0,0,0,1};
-            scale : Vector3f = { 1,1,1 };
+        : pomegranate {
+            transform {
+                pos : Vector3f = { 2,0,-3 };
+                rot : Matrix3f = { 1,0,0,0,1,0,0,0,1};
+                scale : Vector3f = { 1,1,1 };
+            }
         }
     }
 

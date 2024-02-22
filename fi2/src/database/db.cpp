@@ -124,6 +124,18 @@ namespace nugget::db {
         ERR(sql.Apply());
         return true;
     }
+    // INSERT OR REPLACE INTO table_name(column1, column2, ... columnN)
+
+    bool db::AddAssetCache(const std::string& path, const std::string &name, const std::string &type,IDType id) {
+        SQLite sql;
+        ERR(sql.Query("insert or replace into cache_info (path,name,type,hash,epoch) values (?,?,?,?,strftime('%s', 'now'))"));
+        ERR(sql.Bind(1, path));
+        ERR(sql.Bind(2, name));
+        ERR(sql.Bind(3, type));
+        ERR(sql.Bind(4, id));
+        ERR(sql.Apply());
+        return true;
+    }
 
     bool LookupAsset(IDType id,std::string &result) {
         SQLite sql;
@@ -139,13 +151,15 @@ namespace nugget::db {
     bool IsAssetCacheDirty(IDType id) {
         SQLite sql;
 
-        ERR(sql.Query("select c.epoch - b.epoch from asset_meta a, cache_info b,assets c where id=b.path and c.path = a.path and nidhash(a.id)=?;"));
+        ERR(sql.Query(
+            "select asset_meta.path<>cache_info.path or cache_info.epoch<assets.epoch from cache_info,asset_meta,assets where assets.path=asset_meta.path and asset_meta.id=cache_info.name and nidhash(cache_info.name) = ?;"
+        ));
         ERR(sql.Bind(1, id));
         if (sql.Step()) {
             std::vector<ValueAny> results;
             ERR(sql.FetchRow({ ValueAny::Type::int64_t_ }, results));
             int64_t result = results[0].AsInt64();
-            return result >= 0;
+            return result != 0;
         } else {
             return true;
         }

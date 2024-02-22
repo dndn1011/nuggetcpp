@@ -12,6 +12,7 @@
 #include "gltf.h"
 #include <chrono>
 #include "system/FileMonitoring.h"
+#include "windows.h"
 
 namespace nugget::asset {
     using namespace identifier;
@@ -45,13 +46,13 @@ namespace nugget::asset {
 
         return result;
     }
-    
 
-    void CollectFiles(const std::string &table,const fs::path& directory,bool withoutRoot=false) {
+
+    void CollectFiles(const std::string& table, const fs::path& directory, bool withoutRoot = false) {
         for (const auto& entry : fs::recursive_directory_iterator(directory)) {
             if (fs::is_regular_file(entry.path())) {
                 std::string ppath = entry.path().string();
-//                    output("{}\n", ppath);
+                //                    output("{}\n", ppath);
                 std::replace(ppath.begin(), ppath.end(), '\\', '/');
                 std::string rpath = withoutRoot ? fs::relative(ppath, directory).string() : ppath;
                 auto ftime = fs::last_write_time(entry.path().string());
@@ -76,26 +77,26 @@ namespace nugget::asset {
             IDType idPath = IDR(x, "path");
             IDType idType = IDR(x, "type");
             IDType idDescription = IDR(x, "description");
-            const std::string &path = gProps.GetString(idPath);
-            const std::string &type = gProps.GetString(idType);
-            const std::string &description = gProps.GetString(idDescription);
+            const std::string& path = gProps.GetString(idPath);
+            const std::string& type = gProps.GetString(idType);
+            const std::string& description = gProps.GetString(idDescription);
             db::AddAssetMeta(IDToString(GetLeaf(x)), path, type, description);
         }
         db::CommitTransaction();
     }
 
-    void ScanAssets(bool update=false) {
+    void ScanAssets(bool update = false) {
         std::string table = update ? "asset_changes" : "assets";
-        
+
         db::StartTransaction();
 
         if (update) {
             db::ClearTable(table);
         }
         std::string textureDir = gProps.GetString(ID("assets.config.textures"));
-        CollectFiles(table,textureDir);
+        CollectFiles(table, textureDir);
         std::string modelDir = gProps.GetString(ID("assets.config.models"));
-        CollectFiles(table,modelDir);
+        CollectFiles(table, modelDir);
 
         if (update) {
             db::ReconcileAssetChanges();
@@ -103,6 +104,7 @@ namespace nugget::asset {
         db::CommitTransaction();
     }
 
+#if 0
     void ScanCache() {
         std::string table = "cache_info";
 
@@ -126,6 +128,7 @@ namespace nugget::asset {
 
         db::CommitTransaction();
     }
+#endif
 
     std::string GetCachePathForAsset(IDType id) {
         fs::path cacheDir = gProps.GetString(ID("assets.config.cache"));
@@ -136,10 +139,9 @@ namespace nugget::asset {
 
     void Init() {
         std::string root = gProps.GetString(ID("assets.config.root"));
-        
+
         ScanAssets();
-        ScanCache();
-     
+
         system::files::Monitor(root, [](const std::string& path) {
             ScanAssets(true);
             needToReconcile++;
@@ -166,9 +168,14 @@ namespace nugget::asset {
     }
 
     void SerialiseTexture(const TextureData& data, const std::string& outPath) {
-        if (auto file = std::ofstream(outPath, std::ios::binary)) {
-            file.write(reinterpret_cast<const char*>(&data), sizeof(data));
-            file.write(reinterpret_cast<const char*>(data.data), data.DataSize());
+        if (auto file = std::basic_ofstream<unsigned char>(outPath, std::ios::binary | std::ios::trunc)) {
+            check(file, "stream invaklid: {}", GetLastError());
+            file.write((unsigned char*)&data, sizeof(data));
+            check(file, "write failure: {}", GetLastError());
+            file.write(data.data, data.DataSize());
+            check(file, "write failure {}", GetLastError());
+        } else {
+            check(0, "could not open {} for writing", outPath);
         }
     }
 
@@ -187,9 +194,9 @@ namespace nugget::asset {
         } else {
             auto re = textures.emplace(std::piecewise_construct, std::forward_as_tuple(id), std::forward_as_tuple());
             TextureData& t = re.first->second;
-            // look up the texture
 
             if (!db::IsAssetCacheDirty(id)) {
+                output("@@@@@@@@@@ USING CACHE!\n");
                 // deserialise binary texture
                 DeserialiseTexture(t, GetCachePathForAsset(id));
                 return t;
@@ -206,6 +213,9 @@ namespace nugget::asset {
                 bool rl = LoadPNG(path, t);
 
                 SerialiseTexture(t, GetCachePathForAsset(id));
+
+                // path text,name text, type text, hash int64, epoch big integer
+                db::AddAssetCache(path, IDToString(id), "texture", id);
 
                 assert(rl);
                 return t;

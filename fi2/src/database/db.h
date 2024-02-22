@@ -19,5 +19,7 @@ namespace nugget::db {
 	bool GetNextToReconcile(ReconcileInfo& result);
 	bool MarkReconciled(int64_t id);
 	bool IsAssetCacheDirty(IDType id);
+	bool AddAssetCache(const std::string& path, const std::string& name, const std::string& type, IDType id);
+
 }
 
