@@ -323,18 +323,20 @@ namespace nugget {
 					if (diff) {
 						static int count = 0;
 						count++;
-//						output("-------------------> {} {}\n", count, IDToString(id));
 						Notify(id);
 					}
 				} else {
 					data.valueEntries[id].Set(value);
 				}
 			} else {
-//				auto parent = Notice::GetParentTry(id);
-//				check(parent != IDType::null && IsValueTypeParent(parent), "Cannot make a child of a leaf node, or parent does not exist: {}\n",IDToString(id));
 				auto r = data.valueEntries.emplace(id,value);
 				check(r.second, ("Emplace failed"));
 			}
+		}
+
+		[[nodiscard]] const ValueAny& Board::Get(IDType id) const {
+			check(data.valueEntries.contains(id), "Could not find {}", IDToString(id));
+			return data.valueEntries.at(id);
 		}
 
 		template void Board::Set<int64_t>(IDType id, const int64_t& value);

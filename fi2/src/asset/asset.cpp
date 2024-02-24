@@ -26,6 +26,23 @@ namespace nugget::asset {
     static volatile int32_t needToReconcile = 0;
     static int32_t lastReconciled = 0;
 
+    struct AssetSystemConfig {
+        APPLY_RULE_OF_MINUS_4(AssetSystemConfig);
+
+        AssetSystemConfig() {}
+
+        Notice::HotValue rootDir = { gProps, ID("assets.config.root") };
+        Notice::HotValue textureDir = { gProps, ID("assets.config.textures") };
+        Notice::HotValue modelDir = { gProps, ID("assets.config.models") };
+    };
+
+    const AssetSystemConfig& assetSystemConfig()
+    {
+        static AssetSystemConfig config;
+        return config;
+    }
+
+
     std::string MakeValidIdentifier(const std::string& input) {
         // Ensure the first character is a letter or underscore
         if (!isalpha(input[0]) && input[0] != '_') {
@@ -93,10 +110,8 @@ namespace nugget::asset {
         if (update) {
             db::ClearTable(table);
         }
-        std::string textureDir = gProps.GetString(ID("assets.config.textures"));
-        CollectFiles(table, textureDir);
-        std::string modelDir = gProps.GetString(ID("assets.config.models"));
-        CollectFiles(table, modelDir);
+        CollectFiles(table, static_cast<std::string>(assetSystemConfig().textureDir));
+        CollectFiles(table, static_cast<std::string>(assetSystemConfig().modelDir));
 
         if (update) {
             db::ReconcileAssetChanges();
@@ -136,13 +151,12 @@ namespace nugget::asset {
         return cachePath.string();
     }
 
-
     void Init() {
-        std::string root = gProps.GetString(ID("assets.config.root"));
 
-        ScanAssets();
+        ScanAssets(); 
 
-        system::files::Monitor(root, [](const std::string& path) {
+        system::files::Monitor(assetSystemConfig().rootDir, [](const std::string& path) {
+            // called by different thread
             ScanAssets(true);
             needToReconcile++;
             });
@@ -152,6 +166,13 @@ namespace nugget::asset {
     }
 
     void Update() {
+  //      static Notice::HotValue foo(gProps, ID("haha.hehe"));
+
+    //    int64_t fooValue = foo.Get();
+
+    //    output("@@@ {}\n", fooValue);
+
+
         if (needToReconcile > lastReconciled) {
             db::ReconcileInfo info;
             if (db::GetNextToReconcile(info /*fill*/)) {

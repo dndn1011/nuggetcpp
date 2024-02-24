@@ -6,7 +6,6 @@
 
 namespace nugget {
     struct ValueAny {
-        // Existing constructors
         ValueAny();
         explicit ValueAny(int32_t v);
         explicit ValueAny(int64_t v);
@@ -29,20 +28,35 @@ namespace nugget {
         explicit ValueAny(const Int64List& v);
         explicit ValueAny(const IdentifierList& v);
 
-        // Copy constructor and assignment operator
+        operator int64_t() const { return AsInt64(); }
+        operator int32_t() const { return AsInt32(); }
+        operator uint64_t() const { return AsUint64(); }
+        operator float() const { return AsFloat(); }
+        operator Color() const { return AsColor(); }
+        operator std::string() const { return AsString(); }
+        operator identifier::IDType() const { return AsIDType(); }
+        operator nugget::ui::Dimension() const { return AsDimension(); }
+        operator Exception() const { return AsException(); }
+        operator Vector3fList() const { return AsVector3fList(); }
+        operator Vector2fList() const { return AsVector2fList(); }
+        operator ColorList() const { return AsColorList(); }
+        operator Vector3f() const { return AsVector3f(); }
+        operator Vector2f() const { return AsVector2f(); }
+        operator Matrix4f() const { return AsMatrix4f(); }
+        operator Matrix3f() const { return AsMatrix3f(); }
+        operator Vector4f() const { return AsVector4f(); }
+        operator Int64List() const { return AsInt64List(); }
+        operator IdentifierList() const { return AsIdentifierList(); }
+
         ValueAny(const ValueAny& other);
         ValueAny& operator=(const ValueAny& other);
 
-        // Move constructor
         ValueAny(ValueAny&& other) noexcept;
 
-        // Comparison operator
         bool operator==(const ValueAny& other) const;
 
-        // Destructor
         ~ValueAny();
 
-        // Type enumeration with new Matrix4f type
         enum class Type {
             void_,
             parent_,
@@ -70,7 +84,6 @@ namespace nugget {
             deleted
         };
 
-        // Existing methods
         static std::string TypeAsString(ValueAny::Type type);
         std::string TypeAsString() const;
         std::string AsString() const;
@@ -93,8 +106,8 @@ namespace nugget {
         const Vector4f& AsVector4f() const;
         const Int64List& AsInt64List() const;
         const IdentifierList& AsIdentifierList() const;
+        const std::string& AsStringRef() const;
 
-        // Existing Set methods
         void Set(std::string val);
         void Set(int32_t val);
         void Set(int64_t val);
@@ -117,7 +130,6 @@ namespace nugget {
         void Set(const Int64List& ints);
         void Set(const IdentifierList& ints);
 
-        // Additional methods
         void SetAsParent();
         bool IsVoid() const;
         bool IsException() const;
@@ -126,7 +138,6 @@ namespace nugget {
         Type GetType() const;
 
     private:
-        // Union Data with new Matrix4f pointer
         union Data {
             int32_t int32_t_;
             int64_t int64_t_;

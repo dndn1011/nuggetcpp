@@ -146,6 +146,10 @@ namespace nugget {
 		assert(typeStringLookup.contains(type));
 		return typeStringLookup.at(type);
 	}
+	const std::string &ValueAny::AsStringRef() const {
+		check(type == ValueAny::Type::string, "Can only use AsStringRef on a string type");
+		return  *data.stringPtr;
+	}
 	std::string ValueAny::AsString() const {
 		assert(NotDeleted());
 		switch (type) {

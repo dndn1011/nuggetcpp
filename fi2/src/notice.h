@@ -69,6 +69,8 @@ namespace nugget {
 			template <typename T>
 			void Set(IDType id, const T& value);
 
+			[[nodiscard]] const ValueAny& Get(IDType id) const;
+
 			void SetAsParent(IDType id);
 
 			void Remove(IDType id);
@@ -102,6 +104,28 @@ namespace nugget {
 			bool GetChildrenWithNodeOfValue(IDType id, IDType leaf, ValueAny value, std::vector<IDType>& fill);
 
 			void Clear();
+		};
+
+
+		struct HotValue {
+			HotValue(Board& boardIn, IDType nodeIn) :
+				node(nodeIn),
+				board(boardIn)
+			{
+				value = board.Get(node);
+				board.RegisterHandler(
+					Notice::Handler(node, [this](IDType cnode) {
+						value = board.Get(cnode);
+						}));
+			}
+			operator const std::string&() const { return value.AsStringRef(); }
+			const ValueAny& Get() const {
+				return value;
+			}
+		private:
+			ValueAny value;
+			IDType node;
+			Board& board;
 		};
 
 		extern Notice::Board gBoard;

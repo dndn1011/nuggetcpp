@@ -182,6 +182,7 @@
     </ClCompile>
     <ClCompile Include="src\nuggetgl\render.cpp" />
     <ClCompile Include="src\nuggetgl\shader.cpp" />
+    <ClCompile Include="src\nuggetgl\texture.cpp" />
     <ClCompile Include="src\nuggetgl\window.cpp" />
     <ClCompile Include="src\propertytree.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
@@ -251,6 +252,7 @@
     <ClInclude Include="src\utils\TimeSampler.h" />
     <ClInclude Include="src\utils\utils.h" />
     <ClInclude Include="src\ValueAny.h" />
+    <ClInclude Include="src\nuggetgl\texture.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="external\sqlite3.lib" />

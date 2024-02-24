@@ -8,6 +8,7 @@
 #include "utils/StableVector.h"
 #include "../renderer/renderer.h"
 #include "../renderer/graphicsapi.h"
+#include "../nuggetgl/texture.h"
 #include "../nuggetgl/graphicsapi_private.h"
 #include <format>
 /*
@@ -201,19 +202,7 @@ namespace nugget::gl::indexedMesh {
                 const IdentifierList& list = gProps.GetIdentifierList(texturesNode);
 
                 for (size_t i = 0; i < list.data.size(); ++i) {
-                    output("LoadPNG LOAD...\n");
-                    const nugget::asset::TextureData& textureData = nugget::asset::GetTexture(list.data[i]);
-                    output("LoadPNG ...ED\n");
-                    GLuint glTexID;
-                    glGenTextures(1, &glTexID);
-                    glBindTexture(GL_TEXTURE_2D, glTexID);
-                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                    glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8, textureData.width, textureData.height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData.data);
-                    glBindTexture(GL_TEXTURE_2D, 0);
-
+                    GLuint glTexID = TextureHandleByHash(list.data[i]);
                     glTextureHandles.push_back(glTexID);
                 }
             }

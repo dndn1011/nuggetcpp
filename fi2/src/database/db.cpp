@@ -2,6 +2,7 @@
 #include "notice.h"
 #include "system.h"
 #include "notice.h"
+#define SQLITE_THREADSAFE 2
 #include "../../external/sqlite3.h"
 #include "debug.h"
 #include "db.h"
@@ -39,6 +40,9 @@ namespace nugget::db {
         }
         DeleteAllFromTable("assets");
         DeleteAllFromTable("asset_meta");
+
+        check(sqlite3_threadsafe(), "sqlite not threadsafe");
+
         return true;
     }
 
