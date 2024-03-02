@@ -110,7 +110,7 @@ namespace nugget::db {
         }
     };
 
-#define ERR(a) if(!(a)) {check(0,"db error"); return false; }
+#define ERR(a) if(!(a)) { output("SQL{}\n", sqlite3_errmsg(databaseConnection)); check(0,"db error"); return false; }
 
     bool DeleteAllFromTable(const std::string &table) {
         SQLite sql;
@@ -141,7 +141,7 @@ namespace nugget::db {
         return true;
     }
 
-    bool LookupAsset(IDType id,std::string &result) {
+    bool LookupAsset(IDType id, std::string& result) {
         SQLite sql;
         ERR(sql.Query("select path from asset_meta where ? = nidhash(id)"));
         ERR(sql.Bind(1, id));
@@ -151,7 +151,21 @@ namespace nugget::db {
         result = results[0].AsString();
         return true;
     }
-          
+
+    bool ReverseLookupAsset(const std::string& path,std::vector<IDType>& results) {
+        SQLite sql;
+        ERR(sql.Query("select nidhash(id) from asset_meta where ? = path"));
+        ERR(sql.Bind(1, path));
+
+        std::vector<ValueAny> fields;
+        while (sql.Step()) {
+            ERR(sql.FetchRow({ ValueAny::Type::IDType }, fields));
+            results.push_back(fields[0].AsIDType());
+        }
+
+        return true;
+    }
+
     bool IsAssetCacheDirty(IDType id) {
         SQLite sql;
 
@@ -169,10 +183,45 @@ namespace nugget::db {
         }
     }
 
+    bool UpdateAssetEpoch(std::string table, std::string path, int64_t epoch) {
+        std::string qstr = std::format("UPDATE {} set epoch=? where path=?", table);
+        const char* sqlQuery = qstr.c_str();
+
+        sqlite3_stmt* stmt;
+        // Prepare the SQL statement
+        auto rc = sqlite3_prepare_v2(databaseConnection, sqlQuery, -1, &stmt, nullptr);
+        if (rc != SQLITE_OK) {
+            check(0, "Error preparing SQL statement: {}\n", sqlite3_errmsg(databaseConnection));
+            return false;
+        }
+
+        // Bind values to the prepared statement
+        rc = sqlite3_bind_int64(stmt, 1, epoch);
+        if (rc != SQLITE_OK) {
+            check(0, "Error binding path parameter: {}\n", sqlite3_errmsg(databaseConnection));
+            sqlite3_finalize(stmt);
+            return false;
+        }
+
+        // Execute the statement to insert the data
+        rc = sqlite3_step(stmt);
+
+        if (rc != SQLITE_DONE) {
+            check(0, "Error executing SQL statement: {}\n", sqlite3_errmsg(databaseConnection));
+            sqlite3_finalize(stmt);
+            return false;
+        }
+
+        // Finalize the statement and close the database
+        sqlite3_finalize(stmt);
+
+        return true;
+    }
+
     bool AddAsset(std::string table, std::string path, std::string name, std::string type,int64_t epoch) {
         std::string qstr = std::format("INSERT INTO {} (path, name, type, hash, epoch) VALUES (?, ?, ?, nidhash(?), ?)", table).c_str();
 
-        
+        // todo : what is this back and forth with c_str?
         // SQL query for insertion
         const char* sqlQuery = qstr.c_str();
 
@@ -265,7 +314,7 @@ namespace nugget::db {
     }
 
     void InsertChanges() {
-        std::string qstr = std::format("insert into need_to_reconcile (path,type) select* from find_all_changes").c_str();
+        std::string qstr = std::format("insert into need_to_reconcile (path,type) select * from find_all_changes").c_str();
 
         char* errMsg = 0;
         int rc;
@@ -293,14 +342,15 @@ namespace nugget::db {
 
     bool GetNextToReconcile(ReconcileInfo& result) {
         SQLite sql;
-        ERR(sql.Query("select * from need_to_reconcile where coalesce(state, '') <> 'done' order by id limit 1"));
+        ERR(sql.Query("select id, path,type,coalesce(state,'') from need_to_reconcile where coalesce(state, '') <> 'done' order by id limit 1"));
         ERR(sql.Step());
         std::vector<ValueAny> results;
-        ERR(sql.FetchRow({ ValueAny::Type::int64_t_ ,ValueAny::Type::string, ValueAny::Type::string }, results));
+        ERR(sql.FetchRow({ ValueAny::Type::int64_t_ ,ValueAny::Type::string, ValueAny::Type::string, ValueAny::Type::string, ValueAny::Type::int64_t_ }, results));
         result.id = results[0].AsInt64();
         result.path = results[1].AsString();
         result.type = results[2].AsString();
-       return true;
+        result.state = results[3].AsString();
+        return true;
     }
 
     bool MarkReconciled(int64_t id) {
@@ -315,7 +365,7 @@ namespace nugget::db {
         }
 
         // Bind values to the prepared statement
-        rc = sqlite3_bind_int64(stmt, 1, id);
+        rc = sqlite3_bind_int64(stmt, 1, (int64_t)id);
         if (rc != SQLITE_OK) {
             check(0, "Error binding path parameter: {}\n", sqlite3_errmsg(databaseConnection));
             sqlite3_finalize(stmt);

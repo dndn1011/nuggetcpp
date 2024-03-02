@@ -13,6 +13,7 @@
 #include <chrono>
 #include "system/FileMonitoring.h"
 #include "windows.h"
+#include "nuggetgl/texture.h"
 
 namespace nugget::asset {
     using namespace identifier;
@@ -64,7 +65,6 @@ namespace nugget::asset {
         return result;
     }
 
-
     void CollectFiles(const std::string& table, const fs::path& directory, bool withoutRoot = false) {
         for (const auto& entry : fs::recursive_directory_iterator(directory)) {
             if (fs::is_regular_file(entry.path())) {
@@ -84,6 +84,35 @@ namespace nugget::asset {
                 db::AddAsset(table, rpath, MakeValidIdentifier(ppath), "", epoch);
             }
         }
+    }
+    
+    bool IsTextureOutOfDate(IDType id) {
+        return !textures.contains(id) || textures.at(id).outOfDate;
+    }
+    void MarkTextureAsOutOfDate(IDType id) {
+        if (textures.contains(id)) {
+            textures.at(id).outOfDate = true;
+        }
+    }
+
+    void UpdateFileEpoch(const std::string& table, const std::string& path) {
+        check(fs::is_regular_file(path), "The path {} ois not for a regular file", path);
+
+        std::string ppath = path;
+        std::replace(ppath.begin(), ppath.end(), '\\', '/');
+
+        auto ftime = fs::last_write_time(path);
+
+        // Convert file_time_type to time_point of system_clock
+        auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+            ftime - fs::file_time_type::clock::now() + std::chrono::system_clock::now()
+        );
+
+        // Now convert to UNIX timestamp using system_clock's to_time_t
+        auto epoch = std::chrono::system_clock::to_time_t(sctp);
+
+        db::UpdateAssetEpoch(table, ppath, epoch);
+
     }
 
     void CollectAssetMetadata(IDType node) {
@@ -165,6 +194,7 @@ namespace nugget::asset {
 
     }
 
+
     void Update() {
   //      static Notice::HotValue foo(gProps, ID("haha.hehe"));
 
@@ -172,19 +202,25 @@ namespace nugget::asset {
 
     //    output("@@@ {}\n", fooValue);
 
-
         if (needToReconcile > lastReconciled) {
             db::ReconcileInfo info;
-            if (db::GetNextToReconcile(info /*fill*/)) {
+             if (db::GetNextToReconcile(info /*fill*/)) {
                 if (info.type == "modified") {
-                    // reload the texture
-                    output("@@@ {} {} \n", info.path, info.type);
-
+                    // update the timestamp on the file so that it will be marked dirty
+                    UpdateFileEpoch("assets", info.path);
+                    std::vector<IDType> list;
+                    db::ReverseLookupAsset(info.path,list);
+                    for (auto&& x : list) {
+                        MarkTextureAsOutOfDate(x);
+                    }
+                    renderer::TexturesAreDirty();
+//                        const TextureData& texture = GetTexture(info.node);
+                } else {
+                    check(0, "Unhandled change type: {}",info.type);
                 }
                 db::MarkReconciled(info.id);
-            } else {
-                lastReconciled = needToReconcile;
             }
+            lastReconciled = needToReconcile;
         }
     }
 
@@ -210,7 +246,7 @@ namespace nugget::asset {
     }
 
     const TextureData& GetTexture(IDType id) {
-        if (textures.contains(id)) {
+        if (!IsTextureOutOfDate(id)) {
             return textures.at(id);
         } else {
             auto re = textures.emplace(std::piecewise_construct, std::forward_as_tuple(id), std::forward_as_tuple());

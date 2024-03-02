@@ -19,4 +19,4 @@ namespace nugget::debug {
 			exit(-1);
 		}
 	}
-}
+} 

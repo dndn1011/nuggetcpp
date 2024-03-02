@@ -14,12 +14,14 @@ namespace nugget::db {
 		int64_t id = 0;
 		std::string path = "";
 		std::string type = "";
+		std::string state = "";
 	};
 
 	bool GetNextToReconcile(ReconcileInfo& result);
 	bool MarkReconciled(int64_t id);
 	bool IsAssetCacheDirty(IDType id);
 	bool AddAssetCache(const std::string& path, const std::string& name, const std::string& type, IDType id);
-
+	bool UpdateAssetEpoch(std::string table, std::string path, int64_t epoch);
+	bool ReverseLookupAsset(const std::string& path, std::vector<IDType>& results);
 }
 

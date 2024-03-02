@@ -43,7 +43,7 @@ namespace nugget::gl::indexedMesh {
         }
 
         GLuint shader = 0;
-        std::vector<GLuint> glTextureHandles;
+        std::vector<TextureService> textureServices;
         std::vector<GLuint> textureUniforms;
 
         IDType modelID=IDType::null;
@@ -64,7 +64,7 @@ namespace nugget::gl::indexedMesh {
         void InitUniforms() {
 
             // get the locations of the texture uniforms for the shader
-            for (GLuint i = 0; i < glTextureHandles.size(); i++) {
+            for (GLuint i = 0; i < textureServices.size(); i++) {
                 auto loc = glGetUniformLocation(shader,
                     std::format("{}{}", shaderTexturePrefix, i).c_str());
                 textureUniforms.push_back(loc);
@@ -126,9 +126,9 @@ namespace nugget::gl::indexedMesh {
 
             check(shader, "shader is not set");
             glUseProgram(shader);
-            for (GLuint i = 0; i < glTextureHandles.size(); i++) {
+            for (GLuint i = 0; i < textureServices.size(); i++) {
                 glActiveTexture(GL_TEXTURE0 + i);
-                glBindTexture(GL_TEXTURE_2D, glTextureHandles[i]);
+                glBindTexture(GL_TEXTURE_2D, textureServices[i].textureHandle);
                 auto loc = textureUniforms[i]; 
                 glUniform1i(loc, i);
             }
@@ -192,7 +192,7 @@ namespace nugget::gl::indexedMesh {
             }
 
             // todo handle reloading
-            assert(glTextureHandles.size() == 0);
+            assert(textureServices.size() == 0);
 
             // Texture
             {
@@ -201,9 +201,17 @@ namespace nugget::gl::indexedMesh {
                 IDType texturesNode = IDR(nodeID, "textures");
                 const IdentifierList& list = gProps.GetIdentifierList(texturesNode);
 
+                check(textureServices.size() == 0, "not supporting hot reloading yet");
+
                 for (size_t i = 0; i < list.data.size(); ++i) {
-                    GLuint glTexID = TextureHandleByHash(list.data[i]);
-                    glTextureHandles.push_back(glTexID);
+
+                    textureServices.emplace_back(
+                        TextureService {
+                            .requiredTextureHash = list.data[i],
+                        });
+
+                    RequestTextureService(textureServices.back());
+
                 }
             }
 

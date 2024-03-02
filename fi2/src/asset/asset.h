@@ -13,6 +13,7 @@ namespace nugget::asset {
 		int height=0;
 		int channels=0;
 		bool fromCache = false;
+		bool outOfDate = false;
 		size_t DataSize() const {
 			return (size_t)width * height * channels;
 		}
@@ -30,6 +31,8 @@ namespace nugget::asset {
 	const TextureData& GetTexture(IDType id);
 
 	const ModelData& GetModel(IDType id);
+
+	bool IsTextureOutOfDate(IDType id);
 
 }
              
