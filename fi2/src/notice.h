@@ -92,7 +92,7 @@ namespace nugget {
 
 			void UnregisterHandler(const Handler& handler);
 
-			void RegisterHandlerOnChildren(const Handler& handler, std::vector<Handler>& out);
+			void RegisterHandlerOnChildren(const Handler& handler, std::vector<Handler>& out,bool immediate = false);
 
 			void LockNotifications();
 			void UnlockNotifications();

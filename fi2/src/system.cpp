@@ -89,6 +89,18 @@ namespace nugget::system {
 		return true;
 	}
 
+	void SystemEvent(IDType hashName) {
+		auto& list = RegisterSingleton::GetInstance()->moduleList[hashName];
+		if (list.size() != 0) {
+			std::ranges::sort(list, [](const ModuleReg& a, const ModuleReg& b) {
+				return a.order < b.order;
+				});
+			for (auto&& x : list) {
+				x.func();
+			}
+		}
+	}
+
 	void Shutdown() {
 		auto& list = RegisterSingleton::GetInstance()->moduleList[ID("shutdown")];
 		if (list.size() != 0) {

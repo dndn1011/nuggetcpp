@@ -72,6 +72,8 @@ void ReloadPt(std::string filename) {
         output("Could not load propertries for {}: {}\n", filename.c_str(), result.description.c_str());
     }
     //            gNotice.UnlockNotifications();
+
+    system::SystemEvent(ID("reconfigure"));
 }
 
 

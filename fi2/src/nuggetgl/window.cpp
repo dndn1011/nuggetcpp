@@ -81,7 +81,11 @@ namespace nugget::gl {
 
         CompileShaderFromProperties(IDR("shaders.simple"));
 
-        GLCameraSetProjectionFromProperties(ID("testobj.section"));
+        std::vector<Notice::Handler> handlers;
+        gProps.RegisterHandlerOnChildren(Notice::Handler(ID("camera"), [](IDType id) {
+                GLCameraSetProjectionFromProperties(ID("camera"));
+            }), handlers, true);
+
     }
 }
 

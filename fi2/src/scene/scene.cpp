@@ -56,10 +56,28 @@ namespace nugget::scene {
             sceneData.viewMatrix = gProps.GetMatrix4f(IDR(baseSceneNodeID, ID("viewMatrix")));
         }
 
+        float xxxx = -9;
+        float xxxy = 0.1f;
+        void SetCamera(IDType node) {
+            Vector3f pos = gProps.GetVector3f(IDR(node,ID("pos")));
+            const Vector3f& lookAt = gProps.GetVector3f(IDR(node, ID("lookAt")));;
+            const Vector3f& lookUp = gProps.GetVector3f(IDR(node, ID("lookUp")));;
+            pos.x += xxxx;
+            if (abs(xxxx) < 10) {
+                xxxx += xxxy;
+            } else {
+                xxxy *= -1;
+                xxxx += xxxy;
+            }
+            
+            Matrix4f::LookAt(pos, lookAt, lookUp, sceneData.viewMatrix);
+        }
+
         void Update() {
             std::vector<IDType> children;
 
-            sceneData.viewMatrix = gProps.GetMatrix4f(IDR(baseSceneNodeID, ID("viewMatrix")));
+//            sceneData.viewMatrix = gProps.GetMatrix4f(IDR(baseSceneNodeID, ID("viewMatrix")));
+            SetCamera(ID("camera"));
 
             gProps.GetChildrenWithNodeExisting(baseSceneNodeID, ID("model"), children /*fill*/);
             for (auto&& x : children) {

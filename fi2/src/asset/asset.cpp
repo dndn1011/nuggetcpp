@@ -115,8 +115,10 @@ namespace nugget::asset {
 
     }
 
-    void CollectAssetMetadata(IDType node) {
-        db::StartTransaction();
+    void CollectAssetMetadata(IDType node, std::string table = "asset_meta", bool noTransact = false) {
+        if (!noTransact) {
+            db::StartTransaction();
+        }
         std::vector<IDType> children;
         gProps.GetChildrenWithNodeExisting(node, ID("path"), children);
         for (auto&& x : children) {
@@ -126,9 +128,11 @@ namespace nugget::asset {
             const std::string& path = gProps.GetString(idPath);
             const std::string& type = gProps.GetString(idType);
             const std::string& description = gProps.GetString(idDescription);
-            db::AddAssetMeta(IDToString(GetLeaf(x)), path, type, description);
+            db::AddAssetMeta(table,IDToString(GetLeaf(x)), path, type, description);
         }
-        db::CommitTransaction();
+        if (!noTransact) {
+            db::CommitTransaction();
+        }
     }
 
     void ScanAssets(bool update = false) {
@@ -194,6 +198,25 @@ namespace nugget::asset {
 
     }
 
+    void Reconfigure() {
+        db::StartTransaction();
+        std::string oldTable = "asset_meta";
+        std::string newTable = "asset_meta_new";
+        db::ClearTable(newTable);
+        CollectAssetMetadata(ID("assets.meta"), newTable,true);
+        std::vector<IDType> list;
+        db::CompareTables("asset_meta","asset_meta_new","path",list);
+        db::ClearTable(oldTable);
+        db::CopyTable(newTable,oldTable);
+        db::CommitTransaction();
+        if (list.size() > 0) {
+            for (auto&& x : list) {
+                MarkTextureAsOutOfDate(x);
+            }
+            renderer::TexturesAreDirty();
+        }
+
+    }
 
     void Update() {
   //      static Notice::HotValue foo(gProps, ID("haha.hehe"));
@@ -331,6 +354,13 @@ namespace nugget::asset {
                 Update();
                 return 0;
             }, 200, ID("update"))
+        },
+        {
+            // frame begin
+            nugget::system::RegisterModule([]() {
+                Reconfigure();
+                return 0;
+            }, 200, ID("reconfigure"))
         },
     };
 

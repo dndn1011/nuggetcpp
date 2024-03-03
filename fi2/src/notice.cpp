@@ -372,7 +372,7 @@ namespace nugget {
 			data.handlers.at(handler.changeId).push_back(handler);
 			out.push_back(handler);
 		}
-		void Board::RegisterHandlerOnChildren(const Handler &handler,std::vector<Handler> &out) {
+		void Board::RegisterHandlerOnChildren(const Handler &handler,std::vector<Handler> &out,bool immediate) {
 			std::vector<IDType> children;
 			auto r = GetChildren(handler.notifyId,children /*fill*/);
 			assert(r);
@@ -380,6 +380,9 @@ namespace nugget {
 				auto h = Handler{ handler.notifyId, x, handler.func };
 				out.push_back(h);
 				RegisterHandler(h);
+			}
+			if (immediate) {
+				handler.func(handler.changeId);
 			}
 		}
 

@@ -15,6 +15,11 @@ namespace nugget::db {
     bool DeleteAllFromTable(const std::string &str);
 
     sqlite3* databaseConnection;
+    
+    void ClearAssetMetaData() {
+        DeleteAllFromTable("asset_meta");
+    }
+    
     bool Init() {
         constexpr IDType db_node = ID("database");
         constexpr IDType prop_file = ID(db_node, "file");
@@ -39,7 +44,7 @@ namespace nugget::db {
             return false;
         }
         DeleteAllFromTable("assets");
-        DeleteAllFromTable("asset_meta");
+        ClearAssetMetaData();
 
         check(sqlite3_threadsafe(), "sqlite not threadsafe");
 
@@ -128,6 +133,58 @@ namespace nugget::db {
         ERR(sql.Apply());
         return true;
     }
+
+    bool AddAssetMeta(const std::string& table,const std::string& idName, const std::string& path, const std::string& type, const std::string& description) {
+        std::string qstr = std::format("insert into {} (id,path,type,description) values (?,?,?,?)", table);
+        const char* sqlQuery = qstr.c_str();
+
+        SQLite sql;
+        ERR(sql.Query(sqlQuery));
+        ERR(sql.Bind(1, idName));
+        ERR(sql.Bind(2, path));
+        ERR(sql.Bind(3, type));
+        ERR(sql.Bind(4, description));
+        ERR(sql.Apply());
+        return true;
+    }
+
+
+    bool CopyTable(
+        const std::string& table1,
+        const std::string& table2) {
+
+        DeleteAllFromTable(table2);
+        std::string qstr = std::format("insert into {} select * from {}", table2,table1).c_str();
+
+        char* errMsg = 0;
+        int rc;
+        rc = sqlite3_exec(databaseConnection, qstr.c_str(), NULL, NULL, &errMsg);
+        if (rc != SQLITE_OK) {
+            check(0, "Error executing SQL statement: {}\n", sqlite3_errmsg(databaseConnection));
+        }
+        return true;
+    }
+
+    bool CompareTables(
+        const std::string& table1,
+        const std::string& table2,
+        const std::string& valueField,
+        std::vector<IDType>& results
+    ) {
+        std::string qstr = std::format("select nidhash(b.id) from {} a,{} b where a.id=b.id and a.{}<>b.{}",table1,table2,valueField,valueField);
+        const char* sqlQuery = qstr.c_str();
+        SQLite sql;
+        ERR(sql.Query(sqlQuery));
+
+        std::vector<ValueAny> fields;
+        while (sql.Step()) {
+            ERR(sql.FetchRow({ ValueAny::Type::IDType }, fields));
+            results.push_back(fields[0].AsIDType());
+        }
+
+        return true;
+    }
+
     // INSERT OR REPLACE INTO table_name(column1, column2, ... columnN)
 
     bool db::AddAssetCache(const std::string& path, const std::string &name, const std::string &type,IDType id) {

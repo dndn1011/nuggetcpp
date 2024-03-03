@@ -19,4 +19,6 @@ namespace nugget::system {
 
 	void Shutdown();
 
+	void SystemEvent(IDType hashName);
+
 }

@@ -23,5 +23,20 @@ namespace nugget::db {
 	bool AddAssetCache(const std::string& path, const std::string& name, const std::string& type, IDType id);
 	bool UpdateAssetEpoch(std::string table, std::string path, int64_t epoch);
 	bool ReverseLookupAsset(const std::string& path, std::vector<IDType>& results);
+	void ClearAssetMetaData();
+
+	bool AddAssetMeta(const std::string& table, const std::string& idName, const std::string& path, const std::string& type, const std::string& description);
+
+	bool CompareTables(
+		const std::string& table1,
+		const std::string& table2,
+		const std::string& valueField,
+		std::vector<IDType>& results
+	);
+
+	bool CopyTable(
+		const std::string& table1,
+		const std::string& table2);
+
 }
 
